@@ -4,7 +4,7 @@ import { createAppRouter } from '../src/router'
 describe('router', () => {
   it('uses hash history for GitHub Pages compatibility', () => {
     const router = createAppRouter()
-    expect(router.options.history.base).toBe('/blog-system/#')
+    expect(router.options.history.base).toBe('/simple-blog/#')
   })
 
   it('registers public, auth and admin routes', () => {
