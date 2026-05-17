@@ -1,0 +1,55 @@
+name: Deploy Worker
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: worker/package-lock.json
+
+      - name: Install worker dependencies
+        working-directory: worker
+        run: npm ci
+
+      - name: Verify worker
+        working-directory: worker
+        run: npm run check
+
+      - name: Prepare worker secrets file
+        working-directory: worker
+        run: |
+          printf "SUPABASE_ANON_KEY=%s\n" "$SUPABASE_ANON_KEY" > deploy-secrets.env
+          printf "SUPABASE_SERVICE_ROLE_KEY=%s\n" "$SUPABASE_SERVICE_ROLE_KEY" >> deploy-secrets.env
+        shell: bash
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Deploy worker
+        working-directory: worker
+        run: >
+          npx wrangler deploy
+          --var PUBLIC_APP_ORIGIN:$PUBLIC_APP_ORIGIN
+          --var PUBLIC_APP_BASE_PATH:$PUBLIC_APP_BASE_PATH
+          --var SUPABASE_URL:$SUPABASE_URL
+          --var R2_PUBLIC_BASE_URL:$R2_PUBLIC_BASE_URL
+          --secrets-file deploy-secrets.env
+          --keep-vars
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          PUBLIC_APP_ORIGIN: ${{ vars.PUBLIC_APP_ORIGIN }}
+          PUBLIC_APP_BASE_PATH: ${{ vars.PUBLIC_APP_BASE_PATH }}
+          R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
