@@ -6,23 +6,24 @@ import type { AppEnv } from '../types'
 const publicRoutes = new Hono<AppEnv>()
 
 publicRoutes.get('/posts', c => {
-  const items = listPublishedPosts()
-  return ok({
-    items,
-    page: Number(c.req.query('page') ?? 1),
-    limit: Number(c.req.query('limit') ?? 10),
-    total: items.length,
-  })
+  return listPublishedPosts(c.env).then(items =>
+    ok({
+      items,
+      page: Number(c.req.query('page') ?? 1),
+      limit: Number(c.req.query('limit') ?? 10),
+      total: items.length,
+    }),
+  )
 })
 
 publicRoutes.get('/posts/:slug', c => {
-  const post = getPublishedPostBySlug(c.req.param('slug'))
-  if (!post) {
-    return fail('NOT_FOUND', 'Post not found', 404)
-  }
+  return getPublishedPostBySlug(c.req.param('slug'), c.env).then(post => {
+    if (!post) {
+      return fail('NOT_FOUND', 'Post not found', 404)
+    }
 
-  return ok(post)
+    return ok(post)
+  })
 })
 
 export default publicRoutes
-

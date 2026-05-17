@@ -1,10 +1,15 @@
 import type { MiddlewareHandler } from 'hono'
 import { fail } from '../lib/response'
-import { resolveUserFromAuthorization } from '../lib/auth'
+import { createProfileLookup, resolveUserFromAuthorization } from '../lib/auth'
+import { createSupabaseAdminClient } from '../lib/supabase'
 import type { AppEnv } from '../types'
 
 export const requireAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
-  const user = await resolveUserFromAuthorization(c.req.header('Authorization'))
+  const adminClient = createSupabaseAdminClient(c.env)
+  const user = await resolveUserFromAuthorization(c.req.header('Authorization'), {
+    env: c.env,
+    fetchProfileById: createProfileLookup(adminClient as any),
+  })
 
   if (!user) {
     return fail('UNAUTHORIZED', 'Unauthorized', 401)
@@ -17,4 +22,3 @@ export const requireAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
   c.set('user', user)
   await next()
 }
-

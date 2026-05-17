@@ -5,6 +5,7 @@
       <nav class="nav">
         <RouterLink to="/admin">Dashboard</RouterLink>
         <RouterLink to="/admin/posts">Posts</RouterLink>
+        <RouterLink to="/profile">Profile</RouterLink>
       </nav>
     </header>
     <RouterView />

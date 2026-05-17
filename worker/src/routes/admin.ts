@@ -11,28 +11,29 @@ adminRoutes.use('*', requireAuth, requireRole(['editor', 'admin', 'super_admin']
 
 adminRoutes.get('/posts', c => {
   const user = c.get('user')
-  const items = listAdminPosts(user.role === 'editor' ? user.id : undefined)
-
-  return ok({
-    items,
-    page: Number(c.req.query('page') ?? 1),
-    limit: Number(c.req.query('limit') ?? 20),
-    total: items.length,
-  })
+  return listAdminPosts(c.env, user.role === 'editor' ? user.id : undefined).then(items =>
+    ok({
+      items,
+      page: Number(c.req.query('page') ?? 1),
+      limit: Number(c.req.query('limit') ?? 20),
+      total: items.length,
+    }),
+  )
 })
 
 adminRoutes.get('/posts/:id', c => {
   const user = c.get('user')
-  const post = getAdminPostById(c.req.param('id'))
-  if (!post) {
-    return fail('NOT_FOUND', 'Post not found', 404)
-  }
+  return getAdminPostById(c.req.param('id'), c.env).then(post => {
+    if (!post) {
+      return fail('NOT_FOUND', 'Post not found', 404)
+    }
 
-  if (user.role === 'editor' && post.authorId !== user.id) {
-    return fail('FORBIDDEN', 'Insufficient permissions', 403)
-  }
+    if (user.role === 'editor' && post.authorId !== user.id) {
+      return fail('FORBIDDEN', 'Insufficient permissions', 403)
+    }
 
-  return ok(post)
+    return ok(post)
+  })
 })
 
 adminRoutes.post('/posts', c => ok({
@@ -51,4 +52,3 @@ adminRoutes.delete('/posts/:id', c => ok({
 }))
 
 export default adminRoutes
-

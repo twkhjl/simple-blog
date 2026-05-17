@@ -1,4 +1,5 @@
-import type { AuthUser } from '../types'
+import { createClient } from '@supabase/supabase-js'
+import type { AuthUser, WorkerBindings } from '../types'
 
 const mockUsers: Record<string, AuthUser> = {
   'user-token': {
@@ -46,12 +47,121 @@ export function getBearerToken(headerValue?: string | null): string | null {
   return headerValue.slice('Bearer '.length).trim() || null
 }
 
-export async function resolveUserFromAuthorization(headerValue?: string | null): Promise<AuthUser | null> {
+interface ProfileRow {
+  id: string
+  email: string
+  display_name: string | null
+  role: AuthUser['role']
+  status: AuthUser['status']
+}
+
+interface ResolveUserOptions {
+  env?: WorkerBindings
+  getAuthUserByToken?: (token: string) => Promise<{
+    data: {
+      user: {
+        id: string
+        email?: string | null
+      } | null
+    }
+    error: unknown
+  }>
+  fetchProfileById?: (id: string) => Promise<ProfileRow | null>
+}
+
+export function createProfileLookup(adminClient: {
+  from: (table: string) => {
+    select: (query: string) => {
+      eq: (column: string, value: string) => {
+        maybeSingle: () => PromiseLike<{ data: ProfileRow | null, error: unknown }>
+      }
+    }
+  }
+} | null) {
+  return async (id: string): Promise<ProfileRow | null> => {
+    if (!adminClient) {
+      return null
+    }
+
+    const { data, error } = await adminClient
+      .from('profiles')
+      .select('id, email, display_name, role, status')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (error || !data) {
+      return null
+    }
+
+    return data
+  }
+}
+
+function mapProfileToAuthUser(profile: ProfileRow): AuthUser {
+  return {
+    id: profile.id,
+    email: profile.email,
+    displayName: profile.display_name,
+    role: profile.role,
+    status: profile.status,
+  }
+}
+
+function createSupabaseAuthClient(env: WorkerBindings) {
+  if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
+    return null
+  }
+
+  return createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
+}
+
+export async function resolveUserFromAuthorization(
+  headerValue?: string | null,
+  options: ResolveUserOptions = {},
+): Promise<AuthUser | null> {
   const token = getBearerToken(headerValue)
   if (!token) {
     return null
   }
 
-  return mockUsers[token] ?? null
-}
+  if (mockUsers[token]) {
+    return mockUsers[token]
+  }
 
+  if (!options.env) {
+    return null
+  }
+
+  const authClient = createSupabaseAuthClient(options.env)
+  const getAuthUserByToken = options.getAuthUserByToken
+    ?? (authClient ? async (accessToken: string) => authClient.auth.getUser(accessToken) : null)
+
+  if (!getAuthUserByToken) {
+    return null
+  }
+
+  const authResult = await getAuthUserByToken(token)
+  const authUser = authResult.data.user
+  if (!authUser?.id) {
+    return null
+  }
+
+  const fetchProfileById = options.fetchProfileById
+  if (fetchProfileById) {
+    const profile = await fetchProfileById(authUser.id)
+    return profile ? mapProfileToAuthUser(profile) : null
+  }
+
+  return {
+    id: authUser.id,
+    email: authUser.email ?? '',
+    displayName: null,
+    role: 'user',
+    status: 'active',
+  }
+}
