@@ -14,8 +14,9 @@ describe('createApiClient', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
     const [, init] = fetchMock.mock.calls[0]
     const headers = init?.headers as Headers
+    const baseUrl = import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com'
 
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://api.example.com/api/posts')
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(`${baseUrl}/api/posts`)
     expect(headers.get('Authorization')).toBe('Bearer token-1')
   })
 })

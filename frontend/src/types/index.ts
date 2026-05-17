@@ -58,3 +58,18 @@ export interface AdminPostListItem {
   publishedAt: string | null
   updatedAt: string
 }
+
+export interface AdminPostDetail {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  content: string
+  coverImageKey: string | null
+  status: 'draft' | 'published' | 'archived'
+  authorId: string
+  authorDisplayName: string | null
+  publishedAt: string | null
+  createdAt: string
+  updatedAt: string
+}

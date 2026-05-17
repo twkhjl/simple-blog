@@ -67,6 +67,7 @@ interface ResolveUserOptions {
     error: unknown
   }>
   fetchProfileById?: (id: string) => Promise<ProfileRow | null>
+  upsertProfile?: (profile: ProfileRow) => Promise<ProfileRow | null>
 }
 
 export function createProfileLookup(adminClient: {
@@ -154,7 +155,23 @@ export async function resolveUserFromAuthorization(
   const fetchProfileById = options.fetchProfileById
   if (fetchProfileById) {
     const profile = await fetchProfileById(authUser.id)
-    return profile ? mapProfileToAuthUser(profile) : null
+    if (profile) {
+      return mapProfileToAuthUser(profile)
+    }
+
+    if (options.upsertProfile) {
+      const createdProfile = await options.upsertProfile({
+        id: authUser.id,
+        email: authUser.email ?? '',
+        display_name: null,
+        role: 'user',
+        status: 'active',
+      })
+
+      if (createdProfile) {
+        return mapProfileToAuthUser(createdProfile)
+      }
+    }
   }
 
   return {

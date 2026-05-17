@@ -7,6 +7,7 @@
 ```bash
 cd frontend
 npm install
+copy .env.local.example .env.local
 npm run dev
 ```
 
@@ -19,6 +20,7 @@ npm run dev
 ```bash
 cd worker
 npm install
+copy .dev.vars.example .dev.vars
 npm run dev
 ```
 
@@ -40,6 +42,20 @@ Supabase 本地設定檔在 `supabase/config.toml`，已指向上述 SQL 檔。
 
 - Frontend: GitHub Actions -> GitHub Pages
 - Worker: Wrangler deploy
+
+### GitHub Actions Variables / Secrets
+
+- `vars.VITE_SUPABASE_URL`
+- `secrets.VITE_SUPABASE_ANON_KEY`
+- `vars.VITE_API_BASE_URL`
+- `secrets.CLOUDFLARE_API_TOKEN`
+- `secrets.CLOUDFLARE_ACCOUNT_ID`
+- `vars.SUPABASE_URL`
+- `secrets.SUPABASE_ANON_KEY`
+- `secrets.SUPABASE_SERVICE_ROLE_KEY`
+- `vars.PUBLIC_APP_ORIGIN`
+- `vars.PUBLIC_APP_BASE_PATH`
+- `vars.R2_PUBLIC_BASE_URL`
 
 ## Public Repo Notes
 

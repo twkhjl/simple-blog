@@ -3,6 +3,7 @@ import { buildApiUrl } from '../src/services/api'
 
 describe('buildApiUrl', () => {
   it('joins base url with endpoint path', () => {
-    expect(buildApiUrl('/api/posts')).toBe('https://api.example.com/api/posts')
+    const baseUrl = import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com'
+    expect(buildApiUrl('/api/posts')).toBe(`${baseUrl}/api/posts`)
   })
 })

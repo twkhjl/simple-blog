@@ -1,11 +1,12 @@
 <template>
   <section class="page">
     <h2>Manage Posts</h2>
+    <p><RouterLink to="/admin/posts/new">Create New Post</RouterLink></p>
     <p v-if="loading">Loading posts...</p>
     <p v-else-if="error">{{ error }}</p>
     <ul v-else class="list">
       <li v-for="post in posts" :key="post.id">
-        <strong>{{ post.title }}</strong>
+        <RouterLink :to="`/admin/posts/${post.id}/edit`"><strong>{{ post.title }}</strong></RouterLink>
         <span>{{ post.status }}</span>
       </li>
     </ul>
@@ -14,6 +15,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
 import { authState } from '../../stores/auth'
