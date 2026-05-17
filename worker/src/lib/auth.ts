@@ -138,9 +138,11 @@ export async function resolveUserFromAuthorization(
     return null
   }
 
-  const authClient = createSupabaseAuthClient(options.env)
   const getAuthUserByToken = options.getAuthUserByToken
-    ?? (authClient ? async (accessToken: string) => authClient.auth.getUser(accessToken) : null)
+    ?? (() => {
+      const authClient = createSupabaseAuthClient(options.env!)
+      return authClient ? async (accessToken: string) => authClient.auth.getUser(accessToken) : null
+    })()
 
   if (!getAuthUserByToken) {
     return null
