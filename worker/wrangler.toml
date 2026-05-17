@@ -1,0 +1,16 @@
+name = "simple-blog-api"
+main = "src/index.ts"
+compatibility_date = "2026-05-17"
+
+[vars]
+PUBLIC_APP_ORIGIN = "https://your-github-username.github.io"
+PUBLIC_APP_BASE_PATH = "/blog-system/"
+SUPABASE_URL = "https://your-project-ref.supabase.co"
+SUPABASE_ANON_KEY = "replace-in-cloudflare-dashboard"
+SUPABASE_SERVICE_ROLE_KEY = "replace-in-cloudflare-dashboard"
+R2_PUBLIC_BASE_URL = "https://api.yourdomain.com/files"
+
+[[r2_buckets]]
+binding = "FILES_BUCKET"
+bucket_name = "simple-blog-files"
+
