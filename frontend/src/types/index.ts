@@ -66,10 +66,19 @@ export interface AdminPostDetail {
   excerpt: string
   content: string
   coverImageKey: string | null
+  coverImageUrl: string | null
   status: 'draft' | 'published' | 'archived'
   authorId: string
   authorDisplayName: string | null
   publishedAt: string | null
   createdAt: string
   updatedAt: string
+}
+
+export interface UploadedFilePayload {
+  key: string
+  url: string
+  fileName: string
+  mimeType: string
+  size: number
 }

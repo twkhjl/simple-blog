@@ -391,6 +391,11 @@ img {
   color: var(--text);
 }
 
+.cover-key {
+  max-width: 100%;
+  word-break: break-word;
+}
+
 .cover-frame,
 .media-fallback {
   aspect-ratio: 4 / 3;

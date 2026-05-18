@@ -13,8 +13,11 @@ export function createApiClient(
   async function request<T>(path: string, init: RequestInit = {}) {
     const accessToken = getAccessToken()
     const headers = new Headers(init.headers)
+    const isFormDataBody = init.body instanceof FormData
 
-    headers.set('Content-Type', 'application/json')
+    if (!isFormDataBody && init.body != null) {
+      headers.set('Content-Type', 'application/json')
+    }
     if (accessToken) {
       headers.set('Authorization', `Bearer ${accessToken}`)
     }
@@ -46,6 +49,12 @@ export function createApiClient(
       return request<T>(path, {
         method: 'POST',
         body: JSON.stringify(body),
+      })
+    },
+    postForm<T>(path: string, body: FormData) {
+      return request<T>(path, {
+        method: 'POST',
+        body,
       })
     },
     put<T>(path: string, body: unknown) {

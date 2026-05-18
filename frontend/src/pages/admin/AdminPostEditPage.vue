@@ -93,12 +93,59 @@
         </div>
 
         <div class="neo-panel">
+          <p class="stat-label">Cover Image</p>
+          <div class="stack-card">
+            <div v-if="previewImageUrl" class="cover-frame neo-inset" style="aspect-ratio: 16 / 9;">
+              <img :src="previewImageUrl" :alt="form.title || 'Cover image preview'">
+            </div>
+            <div v-else class="media-fallback">
+              <span>No Cover Uploaded</span>
+            </div>
+
+            <label class="field">
+              <span class="field-label">Upload File</span>
+              <input
+                ref="fileInput"
+                class="neo-input"
+                type="file"
+                accept="image/*"
+                :disabled="saving || uploadingCover"
+                @change="handleCoverImageChange"
+              >
+            </label>
+
+            <div class="metadata-list">
+              <div class="metadata-row">
+                <span class="metadata-label">Stored Key</span>
+                <span class="metadata-value cover-key">{{ form.coverImageKey ?? 'Not set' }}</span>
+              </div>
+            </div>
+
+            <div class="inline-actions">
+              <button type="button" class="neo-button secondary" :disabled="saving || uploadingCover" @click="triggerCoverBrowse">
+                Choose Image
+              </button>
+              <button
+                type="button"
+                class="neo-button"
+                :disabled="saving || uploadingCover || !form.coverImageKey"
+                @click="clearCoverImage"
+              >
+                Clear Cover
+              </button>
+            </div>
+
+            <p v-if="uploadingCover" class="status-message">Uploading cover image...</p>
+          </div>
+        </div>
+
+        <div class="neo-panel">
           <p class="stat-label">Actions</p>
           <div class="stack-card">
-            <button type="submit" class="neo-button primary" :disabled="saving">
+            <button type="submit" class="neo-button primary" :disabled="saving || uploadingCover">
               {{ isCreateMode ? 'Create' : 'Save' }}
             </button>
-            <button v-if="!isCreateMode" type="button" class="neo-button danger" :disabled="saving" @click="handleDelete">
+            <button v-if="!isCreateMode" type="button" class="neo-button danger" :disabled="saving || uploadingCover" @click="handleDelete">
               Delete
             </button>
           </div>
@@ -109,20 +156,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
 import { authState } from '../../stores/auth'
-import type { AdminPostDetail } from '../../types'
+import type { AdminPostDetail, UploadedFilePayload } from '../../types'
 import { formatDisplayDate } from '../../utils/ui'
 
 const route = useRoute()
 const router = useRouter()
 const isCreateMode = computed(() => route.params.id == null)
 const saving = ref(false)
+const uploadingCover = ref(false)
 const message = ref('')
 const isSuccess = ref(false)
+const previewImageUrl = ref<string | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+let localPreviewUrl: string | null = null
 
 const form = reactive({
   title: '',
@@ -145,6 +196,33 @@ function getClient() {
   return createApiClient(fetch, () => extractAccessToken(authState.session))
 }
 
+function clearLocalPreview() {
+  if (localPreviewUrl) {
+    URL.revokeObjectURL(localPreviewUrl)
+    localPreviewUrl = null
+  }
+}
+
+function setPreviewImage(url: string | null, isLocal = false) {
+  clearLocalPreview()
+  previewImageUrl.value = url
+  if (isLocal) {
+    localPreviewUrl = url
+  }
+}
+
+function triggerCoverBrowse() {
+  fileInput.value?.click()
+}
+
+function clearCoverImage() {
+  form.coverImageKey = null
+  setPreviewImage(null)
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
+}
+
 async function loadPost() {
   if (isCreateMode.value) {
     return
@@ -158,10 +236,53 @@ async function loadPost() {
   form.status = data.status
   form.coverImageKey = data.coverImageKey
   form.publishedAt = data.publishedAt
+  setPreviewImage(data.coverImageUrl)
   metadata.author = data.authorDisplayName ?? 'Editorial Desk'
   metadata.createdAt = formatDisplayDate(data.createdAt)
   metadata.updatedAt = formatDisplayDate(data.updatedAt)
   metadata.publishedAt = formatDisplayDate(data.publishedAt)
+}
+
+async function handleCoverImageChange(event: Event) {
+  const target = event.target as HTMLInputElement | null
+  const file = target?.files?.[0]
+  if (!file) {
+    return
+  }
+
+  if (!file.type.startsWith('image/')) {
+    message.value = 'Cover image must be an image file.'
+    isSuccess.value = false
+    target.value = ''
+    return
+  }
+
+  const previousCoverImageKey = form.coverImageKey
+  const previousPreviewImageUrl = previewImageUrl.value
+  const tempPreviewUrl = URL.createObjectURL(file)
+  setPreviewImage(tempPreviewUrl, true)
+  uploadingCover.value = true
+  message.value = ''
+  isSuccess.value = false
+
+  try {
+    const formData = new FormData()
+    formData.set('folder', 'posts')
+    formData.set('file', file)
+
+    const uploaded = await getClient().postForm<UploadedFilePayload>('/api/files/upload', formData)
+    form.coverImageKey = uploaded.key
+    setPreviewImage(uploaded.url)
+    isSuccess.value = true
+    message.value = 'Cover image uploaded.'
+  } catch (error) {
+    form.coverImageKey = previousCoverImageKey
+    setPreviewImage(previousPreviewImageUrl)
+    message.value = error instanceof Error ? error.message : 'Failed to upload cover image'
+  } finally {
+    uploadingCover.value = false
+    target.value = ''
+  }
 }
 
 async function handleSave() {
@@ -223,5 +344,9 @@ onMounted(async () => {
   } catch (error) {
     message.value = error instanceof Error ? error.message : 'Failed to load post'
   }
+})
+
+onBeforeUnmount(() => {
+  clearLocalPreview()
 })
 </script>

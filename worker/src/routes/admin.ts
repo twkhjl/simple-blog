@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { buildFileUrl } from '../lib/r2'
 import { fail, ok } from '../lib/response'
 import { requireAuth } from '../middleware/requireAuth'
 import { requireRole } from '../middleware/requireRole'
@@ -6,6 +7,17 @@ import { createAdminPost, deleteAdminPost, getAdminPostById, listAdminPosts, upd
 import type { AppEnv } from '../types'
 
 const adminRoutes = new Hono<AppEnv>()
+
+function serializeAdminPost(post: Awaited<ReturnType<typeof getAdminPostById>>, env: AppEnv['Bindings']) {
+  if (!post) {
+    return null
+  }
+
+  return {
+    ...post,
+    coverImageUrl: post.coverImageKey ? buildFileUrl(env, post.coverImageKey) : null,
+  }
+}
 
 adminRoutes.use('*', requireAuth, requireRole(['editor', 'admin', 'super_admin']))
 
@@ -32,7 +44,7 @@ adminRoutes.get('/posts/:id', c => {
       return fail('FORBIDDEN', 'Insufficient permissions', 403)
     }
 
-    return ok(post)
+    return ok(serializeAdminPost(post, c.env))
   })
 })
 
@@ -66,7 +78,7 @@ adminRoutes.post('/posts', async c => {
     return fail('INTERNAL_ERROR', 'Failed to create post', 500)
   }
 
-  return ok(post, 201)
+  return ok(serializeAdminPost(post, c.env), 201)
 })
 
 adminRoutes.put('/posts/:id', async c => {
@@ -108,7 +120,7 @@ adminRoutes.put('/posts/:id', async c => {
     return fail('INTERNAL_ERROR', 'Failed to update post', 500)
   }
 
-  return ok(post)
+  return ok(serializeAdminPost(post, c.env))
 })
 
 adminRoutes.delete('/posts/:id', async c => {
