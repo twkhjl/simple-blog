@@ -12,10 +12,12 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
-    "hono": "^4.7.10"
+    "hono": "^4.7.10",
+    "sanitize-html": "^2.17.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260516.0",
+    "@types/sanitize-html": "^2.16.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",
     "wrangler": "^4.16.1"

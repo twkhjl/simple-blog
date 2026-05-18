@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { isMeaningfulRichText, sanitizeRichTextHtml } from '../lib/content'
 import { buildFileUrl } from '../lib/r2'
 import { fail, ok } from '../lib/response'
 import { requireAuth } from '../middleware/requireAuth'
@@ -64,11 +65,16 @@ adminRoutes.post('/posts', async c => {
     return fail('VALIDATION_ERROR', 'Missing required fields', 400)
   }
 
+  const content = sanitizeRichTextHtml(body.content)
+  if (!isMeaningfulRichText(content)) {
+    return fail('VALIDATION_ERROR', 'Content must not be empty', 400)
+  }
+
   const post = await createAdminPost(c.env, user, {
     title: body.title,
     slug: body.slug,
     excerpt: body.excerpt ?? '',
-    content: body.content,
+    content,
     coverImageKey: body.coverImageKey ?? null,
     status: body.status,
     publishedAt: body.publishedAt ?? null,
@@ -106,11 +112,16 @@ adminRoutes.put('/posts/:id', async c => {
     return fail('VALIDATION_ERROR', 'Missing required fields', 400)
   }
 
+  const content = sanitizeRichTextHtml(body.content)
+  if (!isMeaningfulRichText(content)) {
+    return fail('VALIDATION_ERROR', 'Content must not be empty', 400)
+  }
+
   const post = await updateAdminPost(c.env, c.req.param('id'), {
     title: body.title,
     slug: body.slug,
     excerpt: body.excerpt ?? '',
-    content: body.content,
+    content,
     coverImageKey: body.coverImageKey ?? null,
     status: body.status,
     publishedAt: body.publishedAt ?? null,

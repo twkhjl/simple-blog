@@ -639,26 +639,46 @@ img {
   align-items: start;
 }
 
-.rich-text {
+.rich-content {
   display: grid;
   gap: 1.15rem;
   color: var(--text-muted);
   line-height: 1.85;
 }
 
-.rich-text p,
-.rich-text h2,
-.rich-text blockquote {
+.rich-content p,
+.rich-content h1,
+.rich-content h2,
+.rich-content blockquote,
+.rich-content ul,
+.rich-content ol {
   margin: 0;
 }
 
-.rich-text h2 {
+.rich-content h1,
+.rich-content h2 {
   color: var(--text);
-  margin-top: 1rem;
+}
+
+.rich-content h1 {
+  font-size: 1.7rem;
+}
+
+.rich-content h2 {
   font-size: 1.35rem;
 }
 
-.rich-text blockquote {
+.rich-content ul,
+.rich-content ol {
+  padding-left: 1.4rem;
+}
+
+.rich-content a {
+  color: var(--secondary);
+  text-decoration: underline;
+}
+
+.rich-content blockquote {
   padding: 1rem 1.2rem;
   border-left: 3px solid var(--primary);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
@@ -667,33 +687,49 @@ img {
   box-shadow: var(--shadow-extruded-sm);
 }
 
+.rich-editor {
+  display: grid;
+  gap: 1rem;
+}
+
+.rich-editor-surface {
+  min-height: 280px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.rich-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.8rem;
+}
+
+.rich-toolbar .neo-button {
+  min-height: 2.5rem;
+  padding: 0.55rem 0.9rem;
+}
+
+.tiptap {
+  min-height: 280px;
+  padding: 1rem 1.15rem;
+  outline: none;
+  color: var(--text);
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--text-soft);
+  pointer-events: none;
+}
+
 .editor-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.9fr);
   gap: 1.5rem;
   align-items: start;
-}
-
-.editor-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.8rem;
-}
-
-.editor-toolbar button {
-  width: 2.6rem;
-  height: 2.6rem;
-  border: 0;
-  border-radius: 14px;
-  color: var(--text-soft);
-  background: transparent;
-  cursor: pointer;
-}
-
-.editor-toolbar button:hover {
-  color: var(--primary);
-  background: rgba(255, 255, 255, 0.03);
 }
 
 .list-shell {

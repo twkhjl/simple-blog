@@ -11,12 +11,18 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
+    "@tiptap/extension-link": "^2.14.0",
+    "@tiptap/extension-placeholder": "^2.14.0",
+    "@tiptap/starter-kit": "^2.14.0",
+    "@tiptap/vue-3": "^2.14.0",
+    "dompurify": "^3.2.6",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/tsconfig": "^0.7.0",
+    "@vue/test-utils": "^2.4.6",
     "jsdom": "^26.1.0",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",

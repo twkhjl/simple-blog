@@ -23,9 +23,7 @@
             <span>{{ getInitials(post.title) }}</span>
           </div>
 
-          <div class="rich-text">
-            <p>{{ post.content }}</p>
-          </div>
+          <div class="rich-content" v-html="renderedContent"></div>
         </article>
 
         <aside class="stack-card">
@@ -65,6 +63,7 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { createApiClient } from '../../services/api'
 import type { PublicPostDetail } from '../../types'
+import { isHtmlLike, plainTextToHtml, sanitizeRenderHtml } from '../../utils/richText'
 import { formatDisplayDate, getInitials } from '../../utils/ui'
 
 const route = useRoute()
@@ -72,6 +71,10 @@ const slug = computed(() => String(route.params.slug ?? ''))
 const post = ref<PublicPostDetail | null>(null)
 const loading = ref(true)
 const error = ref('')
+const renderedContent = computed(() => {
+  const content = post.value?.content ?? ''
+  return sanitizeRenderHtml(isHtmlLike(content) ? content : plainTextToHtml(content))
+})
 
 onMounted(async () => {
   try {

@@ -37,22 +37,9 @@
         </div>
 
         <div class="neo-shell" style="padding: 1rem;">
-          <div class="editor-toolbar neo-inset">
-            <button type="button" aria-label="Bold">B</button>
-            <button type="button" aria-label="Italic">I</button>
-            <button type="button" aria-label="Heading">H1</button>
-            <button type="button" aria-label="Quote">"</button>
-            <button type="button" aria-label="Link">#</button>
-          </div>
           <label class="field" style="margin-top: 1rem;">
             <span class="field-label">Content</span>
-            <textarea
-              v-model="form.content"
-              class="neo-textarea"
-              rows="16"
-              required
-              placeholder="Write the post body here."
-            ></textarea>
+            <RichTextEditor v-model="form.content" />
           </label>
         </div>
       </div>
@@ -158,10 +145,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import RichTextEditor from '../../components/editor/RichTextEditor.vue'
 import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
 import { authState } from '../../stores/auth'
 import type { AdminPostDetail, UploadedFilePayload } from '../../types'
+import { isHtmlLike, isMeaningfulEditorHtml, plainTextToHtml } from '../../utils/richText'
 import { formatDisplayDate } from '../../utils/ui'
 
 const route = useRoute()
@@ -232,7 +221,7 @@ async function loadPost() {
   form.title = data.title
   form.slug = data.slug
   form.excerpt = data.excerpt
-  form.content = data.content
+  form.content = isHtmlLike(data.content) ? data.content : plainTextToHtml(data.content)
   form.status = data.status
   form.coverImageKey = data.coverImageKey
   form.publishedAt = data.publishedAt
@@ -289,6 +278,12 @@ async function handleSave() {
   saving.value = true
   message.value = ''
   isSuccess.value = false
+
+  if (!isMeaningfulEditorHtml(form.content)) {
+    message.value = 'Content must not be empty.'
+    saving.value = false
+    return
+  }
 
   const payload = {
     title: form.title,

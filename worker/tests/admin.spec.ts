@@ -73,6 +73,48 @@ describe('admin posts api', () => {
     expect(payload.data.excerpt).toBe('updated excerpt')
   })
 
+  it('sanitizes html content before creating a post', async () => {
+    const res = await app.request('/api/admin/posts', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer editor-token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: 'Sanitized post',
+        slug: 'sanitized-post',
+        excerpt: 'excerpt',
+        content: '<p>Hello</p><script>alert(1)</script><a href="javascript:alert(1)">bad</a>',
+        status: 'draft',
+        publishedAt: null,
+      }),
+    })
+
+    expect(res.status).toBe(201)
+    const payload = await res.json() as { data: { content: string } }
+    expect(payload.data.content).toBe('<p>Hello</p><a>bad</a>')
+  })
+
+  it('rejects empty rich text content after sanitization', async () => {
+    const res = await app.request('/api/admin/posts', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer editor-token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: 'Empty post',
+        slug: 'empty-post',
+        excerpt: 'excerpt',
+        content: '<p><br></p>',
+        status: 'draft',
+        publishedAt: null,
+      }),
+    })
+
+    expect(res.status).toBe(400)
+  })
+
   it('deletes an existing post for editor owner', async () => {
     const createRes = await app.request('/api/admin/posts', {
       method: 'POST',
