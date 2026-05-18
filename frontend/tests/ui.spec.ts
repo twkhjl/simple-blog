@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { buildAdminPostStats, formatDisplayDate, getInitials } from '../src/utils/ui'
 
@@ -40,5 +42,13 @@ describe('ui helpers', () => {
   it('creates initials fallback for display names', () => {
     expect(getInitials('Simple Blog')).toBe('SB')
     expect(getInitials('')).toBe('SB')
+  })
+
+  it('does not force cover images into grayscale-like blend styling', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const coverFrameRule = css.match(/\.cover-frame img\s*\{[^}]*\}/)?.[0] ?? ''
+
+    expect(coverFrameRule).not.toContain('mix-blend-mode: luminosity')
+    expect(coverFrameRule).not.toContain('opacity: 0.88')
   })
 })
