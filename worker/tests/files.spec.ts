@@ -94,4 +94,30 @@ describe('files upload api', () => {
 
     expect(res.status).toBe(500)
   })
+
+  it('serves uploaded file content from public files path', async () => {
+    const get = vi.fn().mockResolvedValue({
+      body: new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode('image-bytes'))
+          controller.close()
+        },
+      }),
+      httpMetadata: {
+        contentType: 'image/webp',
+      },
+      writeHttpMetadata(headers: Headers) {
+        headers.set('content-type', 'image/webp')
+      },
+    })
+
+    const res = await app.request('/files/posts/2026/05/example-cover.webp', undefined, {
+      FILES_BUCKET: { get } as unknown as R2Bucket,
+    })
+
+    expect(res.status).toBe(200)
+    expect(get).toHaveBeenCalledWith('posts/2026/05/example-cover.webp')
+    expect(res.headers.get('content-type')).toContain('image/webp')
+    await expect(res.text()).resolves.toBe('image-bytes')
+  })
 })

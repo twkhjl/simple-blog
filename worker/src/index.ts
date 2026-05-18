@@ -34,7 +34,31 @@ app.use(
 )
 
 app.get('/health', () => ok({ ok: true }))
-app.get('/files/*', () => fail('NOT_FOUND', 'File not found', 404))
+app.get('/files/*', async c => {
+  const key = decodeURIComponent(c.req.path.replace(/^\/files\//, ''))
+  if (!key) {
+    return fail('NOT_FOUND', 'File not found', 404)
+  }
+
+  const bucket = c.env?.FILES_BUCKET
+  if (!bucket) {
+    return fail('INTERNAL_ERROR', 'Files bucket is not configured', 500)
+  }
+
+  const object = await bucket.get(key)
+  if (!object) {
+    return fail('NOT_FOUND', 'File not found', 404)
+  }
+
+  const headers = new Headers()
+  object.writeHttpMetadata(headers)
+
+  if (!headers.has('content-type')) {
+    headers.set('content-type', 'application/octet-stream')
+  }
+
+  return new Response(object.body, { headers })
+})
 
 app.route('/api', publicRoutes)
 app.route('/api', authRoutes)
