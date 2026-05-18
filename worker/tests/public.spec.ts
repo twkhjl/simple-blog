@@ -15,7 +15,7 @@ describe('public posts api', () => {
   })
 
   it('returns post detail by slug', async () => {
-    const res = await app.request('/api/posts/first-post')
+    const res = await app.request('/api/posts/launch-checklist')
     expect(res.status).toBe(200)
   })
 })

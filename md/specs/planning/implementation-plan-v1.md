@@ -532,7 +532,7 @@ authRoutes.get('/me', c => {
 
   return c.json({
     success: true,
-    data: { id: 'mock-user', email: 'user@example.com', displayName: null, role: 'user', status: 'active' },
+    data: { id: 'sample-user', email: 'member@demo.invalid', displayName: null, role: 'user', status: 'active' },
   })
 })
 
@@ -596,14 +596,14 @@ publicRoutes.get('/posts/:slug', c =>
   c.json({
     success: true,
     data: {
-      id: 'mock-post',
-      title: 'Mock Post',
+      id: 'sample-post',
+      title: 'Sample Post',
       slug: c.req.param('slug'),
-      content: 'Mock Content',
-      excerpt: 'Mock Excerpt',
+      content: 'Sample Content',
+      excerpt: 'Sample Excerpt',
       coverImageUrl: null,
       status: 'published',
-      author: { id: 'mock-user', displayName: 'Mock User' },
+      author: { id: 'sample-user', displayName: 'Sample Account' },
       publishedAt: '2026-05-16T00:00:00Z',
     },
   }),
@@ -731,9 +731,9 @@ fileRoutes.post('/upload', c => {
   return c.json({
     success: true,
     data: {
-      key: 'posts/2026/05/mock.webp',
-      url: 'https://api.yourdomain.com/files/posts/2026/05/mock.webp',
-      fileName: 'mock.webp',
+      key: 'posts/2026/05/sample-image.webp',
+      url: 'https://api.yourdomain.com/files/posts/2026/05/sample-image.webp',
+      fileName: 'sample-image.webp',
       mimeType: 'image/webp',
       size: 100,
     },

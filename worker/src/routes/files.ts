@@ -18,11 +18,11 @@ fileRoutes.post('/upload', c => {
       return fail('VALIDATION_ERROR', 'folder must be posts', 400)
     }
 
-    const key = 'posts/2026/05/mock.webp'
+    const key = 'posts/2026/05/sample-image.webp'
     return ok({
       key,
       url: buildFileUrl(c.env, key),
-      fileName: 'mock.webp',
+      fileName: 'sample-image.webp',
       mimeType: 'image/webp',
       size: 100,
     })

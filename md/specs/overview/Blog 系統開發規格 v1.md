@@ -94,7 +94,7 @@ https://your-github-username.github.io/blog-system/
 因為 GitHub Pages 是靜態網站，前端路由使用 Hash Router：
 
 https://your-github-username.github.io/blog-system/#/
-https://your-github-username.github.io/blog-system/#/post/my-first-post
+https://your-github-username.github.io/blog-system/#/post/launch-checklist
 https://your-github-username.github.io/blog-system/#/login
 https://your-github-username.github.io/blog-system/#/admin
 https://your-github-username.github.io/blog-system/#/admin/posts
@@ -623,7 +623,7 @@ Response：
     "status": "published",
     "author": {
       "id": "uuid",
-      "displayName": "John"
+      "displayName": "Editorial Account"
     },
     "publishedAt": "2026-05-16T00:00:00Z"
   }
@@ -645,8 +645,8 @@ Response：
   "success": true,
   "data": {
     "id": "uuid",
-    "email": "user@example.com",
-    "displayName": "John",
+    "email": "member@demo.invalid",
+    "displayName": "Editorial Account",
     "role": "admin",
     "status": "active"
   }
@@ -663,7 +663,7 @@ Body：
 
 ```json
 {
-  "displayName": "New Name"
+  "displayName": "Team Alias"
 }
 ```
 
@@ -681,8 +681,8 @@ Response：
   "success": true,
   "data": {
     "id": "uuid",
-    "email": "user@example.com",
-    "displayName": "New Name",
+    "email": "member@demo.invalid",
+    "displayName": "Team Alias",
     "role": "user",
     "status": "active"
   }
@@ -730,7 +730,7 @@ Response：
         "slug": "post-slug",
         "status": "draft",
         "authorId": "uuid",
-        "authorDisplayName": "John",
+        "authorDisplayName": "Editorial Account",
         "publishedAt": "2026-05-16T00:00:00Z",
         "updatedAt": "2026-05-16T00:00:00Z"
       }
@@ -765,7 +765,7 @@ Response：
     "coverImageKey": "posts/2026/05/xxx.webp",
     "status": "draft",
     "authorId": "uuid",
-    "authorDisplayName": "John",
+    "authorDisplayName": "Editorial Account",
     "publishedAt": null,
     "createdAt": "2026-05-16T00:00:00Z",
     "updatedAt": "2026-05-16T00:00:00Z"

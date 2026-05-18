@@ -1,6 +1,6 @@
 # Simple Blog
 
-依據 `md/specs` 開發的簡易部落格專案。
+此 repo 包含前端、Worker、資料庫腳本與公開規格文件；`md/specs` 為公開資料，範例內容需維持去識別化。
 
 ## Frontend
 
@@ -12,8 +12,8 @@ npm run dev
 ```
 
 - 使用 `Vue 3 + Vite + Hash Router`
-- GitHub Pages 子路徑部署已在 `vite.config.ts` 固定 `base`
-- 靜態資源請走 Vite import 或 `import.meta.env.BASE_URL`
+- GitHub Pages 部署需配合 [frontend/vite.config.ts](/D:/codes/simple-blog/frontend/vite.config.ts) 的 `base` 設定
+- 前端組裝 API URL 時需考慮 Vite 的 `import.meta.env.BASE_URL`
 
 ## Worker
 
@@ -29,14 +29,14 @@ npm run dev
 
 ## Database
 
-依序執行：
+初始化腳本：
 
 1. `database/schema.sql`
 2. `database/policies.sql`
 3. `database/triggers.sql`
 4. `database/seed.sql`
 
-Supabase 本地設定檔在 `supabase/config.toml`，已指向上述 SQL 檔。
+Supabase 本地設定集中在 `supabase/config.toml`，資料庫 schema 與 seed 由 SQL 檔維護。
 
 ## Deploy
 
@@ -59,5 +59,5 @@ Supabase 本地設定檔在 `supabase/config.toml`，已指向上述 SQL 檔。
 
 ## Public Repo Notes
 
-- `md/specs` 是公開文件，內容需維持去識別化
-- `database/seed.sql` 與 `supabase/config.toml` 只保留 placeholder，不放真實敏感值
+- `md/specs` 只放可公開分享內容。範例帳號、文章 slug、作者名稱請統一使用去識別化 placeholder，例如 `member@demo.invalid`、`launch-checklist`、`Editorial Account`
+- `database/seed.sql` 與 `supabase/config.toml` 只保留示意設定，不可放真實帳號、正式網域或可追溯個資

@@ -10,7 +10,7 @@
       <form @submit.prevent="handleLogin">
         <label class="field">
           <span class="field-label">Email</span>
-          <input v-model="email" class="neo-input" type="email" autocomplete="email" required placeholder="editor@example.com">
+          <input v-model="email" class="neo-input" type="email" autocomplete="email" required placeholder="editor@demo.invalid">
         </label>
         <label class="field">
           <span class="field-label">Password</span>

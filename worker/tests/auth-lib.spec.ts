@@ -3,7 +3,7 @@ import { createProfileLookup, resolveUserFromAuthorization } from '../src/lib/au
 import type { WorkerBindings } from '../src/types'
 
 describe('resolveUserFromAuthorization', () => {
-  it('returns mock user for known dev token', async () => {
+  it('returns dev user for known dev token', async () => {
     const user = await resolveUserFromAuthorization('Bearer editor-token')
 
     expect(user?.role).toBe('editor')
@@ -20,7 +20,7 @@ describe('resolveUserFromAuthorization', () => {
       data: {
         user: {
           id: 'user-9',
-          email: 'real@example.com',
+          email: 'member@demo.invalid',
         },
       },
       error: null,
@@ -28,8 +28,8 @@ describe('resolveUserFromAuthorization', () => {
 
     const fetchProfileById = vi.fn().mockResolvedValue({
       id: 'user-9',
-      email: 'real@example.com',
-      display_name: 'Real User',
+      email: 'member@demo.invalid',
+      display_name: 'Operations Account',
       role: 'admin',
       status: 'active',
     })
@@ -49,8 +49,8 @@ describe('resolveUserFromAuthorization', () => {
     expect(fetchProfileById).toHaveBeenCalledWith('user-9')
     expect(user).toEqual({
       id: 'user-9',
-      email: 'real@example.com',
-      displayName: 'Real User',
+      email: 'member@demo.invalid',
+      displayName: 'Operations Account',
       role: 'admin',
       status: 'active',
     })

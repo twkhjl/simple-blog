@@ -59,7 +59,7 @@ describe('admin posts api', () => {
       },
       body: JSON.stringify({
         title: 'Updated Draft',
-        slug: 'draft-post',
+        slug: 'review-queue-note',
         excerpt: 'updated excerpt',
         content: '# updated',
         status: 'draft',

@@ -255,7 +255,7 @@ for each row execute procedure public.set_updated_at();
 ```sql
 update public.profiles
 set role = 'super_admin'
-where email = 'your-admin@example.com';
+where email = 'admin@demo.invalid';
 ```
 
 6.2 seed 原則
