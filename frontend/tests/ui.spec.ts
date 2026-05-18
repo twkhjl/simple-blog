@@ -59,4 +59,14 @@ describe('ui helpers', () => {
     expect(page).toContain('<RichTextEditor v-model="form.content" />')
     expect(page).not.toContain('<label class="field" style="margin-top: 1rem;">')
   })
+
+  it('styles code blocks with distinct background in editor and public content', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+
+    const preRule = css.match(/\.rich-content pre,\s*[\r\n]+\s*\.tiptap pre\s*\{[^}]*\}/)?.[0] ?? ''
+
+    expect(preRule).toContain('background:')
+    expect(preRule).toContain('border:')
+    expect(preRule).toContain('overflow-x: auto')
+  })
 })

@@ -671,6 +671,38 @@ img {
   padding-left: 1.4rem;
 }
 
+.rich-content pre,
+.tiptap pre {
+  margin: 0;
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  border: 1px solid var(--outline-strong);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(145deg, rgba(19, 17, 24, 0.98), rgba(12, 10, 16, 0.98));
+  box-shadow: var(--shadow-inset);
+}
+
+.rich-content pre code,
+.tiptap pre code {
+  display: block;
+  padding: 0;
+  color: #d7f5ff;
+  background: transparent;
+  font-family: Consolas, 'SFMono-Regular', Menlo, Monaco, monospace;
+  font-size: 0.92rem;
+  line-height: 1.75;
+}
+
+.rich-content code,
+.tiptap code {
+  padding: 0.18rem 0.42rem;
+  border-radius: 0.55rem;
+  background: rgba(100, 231, 255, 0.12);
+  color: #c9f6ff;
+  font-family: Consolas, 'SFMono-Regular', Menlo, Monaco, monospace;
+  font-size: 0.92em;
+}
+
 .rich-content a {
   color: var(--secondary);
   text-decoration: underline;
@@ -713,6 +745,10 @@ img {
   padding: 1rem 1.15rem;
   outline: none;
   color: var(--text);
+}
+
+.tiptap pre code {
+  white-space: pre;
 }
 
 .tiptap p.is-editor-empty:first-child::before {
