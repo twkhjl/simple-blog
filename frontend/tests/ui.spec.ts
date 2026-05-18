@@ -51,4 +51,12 @@ describe('ui helpers', () => {
     expect(coverFrameRule).not.toContain('mix-blend-mode: luminosity')
     expect(coverFrameRule).not.toContain('opacity: 0.88')
   })
+
+  it('does not wrap RichTextEditor inside a label element', () => {
+    const page = readFileSync(resolve(__dirname, '../src/pages/admin/AdminPostEditPage.vue'), 'utf8')
+    expect(page).toContain('<div class="field" style="margin-top: 1rem;">')
+    expect(page).toContain('<span class="field-label">Content</span>')
+    expect(page).toContain('<RichTextEditor v-model="form.content" />')
+    expect(page).not.toContain('<label class="field" style="margin-top: 1rem;">')
+  })
 })

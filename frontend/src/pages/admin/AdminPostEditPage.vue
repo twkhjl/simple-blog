@@ -37,10 +37,10 @@
         </div>
 
         <div class="neo-shell" style="padding: 1rem;">
-          <label class="field" style="margin-top: 1rem;">
+          <div class="field" style="margin-top: 1rem;">
             <span class="field-label">Content</span>
             <RichTextEditor v-model="form.content" />
-          </label>
+          </div>
         </div>
       </div>
 
