@@ -12,7 +12,8 @@ describe('rich text helpers', () => {
   })
 
   it('sanitizes render html', () => {
-    expect(sanitizeRenderHtml('<p>Hello</p><script>alert(1)</script>')).toBe('<p>Hello</p>')
+    expect(sanitizeRenderHtml('<h3>Title</h3><pre><code>const x = 1;</code></pre><p>Hello</p><script>alert(1)</script>'))
+      .toBe('<h3>Title</h3><pre><code>const x = 1;</code></pre><p>Hello</p>')
   })
 
   it('detects empty editor html', () => {

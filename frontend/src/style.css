@@ -647,6 +647,10 @@ img {
 .rich-content p,
 .rich-content h1,
 .rich-content h2,
+.rich-content h3,
+.rich-content h4,
+.rich-content h5,
+.rich-content h6,
 .rich-content blockquote,
 .rich-content ul,
 .rich-content ol {
@@ -654,7 +658,11 @@ img {
 }
 
 .rich-content h1,
-.rich-content h2 {
+.rich-content h2,
+.rich-content h3,
+.rich-content h4,
+.rich-content h5,
+.rich-content h6 {
   color: var(--text);
 }
 
@@ -664,6 +672,16 @@ img {
 
 .rich-content h2 {
   font-size: 1.35rem;
+}
+
+.rich-content h3 {
+  font-size: 1.18rem;
+}
+
+.rich-content h4,
+.rich-content h5,
+.rich-content h6 {
+  font-size: 1.02rem;
 }
 
 .rich-content ul,

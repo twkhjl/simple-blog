@@ -1,6 +1,6 @@
 import sanitizeHtml from 'sanitize-html'
 
-const allowedTags = ['p', 'br', 'strong', 'em', 'h1', 'h2', 'ul', 'ol', 'li', 'blockquote', 'a']
+const allowedTags = ['p', 'br', 'strong', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'pre', 'code']
 const allowedAttributes = {
   a: ['href', 'target', 'rel'],
 } satisfies sanitizeHtml.IOptions['allowedAttributes']
