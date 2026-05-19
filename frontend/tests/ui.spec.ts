@@ -69,4 +69,14 @@ describe('ui helpers', () => {
     expect(preRule).toContain('border:')
     expect(preRule).toContain('overflow-x: auto')
   })
+
+  it('defines dedicated mobile public menu styles', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+
+    expect(css).toContain('.mobile-menu-toggle')
+    expect(css).toContain('.mobile-menu-panel')
+    expect(css).toContain('.mobile-menu-section')
+    expect(css).toContain('.desktop-nav')
+    expect(css).toContain('.desktop-actions')
+  })
 })
