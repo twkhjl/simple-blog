@@ -455,6 +455,15 @@ img {
   min-height: 100%;
 }
 
+.post-card .inline-actions {
+  align-self: end;
+}
+
+.post-card .inline-actions .neo-button,
+.post-card .inline-actions .neo-link-button {
+  width: auto;
+}
+
 .post-card-content {
   display: grid;
   gap: 0.7rem;

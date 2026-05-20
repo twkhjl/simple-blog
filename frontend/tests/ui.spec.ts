@@ -99,4 +99,13 @@ describe('ui helpers', () => {
     expect(homePage).toContain('v-if="post.coverImageUrl"')
     expect(postDetailPage).toContain('v-if="post.coverImageUrl"')
   })
+
+  it('keeps public article action buttons from stretching to full card height', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+
+    expect(css).toContain('.post-card .inline-actions')
+    expect(css).toContain('align-self: end')
+    expect(css).toContain('.post-card .inline-actions .neo-button')
+    expect(css).toContain('width: auto')
+  })
 })
