@@ -1,44 +1,41 @@
 <template>
   <section class="page-stack">
     <div class="page-hero neo-shell">
-      <p class="eyebrow">Operations</p>
-      <h1 class="hero-title" style="font-size: clamp(2.1rem, 5vw, 3.8rem);">Admin Dashboard</h1>
-      <p class="hero-copy">
-        Welcome back{{ profile ? `, ${profile.displayName ?? profile.email}` : '' }}. This surface stays useful even
-        with limited backend data by leaning on compact operational summaries.
-      </p>
+      <p class="eyebrow">{{ t('admin.dashboard.eyebrow') }}</p>
+      <h1 class="hero-title" style="font-size: clamp(2.1rem, 5vw, 3.8rem);">{{ t('admin.dashboard.title') }}</h1>
+      <p class="hero-copy">{{ t('admin.dashboard.copy', { target: greetingTarget }) }}</p>
     </div>
 
     <div class="stat-grid">
       <article class="stat-card neo-card">
-        <p class="stat-label">Access</p>
-        <p class="stat-value">{{ profile?.role ?? 'guest' }}</p>
-        <p class="stat-note">Current admin capability profile.</p>
+        <p class="stat-label">{{ t('admin.dashboard.access') }}</p>
+        <p class="stat-value">{{ profile ? t(`common.statusValues.${profile.role}`) : t('common.status.guest') }}</p>
+        <p class="stat-note">{{ t('admin.dashboard.accessNote') }}</p>
       </article>
       <article class="stat-card neo-card">
-        <p class="stat-label">Ready State</p>
-        <p class="stat-value">{{ profile ? 'Online' : 'Locked' }}</p>
-        <p class="stat-note">Derived from current authenticated profile state.</p>
+        <p class="stat-label">{{ t('admin.dashboard.readyState') }}</p>
+        <p class="stat-value">{{ profile ? t('common.status.online') : t('common.status.locked') }}</p>
+        <p class="stat-note">{{ t('admin.dashboard.readyStateNote') }}</p>
       </article>
       <article class="stat-card neo-card">
-        <p class="stat-label">Next Action</p>
-        <p class="stat-value">Posts</p>
-        <p class="stat-note">Jump directly into list management or create a new draft.</p>
+        <p class="stat-label">{{ t('admin.dashboard.nextAction') }}</p>
+        <p class="stat-value">{{ t('admin.dashboard.nextActionValue') }}</p>
+        <p class="stat-note">{{ t('admin.dashboard.nextActionNote') }}</p>
       </article>
     </div>
 
     <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
       <div class="neo-panel stack-card">
-        <p class="stat-label">Quick Links</p>
+        <p class="stat-label">{{ t('admin.dashboard.quickLinks') }}</p>
         <div class="inline-actions">
-          <RouterLink class="neo-button primary" to="/admin/posts">Manage Posts</RouterLink>
-          <RouterLink class="neo-button" to="/admin/posts/new">New Draft</RouterLink>
+          <RouterLink class="neo-button primary" to="/admin/posts">{{ t('common.actions.managePosts') }}</RouterLink>
+          <RouterLink class="neo-button" to="/admin/posts/new">{{ t('common.actions.newDraft') }}</RouterLink>
         </div>
       </div>
       <div class="neo-panel stack-card">
-        <p class="stat-label">Profile Status</p>
+        <p class="stat-label">{{ t('admin.dashboard.profileStatus') }}</p>
         <p class="section-copy">
-          {{ profile ? 'Authenticated and ready for editorial operations.' : 'Please log in with an editor/admin account.' }}
+          {{ profile ? t('admin.dashboard.readyProfile') : t('admin.dashboard.lockedProfile') }}
         </p>
       </div>
     </div>
@@ -47,8 +44,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { authState } from '../../stores/auth'
 
+const { t } = useI18n()
 const profile = computed(() => authState.profile)
+const greetingTarget = computed(() => (profile.value ? `, ${profile.value.displayName ?? profile.value.email}` : ''))
 </script>

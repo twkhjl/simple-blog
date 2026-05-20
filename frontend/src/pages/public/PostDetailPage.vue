@@ -1,14 +1,14 @@
 <template>
   <section class="page-stack">
-    <p v-if="loading" class="status-message">Loading post...</p>
-    <p v-else-if="!post" class="status-message error">{{ error || `Post not found: ${slug}` }}</p>
+    <p v-if="loading" class="status-message">{{ t('common.messages.loadingPost') }}</p>
+    <p v-else-if="!post" class="status-message error">{{ error || t('common.messages.postNotFound', { slug }) }}</p>
     <template v-else>
       <div class="page-hero neo-shell">
-        <p class="eyebrow">Reading Surface</p>
+        <p class="eyebrow">{{ t('public.post.eyebrow') }}</p>
         <h1 class="hero-title" style="font-size: clamp(2.2rem, 5vw, 4rem);">{{ post.title }}</h1>
         <p class="hero-copy">{{ post.excerpt }}</p>
         <div class="toolbar">
-          <span class="chip">{{ formatDisplayDate(post.publishedAt) }}</span>
+          <span class="chip">{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
           <span v-if="post.author.displayName" class="chip">{{ post.author.displayName }}</span>
           <span class="chip">{{ post.slug }}</span>
         </div>
@@ -28,28 +28,28 @@
 
         <aside class="stack-card">
           <div class="neo-panel">
-            <p class="stat-label">Post Metadata</p>
+            <p class="stat-label">{{ t('public.post.metadata') }}</p>
             <div class="metadata-list">
               <div class="metadata-row">
-                <span class="metadata-label">Published</span>
-                <span class="metadata-value">{{ formatDisplayDate(post.publishedAt) }}</span>
+                <span class="metadata-label">{{ t('common.labels.published') }}</span>
+                <span class="metadata-value">{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
               </div>
               <div class="metadata-row">
-                <span class="metadata-label">Author</span>
-                <span class="metadata-value">{{ post.author.displayName ?? 'Editorial Desk' }}</span>
+                <span class="metadata-label">{{ t('common.labels.author') }}</span>
+                <span class="metadata-value">{{ post.author.displayName ?? t('common.status.editorialDesk') }}</span>
               </div>
               <div class="metadata-row">
-                <span class="metadata-label">Status</span>
-                <span class="metadata-value">{{ post.status }}</span>
+                <span class="metadata-label">{{ t('common.labels.status') }}</span>
+                <span class="metadata-value">{{ t(`common.statusValues.${post.status}`) }}</span>
               </div>
             </div>
           </div>
 
           <div class="neo-panel">
-            <p class="stat-label">Continue</p>
-            <p class="section-copy">Return to the latest grid and keep moving through published work.</p>
+            <p class="stat-label">{{ t('public.post.continue') }}</p>
+            <p class="section-copy">{{ t('public.post.continueCopy') }}</p>
             <div class="inline-actions" style="margin-top: 1rem;">
-              <RouterLink class="neo-button primary" to="/">Back to Explore</RouterLink>
+              <RouterLink class="neo-button primary" to="/">{{ t('common.actions.backToExplore') }}</RouterLink>
             </div>
           </div>
         </aside>
@@ -60,12 +60,14 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 import { createApiClient } from '../../services/api'
 import type { PublicPostDetail } from '../../types'
 import { isHtmlLike, plainTextToHtml, sanitizeRenderHtml } from '../../utils/richText'
 import { formatDisplayDate, getInitials } from '../../utils/ui'
 
+const { locale, t } = useI18n()
 const route = useRoute()
 const slug = computed(() => String(route.params.slug ?? ''))
 const post = ref<PublicPostDetail | null>(null)
@@ -80,7 +82,7 @@ onMounted(async () => {
   try {
     post.value = await createApiClient().get<PublicPostDetail>(`/api/posts/${slug.value}`)
   } catch (fetchError) {
-    error.value = fetchError instanceof Error ? fetchError.message : 'Failed to load post'
+    error.value = fetchError instanceof Error ? fetchError.message : t('common.messages.failedToLoadPost')
   } finally {
     loading.value = false
   }

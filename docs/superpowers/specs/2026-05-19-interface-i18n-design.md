@@ -71,12 +71,43 @@
 - `frontend/src/i18n/locales/zh-TW.ts`
 - `frontend/src/i18n/locales/en.ts`
 - `frontend/src/i18n/useLocale.ts`
+- `frontend/src/components/app/LocaleSwitcher.vue`
 
 責任分工：
 
 - `index.ts`：初始化 `vue-i18n`、註冊 messages、設定 fallback
 - `locales/*.ts`：各語系字典
 - `useLocale.ts`：語系偵測、切換、持久化、更新 `html lang` 與 `document.title`
+- `LocaleSwitcher.vue`：共用語言切換 UI，供前台與後台 layout 重用
+
+### 既有檔案調整清單
+
+預期會修改：
+
+- `frontend/package.json`
+- `frontend/src/main.ts`
+- `frontend/src/router/index.ts`
+- `frontend/src/layouts/PublicLayout.vue`
+- `frontend/src/layouts/AdminLayout.vue`
+- `frontend/src/pages/public/HomePage.vue`
+- `frontend/src/pages/public/PostDetailPage.vue`
+- `frontend/src/pages/auth/LoginPage.vue`
+- `frontend/src/pages/auth/RegisterPage.vue`
+- `frontend/src/pages/auth/ProfilePage.vue`
+- `frontend/src/pages/admin/AdminDashboardPage.vue`
+- `frontend/src/pages/admin/AdminPostListPage.vue`
+- `frontend/src/pages/admin/AdminPostEditPage.vue`
+- `frontend/src/components/editor/RichTextEditor.vue`
+- `frontend/index.html`
+- 既有前端測試檔與新增 i18n 測試檔
+
+### 依賴
+
+需新增：
+
+- `vue-i18n`
+
+不新增其他狀態管理套件，locale 狀態維持由 i18n 模組與輕量 composable 處理。
 
 ## 語系規則
 
@@ -95,6 +126,10 @@
 1. `localStorage` 中使用者上次手動選擇
 2. 瀏覽器語系
 3. fallback `zh-TW`
+
+`localStorage` key 固定為：
+
+- `simple-blog.locale`
 
 ### 瀏覽器語系映射
 
@@ -130,6 +165,34 @@
 - 避免單一巨大平面字典
 - 相同語意共用 key，例如共通按鈕
 
+### 字典最小骨架
+
+`zh-TW.ts` 與 `en.ts` 應維持相同結構，至少包含：
+
+- `common.actions.*`
+- `common.status.*`
+- `common.nav.*`
+- `common.messages.*`
+- `public.nav.*`
+- `public.home.*`
+- `public.post.*`
+- `auth.login.*`
+- `auth.register.*`
+- `auth.profile.*`
+- `admin.layout.*`
+- `admin.dashboard.*`
+- `admin.posts.*`
+- `admin.edit.*`
+- `editor.placeholder.*`
+- `seo.*`
+
+### 文案收斂原則
+
+- 共通按鈕如 `Save`、`Delete`、`Login`、`Register` 先放 `common.actions.*`
+- 只在單頁出現且語意特定的句子，放在該頁命名空間
+- 不在元件內直接保留英文 fallback 字串
+- 若字串含變數，使用 i18n 插值，不手動字串串接
+
 ## UI 設計
 
 ### 語言切換器
@@ -152,9 +215,18 @@
 ### 放置位置
 
 - 前台：放在 header 操作區
-- 後台：放在 admin header 或 sidebar 上方
+- 後台：放在 admin header 操作區
 
 目標是讓使用者在任何主要入口都能快速切換語言。
+
+### 互動規則
+
+- 切換器固定顯示兩個選項：`繁中`、`EN`
+- 點擊當前語言不應造成額外副作用
+- 切換後立即更新整個 App 文案
+- 切換後保留當前 route，不導頁
+- 前台手機版 header 中，語言切換器應與既有 mobile menu 共存
+- 若前台 mobile menu 已展開，切換語言不應自動關閉選單，除非實作上有明確衝突
 
 ## 文件標題與 HTML 屬性
 
@@ -169,6 +241,13 @@
 - Register：`seo.register.title`
 - Profile：`seo.profile.title`
 - Admin Posts：`seo.adminPosts.title`
+
+實作規則：
+
+- 使用 router `meta.titleKey`
+- 由 router after hook 或集中 watcher 統一更新 `document.title`
+- title 格式統一為：`<頁面標題> | Simple Blog`
+- 若 route 未提供 `titleKey`，fallback 為 `seo.app.title`
 
 ### `html lang`
 
@@ -193,6 +272,7 @@
 - 導覽列文案改成 `t()`
 - footer 文案改成 `t()`
 - 語言切換器放入 layout
+- 不新增第二套 layout 結構，只替換文案與插入切換器
 
 ### Public / Auth / Admin 頁面
 
@@ -206,6 +286,13 @@
 - placeholder
 - metadata label
 
+此外一併調整：
+
+- 空資料畫面文案
+- hero / eyebrow / section copy
+- CTA 按鈕
+- 同步替換目前測試中出現的硬編碼 UI 字串
+
 ### Editor
 
 修改：
@@ -216,6 +303,7 @@
 
 - 編輯器 placeholder 改用翻譯字串
 - 相關控制按鈕若為硬編碼，也一併改為翻譯 key
+- 若 Tiptap placeholder extension 不會自動響應 locale 改變，允許在 locale 切換時重建 editor instance
 
 ## 錯誤與訊息策略
 
@@ -229,6 +317,12 @@
 - Profile update failed
 - Register failed
 - Content must not be empty
+
+本次也應一併納入：
+
+- 空列表提示
+- 載入失敗時的通用前端提示
+- 按鈕 loading 狀態文案若有顯示
 
 ### 後端原始錯誤訊息
 
@@ -251,6 +345,8 @@
 - `localStorage` 優先於瀏覽器語系
 - 瀏覽器語系映射邏輯正確
 - 切換語言後回傳正確 locale
+- `html lang` 映射正確
+- route title fallback 正確
 
 ### UI / 元件測試
 
@@ -260,6 +356,20 @@
 - 語言切換器可正常切換
 - `html lang` 會更新
 - `document.title` 會更新
+- 前台 mobile menu 中若含切換器，手機版互動不應破壞既有 menu 行為
+- editor placeholder 在切換語言後維持正確內容
+
+### 建議新增測試檔
+
+- `frontend/tests/i18n.spec.ts`
+- `frontend/tests/locale-switcher.spec.ts`
+
+既有測試可能需要調整：
+
+- `frontend/tests/public-layout.spec.ts`
+- `frontend/tests/router.spec.ts`
+- `frontend/tests/ui.spec.ts`
+- 與 auth / editor 有關的測試
 
 ### 驗證命令
 
@@ -303,11 +413,26 @@
 1. 導入 `vue-i18n` 與基礎 i18n 模組
 2. 完成 locale 偵測、fallback、持久化
 3. 串接 `main.ts`
-4. 加入語言切換器
-5. 先改 layout 與共通文案
-6. 再改 public / auth / admin / editor 文案
-7. 串接 `document.title` 與 `html lang`
-8. 補測試與驗證
+4. 在 router 加入 `meta.titleKey` 與 title 更新邏輯
+5. 加入共用語言切換器
+6. 先改 layout 與共通文案
+7. 再改 public / auth / admin / editor 文案
+8. 補 `html lang`、`document.title`、editor placeholder 響應
+9. 補測試與驗證
+
+## 開發完成定義
+
+要視為「可開發完成」，至少需同時滿足：
+
+- `vue-i18n` 已掛入 App，且 locale 初始化規則符合 spec
+- `zh-TW`、`en` 字典存在且 key 結構一致
+- 前台與後台 layout 已可切換語言
+- 所有主要頁面硬編碼介面文案已抽離
+- route title 由集中機制更新
+- `html lang` 可隨語系同步
+- `localStorage` 可記住語系
+- `npm run check` 通過
+- 既有手機版 header menu 行為未被破壞
 
 ## 驗收標準
 

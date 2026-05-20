@@ -2,6 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { createAppI18n } from '../src/i18n'
 import PublicLayout from '../src/layouts/PublicLayout.vue'
 import { authState, logout } from '../src/stores/auth'
 import type { CurrentUser } from '../src/types'
@@ -63,12 +64,13 @@ describe('PublicLayout mobile menu', () => {
 
   it('toggles mobile menu and closes it after menu interaction and route changes', async () => {
     const router = createTestRouter()
+    const i18n = createAppI18n()
     await router.push('/')
     await router.isReady()
 
     const wrapper = mount(PublicLayout, {
       global: {
-        plugins: [router],
+        plugins: [router, i18n],
       },
     })
 
@@ -94,12 +96,13 @@ describe('PublicLayout mobile menu', () => {
     setLoggedInAdminState()
 
     const router = createTestRouter()
+    const i18n = createAppI18n()
     await router.push('/')
     await router.isReady()
 
     const wrapper = mount(PublicLayout, {
       global: {
-        plugins: [router],
+        plugins: [router, i18n],
       },
     })
 
@@ -114,5 +117,22 @@ describe('PublicLayout mobile menu', () => {
     expect(logout).toHaveBeenCalledTimes(1)
     expect(authState.session).toBeNull()
     expect(wrapper.get('[data-testid="mobile-menu-panel"]').attributes('data-open')).toBe('false')
+  })
+
+  it('renders localized public nav labels', async () => {
+    localStorage.setItem('simple-blog.locale', 'zh-TW')
+    const router = createTestRouter()
+    const i18n = createAppI18n()
+    await router.push('/')
+    await router.isReady()
+
+    const wrapper = mount(PublicLayout, {
+      global: {
+        plugins: [router, i18n],
+      },
+    })
+
+    expect(wrapper.text()).toContain('探索文章')
+    expect(wrapper.text()).toContain('登入')
   })
 })

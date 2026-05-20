@@ -1,11 +1,11 @@
 import type { AdminPostListItem } from '../types'
 
-export function formatDisplayDate(value: string | null) {
+export function formatDisplayDate(value: string | null, locale = 'en-US', fallback = 'Unscheduled') {
   if (!value) {
-    return 'Unscheduled'
+    return fallback
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

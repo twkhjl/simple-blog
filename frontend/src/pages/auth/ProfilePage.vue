@@ -1,27 +1,27 @@
 <template>
   <section class="page-stack">
     <div class="page-hero neo-shell">
-      <p class="eyebrow">Account Surface</p>
-      <h1 class="hero-title" style="font-size: clamp(2rem, 5vw, 3.5rem);">Profile</h1>
-      <p class="hero-copy">Review your account metadata and update the display name without leaving the same visual system.</p>
+      <p class="eyebrow">{{ t('auth.profile.eyebrow') }}</p>
+      <h1 class="hero-title" style="font-size: clamp(2rem, 5vw, 3.5rem);">{{ t('auth.profile.title') }}</h1>
+      <p class="hero-copy">{{ t('auth.profile.copy') }}</p>
     </div>
 
-    <p v-if="!profile" class="status-message error">Please log in first.</p>
+    <p v-if="!profile" class="status-message error">{{ t('common.messages.pleaseLoginFirst') }}</p>
     <div v-else class="split-layout">
       <div class="stack-card neo-shell" style="padding: 1.5rem;">
         <div class="stack-card">
-          <p class="eyebrow">Editable Field</p>
-          <h2 class="section-title">Display Settings</h2>
-          <p class="section-copy">The profile endpoint currently exposes a compact account shape, so this screen focuses on clarity instead of extra chrome.</p>
+          <p class="eyebrow">{{ t('auth.profile.editableField') }}</p>
+          <h2 class="section-title">{{ t('auth.profile.displaySettings') }}</h2>
+          <p class="section-copy">{{ t('auth.profile.displaySettingsCopy') }}</p>
         </div>
 
         <form class="stack-card" @submit.prevent="handleSave">
           <label class="field">
-            <span class="field-label">Display name</span>
-            <input v-model="displayName" class="neo-input" type="text" maxlength="50" placeholder="How should your byline appear?">
+            <span class="field-label">{{ t('common.labels.displayName') }}</span>
+            <input v-model="displayName" class="neo-input" type="text" maxlength="50" :placeholder="t('auth.profile.displayNamePlaceholder')">
           </label>
           <div class="inline-actions">
-            <button type="submit" class="neo-button primary" :disabled="saving">Save</button>
+            <button type="submit" class="neo-button primary" :disabled="saving">{{ t('common.actions.save') }}</button>
           </div>
         </form>
 
@@ -30,19 +30,19 @@
 
       <aside class="stack-card">
         <div class="neo-panel">
-          <p class="stat-label">Account Metadata</p>
+          <p class="stat-label">{{ t('auth.profile.metadata') }}</p>
           <div class="metadata-list">
             <div class="metadata-row">
-              <span class="metadata-label">Email</span>
+              <span class="metadata-label">{{ t('common.labels.email') }}</span>
               <span class="metadata-value">{{ profile.email }}</span>
             </div>
             <div class="metadata-row">
-              <span class="metadata-label">Role</span>
-              <span class="metadata-value">{{ profile.role }}</span>
+              <span class="metadata-label">{{ t('common.labels.role') }}</span>
+              <span class="metadata-value">{{ t(`common.statusValues.${profile.role}`) }}</span>
             </div>
             <div class="metadata-row">
-              <span class="metadata-label">Status</span>
-              <span class="metadata-value">{{ profile.status }}</span>
+              <span class="metadata-label">{{ t('common.labels.accountStatus') }}</span>
+              <span class="metadata-value">{{ t(`common.statusValues.${profile.status}`) }}</span>
             </div>
           </div>
         </div>
@@ -53,10 +53,12 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
 import { authState, refreshProfile } from '../../stores/auth'
 
+const { t } = useI18n()
 const profile = computed(() => authState.profile)
 const displayName = ref('')
 const saving = ref(false)
@@ -70,7 +72,7 @@ watch(profile, value => {
 async function handleSave() {
   if (!authState.session) {
     isSuccess.value = false
-    message.value = 'Please log in first.'
+    message.value = t('common.messages.pleaseLoginFirst')
     return
   }
 
@@ -85,9 +87,9 @@ async function handleSave() {
     })
     await refreshProfile()
     isSuccess.value = true
-    message.value = 'Profile updated.'
+    message.value = t('common.messages.profileUpdated')
   } catch (error) {
-    message.value = error instanceof Error ? error.message : 'Profile update failed'
+    message.value = error instanceof Error ? error.message : t('common.messages.profileUpdateFailed')
   } finally {
     saving.value = false
   }

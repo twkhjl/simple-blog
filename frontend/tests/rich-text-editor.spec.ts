@@ -1,10 +1,15 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
+import { createAppI18n } from '../src/i18n'
 import RichTextEditor from '../src/components/editor/RichTextEditor.vue'
 
 describe('RichTextEditor', () => {
   it('emits updated html when content changes', async () => {
+    const i18n = createAppI18n()
     const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
       props: {
         modelValue: '<p>Start</p>',
       },
@@ -17,7 +22,11 @@ describe('RichTextEditor', () => {
   })
 
   it('applies and removes links through inline form', async () => {
+    const i18n = createAppI18n()
     const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
       props: {
         modelValue: '<p>Hello</p>',
       },

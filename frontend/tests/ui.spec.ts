@@ -55,7 +55,7 @@ describe('ui helpers', () => {
   it('does not wrap RichTextEditor inside a label element', () => {
     const page = readFileSync(resolve(__dirname, '../src/pages/admin/AdminPostEditPage.vue'), 'utf8')
     expect(page).toContain('<div class="field" style="margin-top: 1rem;">')
-    expect(page).toContain('<span class="field-label">Content</span>')
+    expect(page).toContain("{{ t('common.labels.content') }}")
     expect(page).toContain('<RichTextEditor v-model="form.content" />')
     expect(page).not.toContain('<label class="field" style="margin-top: 1rem;">')
   })
@@ -78,5 +78,15 @@ describe('ui helpers', () => {
     expect(css).toContain('.mobile-menu-section')
     expect(css).toContain('.desktop-nav')
     expect(css).toContain('.desktop-actions')
+  })
+
+  it('adds locale switcher styling and localized login template bindings', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const loginPage = readFileSync(resolve(__dirname, '../src/pages/auth/LoginPage.vue'), 'utf8')
+
+    expect(css).toContain('.locale-switcher')
+    expect(css).toContain('.locale-switcher-option')
+    expect(loginPage).toContain("t('auth.login.title')")
+    expect(loginPage).toContain("t('common.actions.login')")
   })
 })

@@ -19,4 +19,11 @@ describe('router', () => {
     expect(paths).toContain('/admin/posts/new')
     expect(paths).toContain('/admin/posts/:id/edit')
   })
+
+  it('assigns title keys to key routes', () => {
+    const routes = createAppRouter().getRoutes()
+    expect(routes.find(route => route.path === '/login')?.meta.titleKey).toBe('seo.login.title')
+    expect(routes.find(route => route.path === '/register')?.meta.titleKey).toBe('seo.register.title')
+    expect(routes.find(route => route.path === '/admin/posts')?.meta.titleKey).toBe('seo.adminPosts.title')
+  })
 })

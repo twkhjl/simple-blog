@@ -1,11 +1,11 @@
 <template>
   <section class="page-stack">
     <div class="page-hero neo-shell">
-      <p class="eyebrow">Editorial Editor</p>
+      <p class="eyebrow">{{ t('admin.edit.eyebrow') }}</p>
       <h1 class="hero-title" style="font-size: clamp(2rem, 5vw, 3.6rem);">
-        {{ isCreateMode ? 'Create Post' : 'Edit Post' }}
+        {{ isCreateMode ? t('admin.edit.createTitle') : t('admin.edit.editTitle') }}
       </h1>
-      <p class="hero-copy">Keep the existing content model intact while giving the writing surface, metadata and danger actions clearer separation.</p>
+      <p class="hero-copy">{{ t('admin.edit.copy') }}</p>
     </div>
 
     <p v-if="message" class="status-message" :class="{ error: !isSuccess, success: isSuccess }">{{ message }}</p>
@@ -15,22 +15,22 @@
         <div class="neo-shell" style="padding: 1.4rem;">
           <div class="stack-card">
             <label class="field">
-              <span class="field-label">Title</span>
-              <input v-model="form.title" class="neo-input" type="text" required placeholder="Enter a strong editorial title">
+              <span class="field-label">{{ t('common.labels.title') }}</span>
+              <input v-model="form.title" class="neo-input" type="text" required :placeholder="t('common.labels.title')">
             </label>
 
             <label class="field">
-              <span class="field-label">Slug</span>
+              <span class="field-label">{{ t('common.labels.slug') }}</span>
               <input v-model="form.slug" class="neo-input" type="text" required placeholder="future-of-quiet-interfaces">
             </label>
 
             <label class="field">
-              <span class="field-label">Excerpt</span>
+              <span class="field-label">{{ t('common.labels.excerpt') }}</span>
               <textarea
                 v-model="form.excerpt"
                 class="neo-textarea"
                 rows="4"
-                placeholder="Short summary for list cards and article header."
+                :placeholder="t('common.labels.excerpt')"
               ></textarea>
             </label>
           </div>
@@ -38,7 +38,7 @@
 
         <div class="neo-shell" style="padding: 1rem;">
           <div class="field" style="margin-top: 1rem;">
-            <span class="field-label">Content</span>
+            <span class="field-label">{{ t('common.labels.content') }}</span>
             <RichTextEditor v-model="form.content" />
           </div>
         </div>
@@ -46,51 +46,51 @@
 
       <aside class="stack-card">
         <div class="neo-panel">
-          <p class="stat-label">Publish Status</p>
+          <p class="stat-label">{{ t('admin.edit.publishStatus') }}</p>
           <label class="field">
-            <span class="field-label">Status</span>
+            <span class="field-label">{{ t('common.labels.status') }}</span>
             <select v-model="form.status" class="neo-select">
-              <option value="draft">draft</option>
-              <option value="published">published</option>
-              <option value="archived">archived</option>
+              <option value="draft">{{ t('common.statusValues.draft') }}</option>
+              <option value="published">{{ t('common.statusValues.published') }}</option>
+              <option value="archived">{{ t('common.statusValues.archived') }}</option>
             </select>
           </label>
         </div>
 
         <div class="neo-panel">
-          <p class="stat-label">Metadata</p>
+          <p class="stat-label">{{ t('admin.edit.metadata') }}</p>
           <div class="metadata-list">
             <div class="metadata-row">
-              <span class="metadata-label">Author</span>
+              <span class="metadata-label">{{ t('common.labels.author') }}</span>
               <span class="metadata-value">{{ metadata.author }}</span>
             </div>
             <div class="metadata-row">
-              <span class="metadata-label">Created</span>
+              <span class="metadata-label">{{ t('common.labels.created') }}</span>
               <span class="metadata-value">{{ metadata.createdAt }}</span>
             </div>
             <div class="metadata-row">
-              <span class="metadata-label">Updated</span>
+              <span class="metadata-label">{{ t('common.labels.updated') }}</span>
               <span class="metadata-value">{{ metadata.updatedAt }}</span>
             </div>
             <div class="metadata-row">
-              <span class="metadata-label">Published</span>
+              <span class="metadata-label">{{ t('common.labels.published') }}</span>
               <span class="metadata-value">{{ metadata.publishedAt }}</span>
             </div>
           </div>
         </div>
 
         <div class="neo-panel">
-          <p class="stat-label">Cover Image</p>
+          <p class="stat-label">{{ t('admin.edit.coverImage') }}</p>
           <div class="stack-card">
             <div v-if="previewImageUrl" class="cover-frame neo-inset" style="aspect-ratio: 16 / 9;">
-              <img :src="previewImageUrl" :alt="form.title || 'Cover image preview'">
+              <img :src="previewImageUrl" :alt="form.title || t('admin.edit.coverImage')">
             </div>
             <div v-else class="media-fallback">
-              <span>No Cover Uploaded</span>
+              <span>{{ t('common.status.noCoverUploaded') }}</span>
             </div>
 
             <label class="field">
-              <span class="field-label">Upload File</span>
+              <span class="field-label">{{ t('common.labels.uploadFile') }}</span>
               <input
                 ref="fileInput"
                 class="neo-input"
@@ -103,14 +103,14 @@
 
             <div class="metadata-list">
               <div class="metadata-row">
-                <span class="metadata-label">Stored Key</span>
-                <span class="metadata-value cover-key">{{ form.coverImageKey ?? 'Not set' }}</span>
+                <span class="metadata-label">{{ t('common.labels.storedKey') }}</span>
+                <span class="metadata-value cover-key">{{ form.coverImageKey ?? t('common.status.notSet') }}</span>
               </div>
             </div>
 
             <div class="inline-actions">
               <button type="button" class="neo-button secondary" :disabled="saving || uploadingCover" @click="triggerCoverBrowse">
-                Choose Image
+                {{ t('common.actions.chooseImage') }}
               </button>
               <button
                 type="button"
@@ -118,22 +118,22 @@
                 :disabled="saving || uploadingCover || !form.coverImageKey"
                 @click="clearCoverImage"
               >
-                Clear Cover
+                {{ t('admin.edit.clearCover') }}
               </button>
             </div>
 
-            <p v-if="uploadingCover" class="status-message">Uploading cover image...</p>
+            <p v-if="uploadingCover" class="status-message">{{ t('common.messages.uploadingCover') }}</p>
           </div>
         </div>
 
         <div class="neo-panel">
-          <p class="stat-label">Actions</p>
+          <p class="stat-label">{{ t('admin.edit.actions') }}</p>
           <div class="stack-card">
             <button type="submit" class="neo-button primary" :disabled="saving || uploadingCover">
-              {{ isCreateMode ? 'Create' : 'Save' }}
+              {{ isCreateMode ? t('common.actions.create') : t('common.actions.save') }}
             </button>
             <button v-if="!isCreateMode" type="button" class="neo-button danger" :disabled="saving || uploadingCover" @click="handleDelete">
-              Delete
+              {{ t('common.actions.delete') }}
             </button>
           </div>
         </div>
@@ -144,6 +144,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import RichTextEditor from '../../components/editor/RichTextEditor.vue'
 import { createApiClient } from '../../services/api'
@@ -153,6 +154,7 @@ import type { AdminPostDetail, UploadedFilePayload } from '../../types'
 import { isHtmlLike, isMeaningfulEditorHtml, plainTextToHtml } from '../../utils/richText'
 import { formatDisplayDate } from '../../utils/ui'
 
+const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const isCreateMode = computed(() => route.params.id == null)
@@ -174,12 +176,22 @@ const form = reactive({
   publishedAt: null as string | null,
 })
 
-const metadata = reactive({
-  author: 'Editorial Desk',
-  createdAt: 'Not created yet',
-  updatedAt: 'No updates yet',
-  publishedAt: 'Unscheduled',
+const rawMetadata = reactive({
+  author: null as string | null,
+  createdAt: null as string | null,
+  updatedAt: null as string | null,
 })
+
+const metadata = computed(() => ({
+  author: rawMetadata.author ?? t('common.status.editorialDesk'),
+  createdAt: rawMetadata.createdAt
+    ? formatDisplayDate(rawMetadata.createdAt, locale.value, t('common.status.unscheduled'))
+    : t('common.status.notCreatedYet'),
+  updatedAt: rawMetadata.updatedAt
+    ? formatDisplayDate(rawMetadata.updatedAt, locale.value, t('common.status.unscheduled'))
+    : t('common.status.noUpdatesYet'),
+  publishedAt: formatDisplayDate(form.publishedAt, locale.value, t('common.status.unscheduled')),
+}))
 
 function getClient() {
   return createApiClient(fetch, () => extractAccessToken(authState.session))
@@ -226,10 +238,9 @@ async function loadPost() {
   form.coverImageKey = data.coverImageKey
   form.publishedAt = data.publishedAt
   setPreviewImage(data.coverImageUrl)
-  metadata.author = data.authorDisplayName ?? 'Editorial Desk'
-  metadata.createdAt = formatDisplayDate(data.createdAt)
-  metadata.updatedAt = formatDisplayDate(data.updatedAt)
-  metadata.publishedAt = formatDisplayDate(data.publishedAt)
+  rawMetadata.author = data.authorDisplayName
+  rawMetadata.createdAt = data.createdAt
+  rawMetadata.updatedAt = data.updatedAt
 }
 
 async function handleCoverImageChange(event: Event) {
@@ -240,7 +251,7 @@ async function handleCoverImageChange(event: Event) {
   }
 
   if (!file.type.startsWith('image/')) {
-    message.value = 'Cover image must be an image file.'
+    message.value = t('common.messages.coverMustBeImage')
     isSuccess.value = false
     target.value = ''
     return
@@ -263,11 +274,11 @@ async function handleCoverImageChange(event: Event) {
     form.coverImageKey = uploaded.key
     setPreviewImage(uploaded.url)
     isSuccess.value = true
-    message.value = 'Cover image uploaded.'
+    message.value = t('common.messages.coverUploaded')
   } catch (error) {
     form.coverImageKey = previousCoverImageKey
     setPreviewImage(previousPreviewImageUrl)
-    message.value = error instanceof Error ? error.message : 'Failed to upload cover image'
+    message.value = error instanceof Error ? error.message : t('common.messages.failedToUploadCover')
   } finally {
     uploadingCover.value = false
     target.value = ''
@@ -280,7 +291,7 @@ async function handleSave() {
   isSuccess.value = false
 
   if (!isMeaningfulEditorHtml(form.content)) {
-    message.value = 'Content must not be empty.'
+    message.value = t('common.messages.contentRequired')
     saving.value = false
     return
   }
@@ -299,16 +310,16 @@ async function handleSave() {
     if (isCreateMode.value) {
       const created = await getClient().post<AdminPostDetail>('/api/admin/posts', payload)
       isSuccess.value = true
-      message.value = 'Post created.'
+      message.value = t('common.messages.postCreated')
       await router.replace(`/admin/posts/${created.id}/edit`)
       return
     }
 
     await getClient().put<AdminPostDetail>(`/api/admin/posts/${route.params.id}`, payload)
     isSuccess.value = true
-    message.value = 'Post updated.'
+    message.value = t('common.messages.postUpdated')
   } catch (error) {
-    message.value = error instanceof Error ? error.message : 'Failed to save post'
+    message.value = error instanceof Error ? error.message : t('common.messages.failedToSavePost')
   } finally {
     saving.value = false
   }
@@ -327,7 +338,7 @@ async function handleDelete() {
     await getClient().delete(`/api/admin/posts/${route.params.id}`)
     await router.push('/admin/posts')
   } catch (error) {
-    message.value = error instanceof Error ? error.message : 'Failed to delete post'
+    message.value = error instanceof Error ? error.message : t('common.messages.failedToDeletePost')
   } finally {
     saving.value = false
   }
@@ -337,7 +348,7 @@ onMounted(async () => {
   try {
     await loadPost()
   } catch (error) {
-    message.value = error instanceof Error ? error.message : 'Failed to load post'
+    message.value = error instanceof Error ? error.message : t('common.messages.failedToLoadPost')
   }
 })
 

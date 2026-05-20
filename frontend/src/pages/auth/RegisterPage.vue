@@ -2,28 +2,28 @@
   <section class="auth-shell">
     <div class="auth-card neo-shell">
       <div class="stack-card" style="margin-bottom: 1.2rem;">
-        <p class="eyebrow">New Identity</p>
-        <h1 class="section-title">Register</h1>
-        <p class="section-copy">Create a new account without leaving the same sculpted auth surface.</p>
+        <p class="eyebrow">{{ t('auth.register.eyebrow') }}</p>
+        <h1 class="section-title">{{ t('auth.register.title') }}</h1>
+        <p class="section-copy">{{ t('auth.register.copy') }}</p>
       </div>
 
       <form @submit.prevent="handleRegister">
         <label class="field">
-          <span class="field-label">Email</span>
-          <input v-model="email" class="neo-input" type="email" autocomplete="email" required placeholder="writer@example.com">
+          <span class="field-label">{{ t('common.labels.email') }}</span>
+          <input v-model="email" class="neo-input" type="email" autocomplete="email" required :placeholder="t('auth.register.emailPlaceholder')">
         </label>
         <label class="field">
-          <span class="field-label">Password</span>
+          <span class="field-label">{{ t('common.labels.password') }}</span>
           <input
             v-model="password"
             class="neo-input"
             type="password"
             autocomplete="new-password"
             required
-            placeholder="Choose a strong password"
+            :placeholder="t('auth.register.passwordPlaceholder')"
           >
         </label>
-        <button type="submit" class="neo-button primary" :disabled="submitting">Create account</button>
+        <button type="submit" class="neo-button primary" :disabled="submitting">{{ t('auth.register.submit') }}</button>
       </form>
 
       <p v-if="message" class="status-message" :class="{ error: !isSuccess, success: isSuccess }" style="margin-top: 1rem;">
@@ -35,8 +35,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { signUpWithPassword } from '../../services/supabase'
 
+const { t } = useI18n()
 const email = ref('')
 const password = ref('')
 const message = ref('')
@@ -55,9 +57,9 @@ async function handleRegister() {
     }
 
     isSuccess.value = true
-    message.value = 'Account created. You can log in now.'
+    message.value = t('common.messages.registerSuccess')
   } catch (error) {
-    message.value = error instanceof Error ? error.message : 'Register failed'
+    message.value = error instanceof Error ? error.message : t('common.messages.registerFailed')
   } finally {
     submitting.value = false
   }

@@ -4,25 +4,26 @@
       <div class="public-layout">
         <div class="public-header-inner neo-shell">
           <div class="brand-block">
-            <p class="brand-mark">Simple Blog</p>
-            <p class="brand-copy">Digital tactility for stories and editorial control.</p>
+            <p class="brand-mark">{{ t('public.brand.title') }}</p>
+            <p class="brand-copy">{{ t('public.brand.headerCopy') }}</p>
           </div>
           <nav class="top-nav desktop-nav">
-            <RouterLink class="nav-link" :class="{ active: route.path === '/' }" to="/">Explore</RouterLink>
-            <RouterLink class="nav-link" :class="{ active: route.path === '/profile' }" to="/profile">Profile</RouterLink>
+            <RouterLink class="nav-link" :class="{ active: route.path === '/' }" to="/">{{ t('public.nav.explore') }}</RouterLink>
+            <RouterLink class="nav-link" :class="{ active: route.path === '/profile' }" to="/profile">{{ t('public.nav.profile') }}</RouterLink>
             <RouterLink
               v-if="canAdmin"
               class="nav-link"
               :class="{ active: route.path.startsWith('/admin') }"
               to="/admin/posts"
             >
-              Admin
+              {{ t('public.nav.admin') }}
             </RouterLink>
           </nav>
           <div class="inline-actions desktop-actions">
-            <RouterLink v-if="!isLoggedIn" class="neo-button primary" to="/login">Login</RouterLink>
-            <RouterLink v-if="!isLoggedIn" class="neo-button" to="/register">Register</RouterLink>
-            <button v-else type="button" class="neo-button secondary" @click="handleLogout">Logout</button>
+            <LocaleSwitcher />
+            <RouterLink v-if="!isLoggedIn" class="neo-button primary" to="/login">{{ t('common.actions.login') }}</RouterLink>
+            <RouterLink v-if="!isLoggedIn" class="neo-button" to="/register">{{ t('common.actions.register') }}</RouterLink>
+            <button v-else type="button" class="neo-button secondary" @click="handleLogout">{{ t('common.actions.logout') }}</button>
           </div>
           <button
             type="button"
@@ -32,7 +33,7 @@
             aria-controls="mobile-public-menu"
             @click="toggleMobileMenu"
           >
-            <span class="visually-hidden">Toggle navigation menu</span>
+            <span class="visually-hidden">{{ t('common.messages.toggleNavigationMenu') }}</span>
             <span class="mobile-menu-toggle-line" />
             <span class="mobile-menu-toggle-line" />
             <span class="mobile-menu-toggle-line" />
@@ -52,7 +53,7 @@
                 to="/"
                 @click="closeMobileMenu"
               >
-                Explore
+                {{ t('public.nav.explore') }}
               </RouterLink>
               <RouterLink
                 class="nav-link mobile-nav-link"
@@ -61,7 +62,7 @@
                 to="/profile"
                 @click="closeMobileMenu"
               >
-                Profile
+                {{ t('public.nav.profile') }}
               </RouterLink>
               <RouterLink
                 v-if="canAdmin"
@@ -71,10 +72,11 @@
                 to="/admin/posts"
                 @click="closeMobileMenu"
               >
-                Admin
+                {{ t('public.nav.admin') }}
               </RouterLink>
             </div>
             <div class="mobile-menu-section mobile-menu-actions">
+              <LocaleSwitcher />
               <RouterLink
                 v-if="!isLoggedIn"
                 class="neo-button primary"
@@ -82,7 +84,7 @@
                 to="/login"
                 @click="closeMobileMenu"
               >
-                Login
+                {{ t('common.actions.login') }}
               </RouterLink>
               <RouterLink
                 v-if="!isLoggedIn"
@@ -91,7 +93,7 @@
                 to="/register"
                 @click="closeMobileMenu"
               >
-                Register
+                {{ t('common.actions.register') }}
               </RouterLink>
               <button
                 v-else
@@ -100,7 +102,7 @@
                 data-testid="mobile-logout"
                 @click="handleLogout"
               >
-                Logout
+                {{ t('common.actions.logout') }}
               </button>
             </div>
           </div>
@@ -118,10 +120,10 @@
       <div class="public-layout">
         <div class="public-footer-inner neo-shell">
           <div class="brand-block">
-            <p class="brand-mark">Simple Blog</p>
-            <p class="brand-copy">Sculpted posts, quiet chrome, no flat edges.</p>
+            <p class="brand-mark">{{ t('public.brand.title') }}</p>
+            <p class="brand-copy">{{ t('public.brand.footerLead') }}</p>
           </div>
-          <p class="brand-copy">Built on Vue, Supabase, Workers and a dark tactile interface.</p>
+          <p class="brand-copy">{{ t('public.brand.footerCopy') }}</p>
         </div>
       </div>
     </footer>
@@ -130,10 +132,13 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
+import LocaleSwitcher from '../components/app/LocaleSwitcher.vue'
 import { authState, canAccessAdmin, logout } from '../stores/auth'
 
 const route = useRoute()
+const { t } = useI18n()
 const isMobileMenuOpen = ref(false)
 const isLoggedIn = computed(() => Boolean(authState.session))
 const canAdmin = computed(() => canAccessAdmin())

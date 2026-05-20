@@ -508,6 +508,38 @@ img {
   gap: 0.85rem;
 }
 
+.locale-switcher {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(145deg, rgba(28, 24, 33, 0.98), rgba(20, 17, 25, 0.98));
+  box-shadow: var(--shadow-inset);
+}
+
+.locale-switcher-option {
+  min-width: 3.4rem;
+  min-height: 2.4rem;
+  padding: 0.55rem 0.8rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  color: var(--text-soft);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+}
+
+.locale-switcher-option.active {
+  color: var(--primary);
+  background: linear-gradient(145deg, rgba(36, 31, 44, 0.96), rgba(22, 19, 28, 0.96));
+  box-shadow: var(--shadow-extruded-sm);
+}
+
+.locale-switcher-option:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 1px rgba(100, 231, 255, 0.32), 0 0 0 5px rgba(100, 231, 255, 0.08);
+}
+
 .stack-card {
   display: grid;
   gap: 1rem;

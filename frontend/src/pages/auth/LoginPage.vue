@@ -2,28 +2,28 @@
   <section class="auth-shell">
     <div class="auth-card neo-shell">
       <div class="stack-card" style="margin-bottom: 1.2rem;">
-        <p class="eyebrow">Secure Entry</p>
-        <h1 class="section-title">Login</h1>
-        <p class="section-copy">Enter the editorial workspace with the same dark tactile language as the rest of the app.</p>
+        <p class="eyebrow">{{ t('auth.login.eyebrow') }}</p>
+        <h1 class="section-title">{{ t('auth.login.title') }}</h1>
+        <p class="section-copy">{{ t('auth.login.copy') }}</p>
       </div>
 
       <form @submit.prevent="handleLogin">
         <label class="field">
-          <span class="field-label">Email</span>
-          <input v-model="email" class="neo-input" type="email" autocomplete="email" required placeholder="editor@demo.invalid">
+          <span class="field-label">{{ t('common.labels.email') }}</span>
+          <input v-model="email" class="neo-input" type="email" autocomplete="email" required :placeholder="t('auth.login.emailPlaceholder')">
         </label>
         <label class="field">
-          <span class="field-label">Password</span>
+          <span class="field-label">{{ t('common.labels.password') }}</span>
           <input
             v-model="password"
             class="neo-input"
             type="password"
             autocomplete="current-password"
             required
-            placeholder="Enter your password"
+            :placeholder="t('auth.login.passwordPlaceholder')"
           >
         </label>
-        <button type="submit" class="neo-button primary" :disabled="submitting">Login</button>
+        <button type="submit" class="neo-button primary" :disabled="submitting">{{ t('common.actions.login') }}</button>
       </form>
 
       <p v-if="message" class="status-message" :class="{ error: !isSuccess, success: isSuccess }" style="margin-top: 1rem;">
@@ -35,11 +35,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { hasAdminAccess } from '../../services/auth'
 import { signInWithPassword } from '../../services/supabase'
 import { refreshProfile } from '../../stores/auth'
 
+const { t } = useI18n()
 const router = useRouter()
 const email = ref('')
 const password = ref('')
@@ -60,10 +62,10 @@ async function handleLogin() {
 
     const profile = await refreshProfile()
     isSuccess.value = true
-    message.value = 'Login successful. Redirecting...'
+    message.value = t('common.messages.loginSuccess')
     await router.push(hasAdminAccess(profile?.role) ? '/admin/posts' : '/profile')
   } catch (error) {
-    message.value = error instanceof Error ? error.message : 'Login failed'
+    message.value = error instanceof Error ? error.message : t('common.messages.loginFailed')
   } finally {
     submitting.value = false
   }
