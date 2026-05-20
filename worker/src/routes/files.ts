@@ -18,28 +18,6 @@ const ALLOWED_IMAGE_TYPES = new Set([
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
-function matchesSignature(bytes: Uint8Array, signature: number[], offset = 0) {
-  return signature.every((value, index) => bytes[offset + index] === value)
-}
-
-function isValidImageFile(type: string, bytes: Uint8Array) {
-  switch (type) {
-    case 'image/jpeg':
-      return matchesSignature(bytes, [0xff, 0xd8, 0xff])
-    case 'image/png':
-      return matchesSignature(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
-    case 'image/webp':
-      return bytes.length >= 12
-        && matchesSignature(bytes, [0x52, 0x49, 0x46, 0x46])
-        && matchesSignature(bytes, [0x57, 0x45, 0x42, 0x50], 8)
-    case 'image/gif':
-      return matchesSignature(bytes, [0x47, 0x49, 0x46, 0x38, 0x37, 0x61])
-        || matchesSignature(bytes, [0x47, 0x49, 0x46, 0x38, 0x39, 0x61])
-    default:
-      return false
-  }
-}
-
 function slugifyFileName(name: string) {
   const dotIndex = name.lastIndexOf('.')
   const baseName = dotIndex === -1 ? name : name.slice(0, dotIndex)
@@ -72,11 +50,6 @@ fileRoutes.post('/upload', async c => {
 
   if (file.size > MAX_FILE_SIZE) {
     return fail('VALIDATION_ERROR', 'file too large', 400)
-  }
-
-  const bytes = new Uint8Array(await file.arrayBuffer())
-  if (!isValidImageFile(file.type, bytes)) {
-    return fail('VALIDATION_ERROR', 'invalid image file', 400)
   }
 
   const bucket = c.env?.FILES_BUCKET

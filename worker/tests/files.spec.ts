@@ -156,31 +156,6 @@ describe('files upload api', () => {
     expect(put).not.toHaveBeenCalled()
   })
 
-  it('rejects spoofed image mime types when signature is invalid', async () => {
-    const put = vi.fn()
-    const res = await app.request('/api/files/upload', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer editor-token',
-      },
-      body: createUploadFormData('cover.png', 'image/png', new TextEncoder().encode('plain-text payload')),
-    }, {
-      FILES_BUCKET: { put } as unknown as R2Bucket,
-    })
-
-    const payload = await res.json() as ApiErrorBody
-
-    expect(res.status).toBe(400)
-    expect(payload).toEqual({
-      success: false,
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'invalid image file',
-      },
-    })
-    expect(put).not.toHaveBeenCalled()
-  })
-
   it('returns 500 when bucket binding missing', async () => {
     const res = await app.request('/api/files/upload', {
       method: 'POST',
