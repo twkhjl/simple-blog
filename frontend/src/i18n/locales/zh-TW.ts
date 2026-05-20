@@ -80,7 +80,7 @@ const zhTW = {
       failedToSavePost: '儲存文章失敗',
       failedToDeletePost: '刪除文章失敗',
       failedToUploadCover: '上傳封面失敗',
-      failedToUploadInlineImage: '?????????',
+      failedToUploadInlineImage: '上傳內文圖片失敗',
       coverMustBeImage: '封面檔案必須是 JPEG、PNG、WebP 或 GIF。',
       coverUploaded: '封面圖片已上傳。',
       inlineImageMustBeImage: '圖片檔案必須是 JPEG、PNG、WebP 或 GIF。',
@@ -207,7 +207,7 @@ const zhTW = {
   editor: {
     toolbar: {
       link: '連結',
-      image: '??',
+      image: '圖片',
       heading1: '標題 1',
       heading2: '標題 2',
       bold: '粗體',
