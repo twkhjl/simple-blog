@@ -7,7 +7,7 @@ const ALLOWED_IMAGE_TYPE_LIST = [
   'image/gif',
 ] as const
 
-const ALLOWED_IMAGE_TYPES = new Set(ALLOWED_IMAGE_TYPE_LIST)
+const ALLOWED_IMAGE_TYPES: ReadonlySet<string> = new Set(ALLOWED_IMAGE_TYPE_LIST)
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 
