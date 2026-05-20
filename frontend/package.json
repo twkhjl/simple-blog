@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
+    "@tiptap/extension-image": "^2.14.0",
     "@tiptap/extension-link": "^2.14.0",
     "@tiptap/extension-placeholder": "^2.14.0",
     "@tiptap/starter-kit": "^2.14.0",
@@ -23,8 +24,8 @@
   "devDependencies": {
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^5.2.3",
-    "@vue/tsconfig": "^0.7.0",
     "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.7.0",
     "jsdom": "^26.1.0",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",

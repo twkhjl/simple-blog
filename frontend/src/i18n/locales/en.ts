@@ -80,6 +80,7 @@ const en = {
       failedToSavePost: 'Failed to save post',
       failedToDeletePost: 'Failed to delete post',
       failedToUploadCover: 'Failed to upload cover image',
+      failedToUploadInlineImage: 'Failed to upload inline image',
       coverMustBeImage: 'Cover image must be JPEG, PNG, WebP, or GIF.',
       coverUploaded: 'Cover image uploaded.',
       inlineImageMustBeImage: 'Image file must be JPEG, PNG, WebP, or GIF.',
@@ -206,6 +207,7 @@ const en = {
   editor: {
     toolbar: {
       link: 'Link',
+      image: 'Image',
       heading1: 'H1',
       heading2: 'H2',
       bold: 'B',

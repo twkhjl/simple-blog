@@ -4,6 +4,9 @@
       <button type="button" class="neo-button" data-testid="toggle-link-form" @click="showLinkForm = !showLinkForm">
         {{ t('editor.toolbar.link') }}
       </button>
+      <button type="button" class="neo-button" data-testid="insert-image-button" @click="triggerImageBrowse">
+        {{ t('editor.toolbar.image') }}
+      </button>
       <button type="button" class="neo-button" @click="toggleHeading(1)">{{ t('editor.toolbar.heading1') }}</button>
       <button type="button" class="neo-button" @click="toggleHeading(2)">{{ t('editor.toolbar.heading2') }}</button>
       <button type="button" class="neo-button" @click="toggleBold">{{ t('editor.toolbar.bold') }}</button>
@@ -14,6 +17,15 @@
       <button type="button" class="neo-button" @click="undo">{{ t('editor.toolbar.undo') }}</button>
       <button type="button" class="neo-button" @click="redo">{{ t('editor.toolbar.redo') }}</button>
     </div>
+    <input
+      ref="imageInput"
+      class="visually-hidden"
+      data-testid="image-upload-input"
+      type="file"
+      :accept="ACCEPTED_IMAGE_TYPES"
+      @change="handleImageInputChange"
+    >
+    <p v-if="uploadError" class="status-message error">{{ uploadError }}</p>
 
     <div v-if="showLinkForm" class="neo-panel stack-card">
       <label class="field">
@@ -43,19 +55,24 @@
       @input="handleHtmlInput"
     ></textarea>
 
-    <div class="neo-input rich-editor-surface">
+    <div class="neo-input rich-editor-surface" data-testid="rich-editor-surface" @paste="handlePaste">
       <EditorContent v-if="editorInstance" :editor="editorInstance" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import StarterKit from '@tiptap/starter-kit'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { createApiClient } from '../../services/api'
+import { extractAccessToken } from '../../services/auth'
+import { ACCEPTED_IMAGE_TYPES, createImageUploader } from '../../services/uploads'
+import { authState } from '../../stores/auth'
 import { isMeaningfulEditorHtml, plainTextToHtml } from '../../utils/richText'
 
 const props = defineProps<{
@@ -69,17 +86,32 @@ const emit = defineEmits<{
 const { locale, t } = useI18n()
 const showLinkForm = ref(false)
 const linkUrl = ref('')
+const imageInput = ref<HTMLInputElement | null>(null)
+const uploadError = ref('')
 const currentHtml = ref(props.modelValue || '<p></p>')
 
 const normalizedInitialHtml = computed(() => props.modelValue || '<p></p>')
 
 const editorInstance = shallowRef<Editor | null>(null)
 
+function getClient() {
+  return createApiClient(fetch, () => extractAccessToken(authState.session))
+}
+
+const imageUploader = createImageUploader({
+  postForm: (path, body) => getClient().postForm(path, body),
+  t,
+})
+
 function createEditor(content: string) {
   return new Editor({
     content,
     extensions: [
       StarterKit,
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+      }),
       Link.configure({
         openOnClick: false,
         autolink: false,
@@ -122,6 +154,7 @@ watch(locale, () => {
 function handleHtmlInput(event: Event) {
   const target = event.target as HTMLTextAreaElement
   const nextValue = target.value || '<p></p>'
+  uploadError.value = ''
   currentHtml.value = nextValue
   editorInstance.value?.commands.setContent(nextValue, false)
   emit('update:modelValue', nextValue)
@@ -163,6 +196,53 @@ function undo() {
 
 function redo() {
   updateEditor(() => editorInstance.value?.chain().focus().redo().run())
+}
+
+function triggerImageBrowse() {
+  imageInput.value?.click()
+}
+
+async function insertImageFromFile(file: File) {
+  uploadError.value = ''
+
+  try {
+    const uploaded = await imageUploader.upload(file)
+    editorInstance.value?.chain().focus().setImage({
+      src: uploaded.url,
+      alt: uploaded.fileName,
+    }).run()
+  } catch (error) {
+    uploadError.value = error instanceof Error ? error.message : t('common.messages.failedToUploadInlineImage')
+  }
+}
+
+async function handleImageInputChange(event: Event) {
+  const target = event.target as HTMLInputElement | null
+  const file = target?.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  await insertImageFromFile(file)
+  target.value = ''
+}
+
+async function handlePaste(event: ClipboardEvent) {
+  const files = Array.from(event.clipboardData?.items ?? [])
+    .filter(item => item.kind === 'file' && item.type.startsWith('image/'))
+    .map(item => item.getAsFile())
+    .filter((file): file is File => file instanceof File)
+
+  if (files.length === 0) {
+    return
+  }
+
+  event.preventDefault()
+
+  for (const file of files) {
+    await insertImageFromFile(file)
+  }
 }
 
 function applyLink() {
