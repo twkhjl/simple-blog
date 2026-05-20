@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createImageUploader, isSupportedImageType } from '../src/services/uploads'
+import { ACCEPTED_IMAGE_TYPES, createImageUploader, isSupportedImageType } from '../src/services/uploads'
 
 describe('image uploader', () => {
+  it('exposes accepted image types for file input contracts', () => {
+    expect(ACCEPTED_IMAGE_TYPES).toBe('image/jpeg,image/png,image/webp,image/gif')
+  })
+
   it('exposes reusable image type guard for page-level validation', () => {
     expect(isSupportedImageType(new File(['abc'], 'cover.webp', { type: 'image/webp' }))).toBe(true)
     expect(isSupportedImageType(new File(['abc'], 'vector.svg', { type: 'image/svg+xml' }))).toBe(false)

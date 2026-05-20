@@ -80,7 +80,7 @@ const zhTW = {
       failedToSavePost: '儲存文章失敗',
       failedToDeletePost: '刪除文章失敗',
       failedToUploadCover: '上傳封面失敗',
-      coverMustBeImage: '封面檔案必須是圖片格式。',
+      coverMustBeImage: '封面檔案必須是 JPEG、PNG、WebP 或 GIF。',
       coverUploaded: '封面圖片已上傳。',
       inlineImageMustBeImage: '圖片檔案必須是 JPEG、PNG、WebP 或 GIF。',
       inlineImageTooLarge: '圖片檔案大小不能超過 5MB。',

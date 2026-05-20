@@ -80,7 +80,7 @@ const en = {
       failedToSavePost: 'Failed to save post',
       failedToDeletePost: 'Failed to delete post',
       failedToUploadCover: 'Failed to upload cover image',
-      coverMustBeImage: 'Cover image must be an image file.',
+      coverMustBeImage: 'Cover image must be JPEG, PNG, WebP, or GIF.',
       coverUploaded: 'Cover image uploaded.',
       inlineImageMustBeImage: 'Image file must be JPEG, PNG, WebP, or GIF.',
       inlineImageTooLarge: 'Image file must be 5MB or smaller.',

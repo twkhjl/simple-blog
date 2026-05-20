@@ -95,7 +95,7 @@
                 ref="fileInput"
                 class="neo-input"
                 type="file"
-                accept="image/*"
+                :accept="ACCEPTED_IMAGE_TYPES"
                 :disabled="saving || uploadingCover"
                 @change="handleCoverImageChange"
               >
@@ -149,7 +149,7 @@ import { useRoute, useRouter } from 'vue-router'
 import RichTextEditor from '../../components/editor/RichTextEditor.vue'
 import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
-import { createImageUploader, isSupportedImageType } from '../../services/uploads'
+import { ACCEPTED_IMAGE_TYPES, createImageUploader, isSupportedImageType } from '../../services/uploads'
 import { authState } from '../../stores/auth'
 import type { AdminPostDetail } from '../../types'
 import { isHtmlLike, isMeaningfulEditorHtml, plainTextToHtml } from '../../utils/richText'
