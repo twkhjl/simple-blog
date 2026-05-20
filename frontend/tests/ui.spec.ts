@@ -89,4 +89,14 @@ describe('ui helpers', () => {
     expect(loginPage).toContain("t('auth.login.title')")
     expect(loginPage).toContain("t('common.actions.login')")
   })
+
+  it('does not render public cover fallback blocks when posts have no image', () => {
+    const homePage = readFileSync(resolve(__dirname, '../src/pages/public/HomePage.vue'), 'utf8')
+    const postDetailPage = readFileSync(resolve(__dirname, '../src/pages/public/PostDetailPage.vue'), 'utf8')
+
+    expect(homePage).not.toContain('class="media-fallback"')
+    expect(postDetailPage).not.toContain('class="media-fallback"')
+    expect(homePage).toContain('v-if="post.coverImageUrl"')
+    expect(postDetailPage).toContain('v-if="post.coverImageUrl"')
+  })
 })

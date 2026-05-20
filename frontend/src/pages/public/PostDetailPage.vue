@@ -19,9 +19,6 @@
           <div v-if="post.coverImageUrl" class="cover-frame neo-inset" style="aspect-ratio: 16 / 9;">
             <img :src="post.coverImageUrl" :alt="post.title">
           </div>
-          <div v-else class="media-fallback" style="aspect-ratio: 16 / 9;">
-            <span>{{ getInitials(post.title) }}</span>
-          </div>
 
           <div class="rich-content" v-html="renderedContent"></div>
         </article>
@@ -65,7 +62,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import { createApiClient } from '../../services/api'
 import type { PublicPostDetail } from '../../types'
 import { isHtmlLike, plainTextToHtml, sanitizeRenderHtml } from '../../utils/richText'
-import { formatDisplayDate, getInitials } from '../../utils/ui'
+import { formatDisplayDate } from '../../utils/ui'
 
 const { locale, t } = useI18n()
 const route = useRoute()

@@ -28,9 +28,6 @@
         <div v-if="post.coverImageUrl" class="cover-frame neo-inset">
           <img :src="post.coverImageUrl" :alt="post.title">
         </div>
-        <div v-else class="media-fallback">
-          <span>{{ getInitials(post.title) }}</span>
-        </div>
 
         <div class="post-card-content">
           <div class="toolbar" style="justify-content: space-between; gap: 0.5rem;">
@@ -55,7 +52,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { createApiClient } from '../../services/api'
 import type { PublicPostListItem } from '../../types'
-import { formatDisplayDate, getInitials } from '../../utils/ui'
+import { formatDisplayDate } from '../../utils/ui'
 
 const { locale, t } = useI18n()
 const posts = ref<PublicPostListItem[]>([])
