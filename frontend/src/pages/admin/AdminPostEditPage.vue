@@ -149,7 +149,7 @@ import { useRoute, useRouter } from 'vue-router'
 import RichTextEditor from '../../components/editor/RichTextEditor.vue'
 import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
-import { createImageUploader } from '../../services/uploads'
+import { createImageUploader, isSupportedImageType } from '../../services/uploads'
 import { authState } from '../../stores/auth'
 import type { AdminPostDetail } from '../../types'
 import { isHtmlLike, isMeaningfulEditorHtml, plainTextToHtml } from '../../utils/richText'
@@ -253,6 +253,13 @@ async function handleCoverImageChange(event: Event) {
   const target = event.target as HTMLInputElement | null
   const file = target?.files?.[0]
   if (!file) {
+    return
+  }
+
+  if (!isSupportedImageType(file)) {
+    message.value = t('common.messages.coverMustBeImage')
+    isSuccess.value = false
+    target.value = ''
     return
   }
 

@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createImageUploader } from '../src/services/uploads'
+import { createImageUploader, isSupportedImageType } from '../src/services/uploads'
 
 describe('image uploader', () => {
+  it('exposes reusable image type guard for page-level validation', () => {
+    expect(isSupportedImageType(new File(['abc'], 'cover.webp', { type: 'image/webp' }))).toBe(true)
+    expect(isSupportedImageType(new File(['abc'], 'vector.svg', { type: 'image/svg+xml' }))).toBe(false)
+  })
+
   it('uploads supported images to posts folder', async () => {
     const postForm = vi.fn().mockResolvedValue({
       key: 'posts/2026/05/example.webp',

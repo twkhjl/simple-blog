@@ -14,10 +14,14 @@ interface CreateImageUploaderOptions {
   t: (key: string) => string
 }
 
+export function isSupportedImageType(file: File) {
+  return ALLOWED_IMAGE_TYPES.has(file.type)
+}
+
 export function createImageUploader({ postForm, t }: CreateImageUploaderOptions) {
   return {
     async upload(file: File): Promise<UploadedFilePayload> {
-      if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      if (!isSupportedImageType(file)) {
         throw new Error(t('common.messages.inlineImageMustBeImage'))
       }
 
