@@ -83,6 +83,41 @@ describe('files upload api', () => {
     expect(res.status).toBe(400)
   })
 
+  it('rejects unsupported mime types', async () => {
+    const res = await app.request('/api/files/upload', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer editor-token',
+      },
+      body: createUploadFormData('cover.svg', 'image/svg+xml'),
+    }, {
+      FILES_BUCKET: { put: vi.fn() } as unknown as R2Bucket,
+    })
+
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects files larger than 5MB', async () => {
+    const formData = new FormData()
+    const oversized = new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'huge.png', {
+      type: 'image/png',
+    })
+    formData.set('folder', 'posts')
+    formData.set('file', oversized)
+
+    const res = await app.request('/api/files/upload', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer editor-token',
+      },
+      body: formData,
+    }, {
+      FILES_BUCKET: { put: vi.fn() } as unknown as R2Bucket,
+    })
+
+    expect(res.status).toBe(400)
+  })
+
   it('returns 500 when bucket binding missing', async () => {
     const res = await app.request('/api/files/upload', {
       method: 'POST',

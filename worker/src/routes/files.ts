@@ -9,6 +9,15 @@ const fileRoutes = new Hono<AppEnv>()
 
 fileRoutes.use('/upload', requireAuth, requireRole(['editor', 'admin', 'super_admin']))
 
+const ALLOWED_IMAGE_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+])
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024
+
 function slugifyFileName(name: string) {
   const dotIndex = name.lastIndexOf('.')
   const baseName = dotIndex === -1 ? name : name.slice(0, dotIndex)
@@ -34,6 +43,14 @@ fileRoutes.post('/upload', async c => {
     return fail('VALIDATION_ERROR', 'file is required', 400)
   }
   const file = fileEntry as File
+
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    return fail('VALIDATION_ERROR', 'unsupported file type', 400)
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return fail('VALIDATION_ERROR', 'file too large', 400)
+  }
 
   const bucket = c.env?.FILES_BUCKET
   if (!bucket) {
