@@ -149,8 +149,9 @@ import { useRoute, useRouter } from 'vue-router'
 import RichTextEditor from '../../components/editor/RichTextEditor.vue'
 import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
+import { createImageUploader } from '../../services/uploads'
 import { authState } from '../../stores/auth'
-import type { AdminPostDetail, UploadedFilePayload } from '../../types'
+import type { AdminPostDetail } from '../../types'
 import { isHtmlLike, isMeaningfulEditorHtml, plainTextToHtml } from '../../utils/richText'
 import { formatDisplayDate } from '../../utils/ui'
 
@@ -196,6 +197,11 @@ const metadata = computed(() => ({
 function getClient() {
   return createApiClient(fetch, () => extractAccessToken(authState.session))
 }
+
+const imageUploader = createImageUploader({
+  postForm: (path, body) => getClient().postForm(path, body),
+  t,
+})
 
 function clearLocalPreview() {
   if (localPreviewUrl) {
@@ -250,13 +256,6 @@ async function handleCoverImageChange(event: Event) {
     return
   }
 
-  if (!file.type.startsWith('image/')) {
-    message.value = t('common.messages.coverMustBeImage')
-    isSuccess.value = false
-    target.value = ''
-    return
-  }
-
   const previousCoverImageKey = form.coverImageKey
   const previousPreviewImageUrl = previewImageUrl.value
   const tempPreviewUrl = URL.createObjectURL(file)
@@ -266,11 +265,7 @@ async function handleCoverImageChange(event: Event) {
   isSuccess.value = false
 
   try {
-    const formData = new FormData()
-    formData.set('folder', 'posts')
-    formData.set('file', file)
-
-    const uploaded = await getClient().postForm<UploadedFilePayload>('/api/files/upload', formData)
+    const uploaded = await imageUploader.upload(file)
     form.coverImageKey = uploaded.key
     setPreviewImage(uploaded.url)
     isSuccess.value = true

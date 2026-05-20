@@ -82,6 +82,8 @@ const zhTW = {
       failedToUploadCover: '上傳封面失敗',
       coverMustBeImage: '封面檔案必須是圖片格式。',
       coverUploaded: '封面圖片已上傳。',
+      inlineImageMustBeImage: '圖片檔案必須是 JPEG、PNG、WebP 或 GIF。',
+      inlineImageTooLarge: '圖片檔案大小不能超過 5MB。',
       contentRequired: '內容不得為空白。',
       postCreated: '文章已建立。',
       postUpdated: '文章已更新。',

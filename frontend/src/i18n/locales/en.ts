@@ -82,6 +82,8 @@ const en = {
       failedToUploadCover: 'Failed to upload cover image',
       coverMustBeImage: 'Cover image must be an image file.',
       coverUploaded: 'Cover image uploaded.',
+      inlineImageMustBeImage: 'Image file must be JPEG, PNG, WebP, or GIF.',
+      inlineImageTooLarge: 'Image file must be 5MB or smaller.',
       contentRequired: 'Content must not be empty.',
       postCreated: 'Post created.',
       postUpdated: 'Post updated.',
