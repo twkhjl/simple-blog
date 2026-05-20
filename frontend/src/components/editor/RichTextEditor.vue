@@ -162,8 +162,6 @@ function handleHtmlInput(event: Event) {
 
 function updateEditor(command: () => void) {
   command()
-  currentHtml.value = editorInstance.value?.getHTML() ?? currentHtml.value
-  emit('update:modelValue', currentHtml.value)
 }
 
 function toggleBold() {
@@ -250,11 +248,11 @@ function applyLink() {
     return
   }
 
-  updateEditor(() => editorInstance.value?.chain().focus().selectAll().setLink({ href: linkUrl.value }).run())
+  updateEditor(() => editorInstance.value?.chain().focus().setLink({ href: linkUrl.value }).run())
 }
 
 function removeLink() {
-  updateEditor(() => editorInstance.value?.chain().focus().selectAll().unsetLink().run())
+  updateEditor(() => editorInstance.value?.chain().focus().unsetLink().run())
   showLinkForm.value = false
 }
 

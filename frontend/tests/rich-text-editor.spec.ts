@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createAppI18n } from '../src/i18n'
 import RichTextEditor from '../src/components/editor/RichTextEditor.vue'
+import type { Editor } from '@tiptap/vue-3'
 
 const uploadMock = vi.fn()
 
@@ -14,6 +15,10 @@ vi.mock('../src/services/uploads', async importOriginal => {
     }),
   }
 })
+
+function getEditor(wrapper: ReturnType<typeof mount>) {
+  return (wrapper.vm as any).$?.setupState.editorInstance as Editor
+}
 
 describe('RichTextEditor', () => {
   beforeEach(() => {
@@ -51,20 +56,45 @@ describe('RichTextEditor', () => {
         plugins: [i18n],
       },
       props: {
-        modelValue: '<p>Hello</p>',
+        modelValue: '<p>Hello world</p>',
       },
     })
+    const editor = getEditor(wrapper)
 
     await wrapper.get('[data-testid="toggle-link-form"]').trigger('click')
     await wrapper.get('[data-testid="link-url-input"]').setValue('https://example.com')
+    editor.commands.setTextSelection({ from: 7, to: 12 })
     await wrapper.get('[data-testid="apply-link"]').trigger('click')
 
     const emitted = wrapper.emitted('update:modelValue') ?? []
-    expect(emitted[emitted.length - 1]?.[0]).toContain('href="https://example.com"')
+    expect(emitted[emitted.length - 1]?.[0]).toContain('Hello <a')
+    expect(emitted[emitted.length - 1]?.[0]).toContain('href="https://example.com">world</a>')
 
+    editor.commands.setTextSelection({ from: 7, to: 12 })
     await wrapper.get('[data-testid="remove-link"]').trigger('click')
     const latest = wrapper.emitted('update:modelValue') ?? []
-    expect(latest[latest.length - 1]?.[0]).not.toContain('href=')
+    expect(latest[latest.length - 1]?.[0]).toBe('<p>Hello world</p>')
+  })
+
+  it('emits once for toolbar commands', async () => {
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Hello</p>',
+      },
+    })
+    const editor = getEditor(wrapper)
+
+    editor.commands.setTextSelection({ from: 1, to: 6 })
+    const beforeCount = wrapper.emitted('update:modelValue')?.length ?? 0
+    await wrapper.findAll('button').find(button => button.text() === 'B')?.trigger('click')
+
+    const events = wrapper.emitted('update:modelValue') ?? []
+    expect(events).toHaveLength(beforeCount + 1)
+    expect(events[events.length - 1]?.[0]).toBe('<p><strong>Hello</strong></p>')
   })
 
   it('inserts an uploaded image through toolbar file picker', async () => {
