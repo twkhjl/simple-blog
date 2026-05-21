@@ -1,7 +1,6 @@
 import DOMPurify from 'dompurify'
 
 const htmlLikePattern = /<\/?[a-z][\s\S]*>/i
-const filesBaseUrl = new URL('/files/', import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com')
 const safeImagePlaceholderTag = 'safe-image-placeholder'
 
 function escapeHtml(input: string): string {
@@ -42,9 +41,8 @@ export function sanitizeRenderHtml(input: string): string {
 }
 
 export function isMeaningfulEditorHtml(input: string): boolean {
-  const text = input
-    .replace(/<[^>]+>/g, '')
-    .replace(/\s+/g, '')
+  const text = decodeHtmlEntities(input.replace(/<[^>]+>/g, ''))
+    .replace(/[\s\u00A0]+/g, '')
 
   if (text.length > 0) {
     return true
@@ -54,11 +52,12 @@ export function isMeaningfulEditorHtml(input: string): boolean {
     return hasMeaningfulSafeImage(input)
   }
 
-  return !/^(\s|<p><br><\/p>|<p><\/p>)*$/i.test(input.trim())
+  return false
 }
 
 function isSafeUploadedImageUrl(input: string): boolean {
   try {
+    const filesBaseUrl = getFilesBaseUrl()
     const url = new URL(input)
     return url.origin === filesBaseUrl.origin && url.pathname.startsWith(filesBaseUrl.pathname)
   }
@@ -134,4 +133,19 @@ function createSafeImageId(input: string, safeImages: Map<string, string>): stri
   while (input.includes(safeImageId) || safeImages.has(safeImageId))
 
   return safeImageId
+}
+
+function getFilesBaseUrl(): URL {
+  const configuredFilesBaseUrl = import.meta.env.VITE_FILES_BASE_URL
+  if (configuredFilesBaseUrl) {
+    return new URL(configuredFilesBaseUrl)
+  }
+
+  return new URL('/files/', import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com')
+}
+
+function decodeHtmlEntities(input: string): string {
+  const textarea = document.createElement('textarea')
+  textarea.innerHTML = input
+  return textarea.value
 }

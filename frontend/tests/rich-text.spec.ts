@@ -1,8 +1,14 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { isHtmlLike, isMeaningfulEditorHtml, plainTextToHtml, sanitizeRenderHtml } from '../src/utils/richText'
 
-const filesBaseUrl = new URL('/files/', import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com')
-const uploadedImageUrl = new URL('posts/2026/05/editor.webp', filesBaseUrl).toString()
+const apiFilesBaseUrl = new URL('/files/', import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com')
+const uploadedImageUrl = new URL('posts/2026/05/editor.webp', apiFilesBaseUrl).toString()
+const cdnFilesBaseUrl = 'https://cdn.example.com/files/'
+const cdnImageUrl = new URL('posts/2026/05/editor.webp', cdnFilesBaseUrl).toString()
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
 
 describe('rich text helpers', () => {
   it('detects html-like content', () => {
@@ -22,6 +28,16 @@ describe('rich text helpers', () => {
   it('allows uploaded file images from configured API origin', () => {
     expect(
       sanitizeRenderHtml(`<p><img src="${uploadedImageUrl}" alt="editor.webp"></p>`),
+    ).toContain('<img')
+  })
+
+  it('allows uploaded file images from configured files base url', async () => {
+    vi.stubEnv('VITE_FILES_BASE_URL', cdnFilesBaseUrl)
+    vi.resetModules()
+    const { sanitizeRenderHtml } = await import('../src/utils/richText')
+
+    expect(
+      sanitizeRenderHtml(`<p><img src="${cdnImageUrl}" alt="editor.webp"></p>`),
     ).toContain('<img')
   })
 
@@ -54,6 +70,16 @@ describe('rich text helpers', () => {
     ).toBe(true)
   })
 
+  it('treats configured files base url image html as meaningful', async () => {
+    vi.stubEnv('VITE_FILES_BASE_URL', cdnFilesBaseUrl)
+    vi.resetModules()
+    const { isMeaningfulEditorHtml } = await import('../src/utils/richText')
+
+    expect(
+      isMeaningfulEditorHtml(`<p><img src="${cdnImageUrl}" alt="editor.webp"></p>`),
+    ).toBe(true)
+  })
+
   it('treats external-only image html as not meaningful', () => {
     expect(
       isMeaningfulEditorHtml('<p><img src="https://tracker.example.net/pixel.png" alt="pixel"></p>'),
@@ -76,5 +102,10 @@ describe('rich text helpers', () => {
     expect(
       sanitizeRenderHtml(`<p><img src="${uploadedImageUrl}" alt="editor.webp"></p><p>__SAFE_IMAGE_0__</p>`),
     ).toBe(`<p><img src="${uploadedImageUrl}" alt="editor.webp"></p><p>__SAFE_IMAGE_0__</p>`)
+  })
+
+  it('treats nbsp-only editor html as not meaningful', () => {
+    expect(isMeaningfulEditorHtml('<p>&nbsp;</p>')).toBe(false)
+    expect(isMeaningfulEditorHtml('<p>&#160;</p>')).toBe(false)
   })
 })
