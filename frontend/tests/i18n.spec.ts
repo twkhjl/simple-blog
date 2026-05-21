@@ -51,4 +51,16 @@ describe('i18n locale helpers', () => {
     applyDocumentTitle(router.currentRoute.value, i18n.global.t)
     expect(document.title).toBe('Register | Simple Blog')
   })
+
+  it('renders literal at-signs in localized email placeholders', async () => {
+    const { createAppI18n } = await import('../src/i18n')
+    const i18n = createAppI18n()
+
+    expect(i18n.global.t('auth.login.emailPlaceholder')).toBe('editor@demo.invalid')
+    expect(i18n.global.t('auth.register.emailPlaceholder')).toBe('writer@example.com')
+
+    i18n.global.locale.value = 'zh-TW'
+    expect(i18n.global.t('auth.login.emailPlaceholder')).toBe('editor@demo.invalid')
+    expect(i18n.global.t('auth.register.emailPlaceholder')).toBe('writer@example.com')
+  })
 })
