@@ -1,8 +1,8 @@
 import DOMPurify from 'dompurify'
 
 const htmlLikePattern = /<\/?[a-z][\s\S]*>/i
-const imageTagPattern = /<img\b[^>]*\bsrc\s*=\s*(['"])([^'"]+)\1[^>]*>/i
 const filesBaseUrl = new URL('/files/', import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com')
+const safeImagePlaceholderTag = 'safe-image-placeholder'
 
 function escapeHtml(input: string): string {
   return input
@@ -31,14 +31,14 @@ export function plainTextToHtml(input: string): string {
 
 export function sanitizeRenderHtml(input: string): string {
   const safeImages = new Map<string, string>()
-  const preparedInput = replaceSafeImagesWithTokens(input, safeImages)
+  const preparedInput = replaceSafeImagesWithPlaceholders(input, safeImages)
   const sanitized = DOMPurify.sanitize(preparedInput, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'pre', 'code'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'pre', 'code', safeImagePlaceholderTag],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'safe-image-id'],
     ALLOW_DATA_ATTR: false,
     FORBID_ATTR: ['style', 'class', 'onerror', 'onclick'],
   })
-  return restoreSafeImagesFromTokens(sanitized, safeImages)
+  return restoreSafeImagesFromPlaceholders(sanitized, safeImages)
 }
 
 export function isMeaningfulEditorHtml(input: string): boolean {
@@ -50,8 +50,8 @@ export function isMeaningfulEditorHtml(input: string): boolean {
     return true
   }
 
-  if (imageTagPattern.test(input)) {
-    return true
+  if (input.includes('<img')) {
+    return hasMeaningfulSafeImage(input)
   }
 
   return !/^(\s|<p><br><\/p>|<p><\/p>)*$/i.test(input.trim())
@@ -67,11 +67,24 @@ function isSafeUploadedImageUrl(input: string): boolean {
   }
 }
 
-function replaceSafeImagesWithTokens(input: string, safeImages: Map<string, string>): string {
+function hasMeaningfulSafeImage(input: string): boolean {
   const template = document.createElement('template')
   template.innerHTML = input
 
-  let index = 0
+  for (const image of template.content.querySelectorAll('img')) {
+    const src = image.getAttribute('src')
+    if (src && isSafeUploadedImageUrl(src)) {
+      return true
+    }
+  }
+
+  return false
+}
+
+function replaceSafeImagesWithPlaceholders(input: string, safeImages: Map<string, string>): string {
+  const template = document.createElement('template')
+  template.innerHTML = input
+
   for (const image of template.content.querySelectorAll('img')) {
     const src = image.getAttribute('src')
     if (!src || !isSafeUploadedImageUrl(src)) {
@@ -79,22 +92,46 @@ function replaceSafeImagesWithTokens(input: string, safeImages: Map<string, stri
       continue
     }
 
-    const token = `__SAFE_IMAGE_${index}__`
+    const safeImageId = createSafeImageId(template.innerHTML, safeImages)
     const alt = image.getAttribute('alt') ?? ''
-    safeImages.set(token, `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}">`)
-    image.replaceWith(token)
-    index += 1
+    safeImages.set(safeImageId, `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}">`)
+
+    const placeholder = document.createElement(safeImagePlaceholderTag)
+    placeholder.setAttribute('safe-image-id', safeImageId)
+    image.replaceWith(placeholder)
   }
 
   return template.innerHTML
 }
 
-function restoreSafeImagesFromTokens(input: string, safeImages: Map<string, string>): string {
-  let output = input
+function restoreSafeImagesFromPlaceholders(input: string, safeImages: Map<string, string>): string {
+  const template = document.createElement('template')
+  template.innerHTML = input
 
-  for (const [token, html] of safeImages) {
-    output = output.replaceAll(token, html)
+  for (const placeholder of template.content.querySelectorAll(safeImagePlaceholderTag)) {
+    const safeImageId = placeholder.getAttribute('safe-image-id')
+    const imageHtml = safeImageId ? safeImages.get(safeImageId) : undefined
+
+    if (!imageHtml) {
+      placeholder.remove()
+      continue
+    }
+
+    const imageTemplate = document.createElement('template')
+    imageTemplate.innerHTML = imageHtml
+    placeholder.replaceWith(imageTemplate.content)
   }
 
-  return output
+  return template.innerHTML
+}
+
+function createSafeImageId(input: string, safeImages: Map<string, string>): string {
+  let safeImageId = ''
+
+  do {
+    safeImageId = crypto.randomUUID()
+  }
+  while (input.includes(safeImageId) || safeImages.has(safeImageId))
+
+  return safeImageId
 }

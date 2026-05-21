@@ -53,4 +53,28 @@ describe('rich text helpers', () => {
       isMeaningfulEditorHtml(`<p><img src="${uploadedImageUrl}" alt="editor.webp"></p>`),
     ).toBe(true)
   })
+
+  it('treats external-only image html as not meaningful', () => {
+    expect(
+      isMeaningfulEditorHtml('<p><img src="https://tracker.example.net/pixel.png" alt="pixel"></p>'),
+    ).toBe(false)
+  })
+
+  it('treats data-url-only image html as not meaningful', () => {
+    expect(
+      isMeaningfulEditorHtml('<p><img src="data:image/png;base64,abc" alt="pixel"></p>'),
+    ).toBe(false)
+  })
+
+  it('treats blob-url-only image html as not meaningful', () => {
+    expect(
+      isMeaningfulEditorHtml('<p><img src="blob:https://api.example.com/1234" alt="pixel"></p>'),
+    ).toBe(false)
+  })
+
+  it('does not restore safe image html into body text when token-like text exists', () => {
+    expect(
+      sanitizeRenderHtml(`<p><img src="${uploadedImageUrl}" alt="editor.webp"></p><p>__SAFE_IMAGE_0__</p>`),
+    ).toBe(`<p><img src="${uploadedImageUrl}" alt="editor.webp"></p><p>__SAFE_IMAGE_0__</p>`)
+  })
 })
