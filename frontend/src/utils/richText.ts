@@ -2,6 +2,7 @@ import DOMPurify from 'dompurify'
 
 const htmlLikePattern = /<\/?[a-z][\s\S]*>/i
 const safeImagePlaceholderTag = 'safe-image-placeholder'
+const supportedHtmlTags = new Set(['p', 'br', 'strong', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'pre', 'code', 'img'])
 
 function escapeHtml(input: string): string {
   return input
@@ -13,7 +14,13 @@ function escapeHtml(input: string): string {
 }
 
 export function isHtmlLike(input: string): boolean {
-  return htmlLikePattern.test(input)
+  const match = input.match(htmlLikePattern)
+  if (!match) {
+    return false
+  }
+
+  const tagName = match[0].match(/^<\s*\/?\s*([a-z0-9-]+)/i)?.[1]?.toLowerCase()
+  return tagName != null && supportedHtmlTags.has(tagName)
 }
 
 export function plainTextToHtml(input: string): string {
@@ -138,14 +145,22 @@ function createSafeImageId(input: string, safeImages: Map<string, string>): stri
 function getFilesBaseUrl(): URL {
   const configuredFilesBaseUrl = import.meta.env.VITE_FILES_BASE_URL
   if (configuredFilesBaseUrl) {
-    return new URL(configuredFilesBaseUrl)
+    return normalizeFilesBaseUrl(new URL(configuredFilesBaseUrl))
   }
 
-  return new URL('/files/', import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com')
+  return normalizeFilesBaseUrl(new URL('/files/', import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com'))
 }
 
 function decodeHtmlEntities(input: string): string {
   const textarea = document.createElement('textarea')
   textarea.innerHTML = input
   return textarea.value
+}
+
+function normalizeFilesBaseUrl(url: URL): URL {
+  const normalizedUrl = new URL(url.toString())
+  normalizedUrl.pathname = normalizedUrl.pathname.endsWith('/')
+    ? normalizedUrl.pathname
+    : `${normalizedUrl.pathname}/`
+  return normalizedUrl
 }

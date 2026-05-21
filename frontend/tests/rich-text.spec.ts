@@ -14,6 +14,7 @@ describe('rich text helpers', () => {
   it('detects html-like content', () => {
     expect(isHtmlLike('<p>Hello</p>')).toBe(true)
     expect(isHtmlLike('Plain text only')).toBe(false)
+    expect(isHtmlLike('Use <custom> tags')).toBe(false)
   })
 
   it('converts plain text paragraphs into html blocks', () => {
@@ -39,6 +40,19 @@ describe('rich text helpers', () => {
     expect(
       sanitizeRenderHtml(`<p><img src="${cdnImageUrl}" alt="editor.webp"></p>`),
     ).toContain('<img')
+  })
+
+  it('rejects files-malicious path when configured files base url has no trailing slash', async () => {
+    vi.stubEnv('VITE_FILES_BASE_URL', 'https://cdn.example.com/files')
+    vi.resetModules()
+    const { sanitizeRenderHtml, isMeaningfulEditorHtml } = await import('../src/utils/richText')
+
+    expect(
+      sanitizeRenderHtml('<p><img src="https://cdn.example.com/files-malicious/posts/2026/05/editor.webp" alt="editor.webp"></p>'),
+    ).not.toContain('<img')
+    expect(
+      isMeaningfulEditorHtml('<p><img src="https://cdn.example.com/files-malicious/posts/2026/05/editor.webp" alt="editor.webp"></p>'),
+    ).toBe(false)
   })
 
   it('removes external image urls from rendered html', () => {
