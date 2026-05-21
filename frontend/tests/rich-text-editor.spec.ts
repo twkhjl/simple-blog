@@ -90,7 +90,7 @@ describe('RichTextEditor', () => {
 
     editor.commands.setTextSelection({ from: 1, to: 6 })
     const beforeCount = wrapper.emitted('update:modelValue')?.length ?? 0
-    await wrapper.findAll('button').find(button => button.text() === 'B')?.trigger('click')
+    await wrapper.get('[data-testid="toggle-bold"]').trigger('click')
 
     const events = wrapper.emitted('update:modelValue') ?? []
     expect(events).toHaveLength(beforeCount + 1)
@@ -169,5 +169,43 @@ describe('RichTextEditor', () => {
     const emitted = wrapper.emitted('update:modelValue') ?? []
     expect(emitted[emitted.length - 1]?.[0]).toContain('<img')
     expect(emitted[emitted.length - 1]?.[0]).toContain('paste.png')
+  })
+
+  it('does not intercept unsupported clipboard image formats', async () => {
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Start</p>',
+      },
+    })
+
+    const file = new File(['<svg></svg>'], 'vector.svg', { type: 'image/svg+xml' })
+    const preventDefault = vi.fn()
+    const pasteEvent = new Event('paste', { bubbles: true, cancelable: true })
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      configurable: true,
+      value: {
+        items: [{
+          kind: 'file',
+          type: 'image/svg+xml',
+          getAsFile: () => file,
+        }],
+      },
+    })
+    Object.defineProperty(pasteEvent, 'preventDefault', {
+      configurable: true,
+      value: preventDefault,
+    })
+
+    wrapper.get('[data-testid="rich-editor-surface"]').element.dispatchEvent(pasteEvent)
+
+    await Promise.resolve()
+
+    expect(preventDefault).not.toHaveBeenCalled()
+    expect(uploadMock).not.toHaveBeenCalled()
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
   })
 })

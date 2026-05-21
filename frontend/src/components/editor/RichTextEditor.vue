@@ -9,7 +9,7 @@
       </button>
       <button type="button" class="neo-button" @click="toggleHeading(1)">{{ t('editor.toolbar.heading1') }}</button>
       <button type="button" class="neo-button" @click="toggleHeading(2)">{{ t('editor.toolbar.heading2') }}</button>
-      <button type="button" class="neo-button" @click="toggleBold">{{ t('editor.toolbar.bold') }}</button>
+      <button type="button" class="neo-button" data-testid="toggle-bold" @click="toggleBold">{{ t('editor.toolbar.bold') }}</button>
       <button type="button" class="neo-button" @click="toggleItalic">{{ t('editor.toolbar.italic') }}</button>
       <button type="button" class="neo-button" @click="toggleBulletList">{{ t('editor.toolbar.bulletList') }}</button>
       <button type="button" class="neo-button" @click="toggleOrderedList">{{ t('editor.toolbar.orderedList') }}</button>
@@ -71,7 +71,7 @@ import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
-import { ACCEPTED_IMAGE_TYPES, createImageUploader } from '../../services/uploads'
+import { ACCEPTED_IMAGE_TYPES, createImageUploader, isSupportedImageType } from '../../services/uploads'
 import { authState } from '../../stores/auth'
 import { isMeaningfulEditorHtml, plainTextToHtml } from '../../utils/richText'
 
@@ -231,6 +231,7 @@ async function handlePaste(event: ClipboardEvent) {
     .filter(item => item.kind === 'file' && item.type.startsWith('image/'))
     .map(item => item.getAsFile())
     .filter((file): file is File => file instanceof File)
+    .filter(file => isSupportedImageType(file))
 
   if (files.length === 0) {
     return
