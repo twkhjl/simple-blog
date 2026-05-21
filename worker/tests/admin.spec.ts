@@ -95,6 +95,28 @@ describe('admin posts api', () => {
     expect(payload.data.content).toBe('<p>Hello</p><a>bad</a>')
   })
 
+  it('keeps uploaded inline images when saving a post', async () => {
+    const res = await app.request('/api/admin/posts', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer editor-token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: 'Inline image post',
+        slug: 'inline-image-post',
+        excerpt: 'excerpt',
+        content: '<p><img src="https://cdn.example.com/files/posts/2026/05/editor.webp" alt="editor.webp"></p>',
+        status: 'draft',
+        publishedAt: null,
+      }),
+    })
+
+    expect(res.status).toBe(201)
+    const payload = await res.json() as { data: { content: string } }
+    expect(payload.data.content).toBe('<p><img src="https://cdn.example.com/files/posts/2026/05/editor.webp" alt="editor.webp" /></p>')
+  })
+
   it('rejects empty rich text content after sanitization', async () => {
     const res = await app.request('/api/admin/posts', {
       method: 'POST',
