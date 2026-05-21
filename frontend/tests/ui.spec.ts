@@ -108,4 +108,13 @@ describe('ui helpers', () => {
     expect(css).toContain('.post-card .inline-actions .neo-button')
     expect(css).toContain('width: auto')
   })
+
+  it('styles inline editor images for both authoring and public views', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+
+    expect(css).toContain('.rich-content img')
+    expect(css).toContain('.tiptap img')
+    expect(css).toContain('max-width: 100%')
+    expect(css).toContain('height: auto')
+  })
 })
