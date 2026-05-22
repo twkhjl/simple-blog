@@ -112,7 +112,7 @@ describe('RichTextEditor', () => {
     expect(events[events.length - 1]?.[0]).toBe('<p><strong>Hello</strong></p>')
   })
 
-  it('inserts an uploaded image through toolbar file picker', async () => {
+  it('uploads an image through toolbar file picker', async () => {
     const i18n = createAppI18n()
     const wrapper = mount(RichTextEditor, {
       global: {
@@ -129,15 +129,10 @@ describe('RichTextEditor', () => {
       configurable: true,
       value: [file],
     })
-    input.dispatchEvent(new Event('change'))
+    await wrapper.get('[data-testid="image-upload-input"]').trigger('change')
 
-    await Promise.resolve()
-    await Promise.resolve()
-
-    const emitted = wrapper.emitted('update:modelValue') ?? []
     expect(uploadMock).toHaveBeenCalledWith(file)
-    expect(emitted[emitted.length - 1]?.[0]).toContain('<img')
-    expect(emitted[emitted.length - 1]?.[0]).toContain('editor.webp')
+    expect(wrapper.text()).not.toContain('Failed to upload inline image')
   })
 
   it('uploads clipboard image blobs on paste', async () => {

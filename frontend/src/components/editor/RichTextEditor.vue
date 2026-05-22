@@ -94,6 +94,28 @@ const normalizedInitialHtml = computed(() => props.modelValue || '<p></p>')
 
 const editorInstance = shallowRef<Editor | null>(null)
 
+interface PendingImageUpload {
+  uploadId: string
+  objectUrl: string
+}
+
+const pendingImageUploads = new Map<string, PendingImageUpload>()
+
+const InstantPreviewImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      'data-upload-id': {
+        default: null,
+        parseHTML: element => element.getAttribute('data-upload-id'),
+        renderHTML: attributes => attributes['data-upload-id']
+          ? { 'data-upload-id': attributes['data-upload-id'] }
+          : {},
+      },
+    }
+  },
+})
+
 function getClient() {
   return createApiClient(fetch, () => extractAccessToken(authState.session))
 }
@@ -108,7 +130,7 @@ function createEditor(content: string) {
     content,
     extensions: [
       StarterKit,
-      Image.configure({
+      InstantPreviewImage.configure({
         inline: false,
         allowBase64: false,
       }),
@@ -164,6 +186,31 @@ function updateEditor(command: () => void) {
   command()
 }
 
+function syncCurrentHtmlFromEditor() {
+  if (!editorInstance.value) {
+    return
+  }
+
+  currentHtml.value = editorInstance.value.getHTML()
+  emit('update:modelValue', currentHtml.value)
+}
+
+function createUploadId() {
+  return crypto.randomUUID()
+}
+
+function hasPendingUploads() {
+  return pendingImageUploads.size > 0
+}
+
+function insertImageNode(attrs: Record<string, string | null>) {
+  editorInstance.value?.chain().focus('end').insertContent({
+    type: 'image',
+    attrs,
+  }).run()
+  syncCurrentHtmlFromEditor()
+}
+
 function toggleBold() {
   updateEditor(() => editorInstance.value?.chain().focus().toggleBold().run())
 }
@@ -200,15 +247,102 @@ function triggerImageBrowse() {
   imageInput.value?.click()
 }
 
+function insertPendingImage(file: File) {
+  const uploadId = createUploadId()
+  const objectUrl = URL.createObjectURL(file)
+
+  pendingImageUploads.set(uploadId, {
+    uploadId,
+    objectUrl,
+  })
+
+  insertImageNode({
+    src: objectUrl,
+    alt: file.name,
+    'data-upload-id': uploadId,
+  })
+
+  return {
+    uploadId,
+    objectUrl,
+  }
+}
+
+function replacePendingImage(uploadId: string, uploaded: { url: string; fileName: string }) {
+  const editor = editorInstance.value
+  if (!editor) {
+    return
+  }
+
+  let replaced = false
+
+  editor.state.doc.descendants((node, pos) => {
+    if (replaced || node.type.name !== 'image' || node.attrs['data-upload-id'] !== uploadId) {
+      return !replaced
+    }
+
+    editor.chain().focus().command(({ tr }) => {
+      tr.setNodeMarkup(pos, node.type, {
+        ...node.attrs,
+        src: uploaded.url,
+        alt: uploaded.fileName,
+        'data-upload-id': null,
+      })
+      return true
+    }).run()
+
+    replaced = true
+    syncCurrentHtmlFromEditor()
+    return false
+  })
+}
+
+function removePendingImage(uploadId: string) {
+  const editor = editorInstance.value
+  if (!editor) {
+    return
+  }
+
+  let removed = false
+
+  editor.state.doc.descendants((node, pos) => {
+    if (removed || node.type.name !== 'image' || node.attrs['data-upload-id'] !== uploadId) {
+      return !removed
+    }
+
+    editor.chain().focus().command(({ tr }) => {
+      tr.delete(pos, pos + node.nodeSize)
+      return true
+    }).run()
+
+    removed = true
+    syncCurrentHtmlFromEditor()
+    return false
+  })
+}
+
+async function uploadAndReplaceImage(file: File, uploadId: string, objectUrl: string) {
+  try {
+    const uploaded = await imageUploader.upload(file)
+    replacePendingImage(uploadId, uploaded)
+  } catch (error) {
+    removePendingImage(uploadId)
+    uploadError.value = error instanceof Error ? error.message : t('common.messages.failedToUploadInlineImage')
+  } finally {
+    pendingImageUploads.delete(uploadId)
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
 async function insertImageFromFile(file: File) {
   uploadError.value = ''
 
   try {
     const uploaded = await imageUploader.upload(file)
-    editorInstance.value?.chain().focus().setImage({
+    insertImageNode({
       src: uploaded.url,
       alt: uploaded.fileName,
-    }).run()
+    })
   } catch (error) {
     uploadError.value = error instanceof Error ? error.message : t('common.messages.failedToUploadInlineImage')
   }
@@ -238,9 +372,11 @@ async function handlePaste(event: ClipboardEvent) {
   }
 
   event.preventDefault()
+  uploadError.value = ''
 
   for (const file of files) {
-    await insertImageFromFile(file)
+    const pending = insertPendingImage(file)
+    void uploadAndReplaceImage(file, pending.uploadId, pending.objectUrl)
   }
 }
 
@@ -260,9 +396,14 @@ function removeLink() {
 defineExpose({
   isMeaningful: () => isMeaningfulEditorHtml(currentHtml.value),
   toPlainTextFallback: plainTextToHtml,
+  hasPendingUploads,
 })
 
 onBeforeUnmount(() => {
+  for (const pending of pendingImageUploads.values()) {
+    URL.revokeObjectURL(pending.objectUrl)
+  }
+  pendingImageUploads.clear()
   editorInstance.value?.destroy()
 })
 </script>
