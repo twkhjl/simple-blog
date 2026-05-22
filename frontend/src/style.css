@@ -838,7 +838,6 @@ img {
 .tiptap img {
   display: block;
   max-width: 100%;
-  height: auto;
   margin: 1rem 0;
   border-radius: var(--radius-sm);
 }
@@ -863,8 +862,6 @@ img {
 
 .image-resize-handle {
   position: absolute;
-  right: -10px;
-  bottom: -10px;
   width: 18px;
   height: 18px;
   padding: 0;
@@ -872,7 +869,58 @@ img {
   border-radius: 999px;
   background: var(--secondary);
   box-shadow: 0 0 0 3px rgba(20, 17, 25, 0.92);
+}
+
+.image-resize-handle.top {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+}
+
+.image-resize-handle.bottom {
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+}
+
+.image-resize-handle.left {
+  top: 50%;
+  left: -10px;
+  transform: translateY(-50%);
+  cursor: ew-resize;
+}
+
+.image-resize-handle.right {
+  top: 50%;
+  right: -10px;
+  transform: translateY(-50%);
+  cursor: ew-resize;
+}
+
+.image-resize-handle.top-left {
+  top: -10px;
+  left: -10px;
   cursor: nwse-resize;
+}
+
+.image-resize-handle.top-right {
+  top: -10px;
+  right: -10px;
+  cursor: nesw-resize;
+}
+
+.image-resize-handle.bottom-right {
+  right: -10px;
+  bottom: -10px;
+  cursor: nwse-resize;
+}
+
+.image-resize-handle.bottom-left {
+  left: -10px;
+  bottom: -10px;
+  cursor: nesw-resize;
 }
 
 .rich-content pre,

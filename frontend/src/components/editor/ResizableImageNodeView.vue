@@ -10,13 +10,17 @@
       :src="node.attrs.src"
       :alt="node.attrs.alt ?? ''"
       :width="displayWidth ?? undefined"
+      :height="displayHeight ?? undefined"
     >
     <button
+      v-for="handle in resizeHandles"
       v-if="selected"
+      :key="handle.name"
       type="button"
       class="image-resize-handle"
-      data-testid="image-resize-handle"
-      @pointerdown.prevent="handleResizeStart"
+      :class="handle.className"
+      :data-testid="`image-resize-handle-${handle.name}`"
+      @pointerdown.prevent="event => handleResizeStart(event, handle)"
     ></button>
   </NodeViewWrapper>
 </template>
@@ -27,6 +31,14 @@ import { NodeViewWrapper } from '@tiptap/vue-3'
 import type { NodeViewProps } from '@tiptap/vue-3'
 
 const MIN_WIDTH = 120
+const MIN_HEIGHT = 80
+
+interface ResizeHandle {
+  name: string
+  className: string
+  x: -1 | 0 | 1
+  y: -1 | 0 | 1
+}
 
 const props = defineProps<NodeViewProps>()
 
@@ -34,13 +46,29 @@ const wrapperRef = ref<InstanceType<typeof NodeViewWrapper> | null>(null)
 
 let stopResizeListeners: (() => void) | null = null
 
+const resizeHandles: ResizeHandle[] = [
+  { name: 'top-left', className: 'top left top-left', x: -1, y: -1 },
+  { name: 'top', className: 'top', x: 0, y: -1 },
+  { name: 'top-right', className: 'top right top-right', x: 1, y: -1 },
+  { name: 'right', className: 'right', x: 1, y: 0 },
+  { name: 'bottom-right', className: 'bottom right bottom-right', x: 1, y: 1 },
+  { name: 'bottom', className: 'bottom', x: 0, y: 1 },
+  { name: 'bottom-left', className: 'bottom left bottom-left', x: -1, y: 1 },
+  { name: 'left', className: 'left', x: -1, y: 0 },
+]
+
 const displayWidth = computed<number | null>(() => {
   const width = props.node.attrs.width
   return typeof width === 'number' && Number.isFinite(width) ? width : null
 })
 
-function clampWidth(width: number, hostWidth: number) {
-  return Math.max(MIN_WIDTH, Math.min(Math.round(width), Math.round(hostWidth)))
+const displayHeight = computed<number | null>(() => {
+  const height = props.node.attrs.height
+  return typeof height === 'number' && Number.isFinite(height) ? height : null
+})
+
+function clampDimension(size: number, minSize: number, maxSize: number) {
+  return Math.max(minSize, Math.min(Math.round(size), Math.round(maxSize)))
 }
 
 function getWrapperElement() {
@@ -60,7 +88,7 @@ function clearResizeListeners() {
   stopResizeListeners = null
 }
 
-function handleResizeStart(event: PointerEvent) {
+function handleResizeStart(event: PointerEvent, handle: ResizeHandle) {
   const host = getWrapperElement()
   if (!host) {
     return
@@ -69,12 +97,32 @@ function handleResizeStart(event: PointerEvent) {
   handleSelect()
 
   const startX = event.clientX
+  const startY = event.clientY
   const startWidth = host.getBoundingClientRect().width
+  const startHeight = host.getBoundingClientRect().height
   const maxWidth = host.parentElement?.getBoundingClientRect().width ?? startWidth
+  const maxHeight = host.parentElement?.getBoundingClientRect().height ?? startHeight
 
   const onMove = (moveEvent: PointerEvent) => {
-    const nextWidth = clampWidth(startWidth + (moveEvent.clientX - startX), maxWidth)
-    props.updateAttributes({ width: nextWidth })
+    const nextAttrs: Record<string, number> = {}
+
+    if (handle.x !== 0) {
+      nextAttrs.width = clampDimension(
+        startWidth + ((moveEvent.clientX - startX) * handle.x),
+        MIN_WIDTH,
+        maxWidth,
+      )
+    }
+
+    if (handle.y !== 0) {
+      nextAttrs.height = clampDimension(
+        startHeight + ((moveEvent.clientY - startY) * handle.y),
+        MIN_HEIGHT,
+        maxHeight,
+      )
+    }
+
+    props.updateAttributes(nextAttrs)
   }
 
   const stop = () => {

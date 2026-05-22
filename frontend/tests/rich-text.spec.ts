@@ -32,10 +32,13 @@ describe('rich text helpers', () => {
     ).toContain('<img')
   })
 
-  it('preserves width on safe uploaded images during sanitize', () => {
+  it('preserves width and height on safe uploaded images during sanitize', () => {
     expect(
-      sanitizeRenderHtml(`<p><img src="${uploadedImageUrl}" alt="editor.webp" width="320"></p>`),
+      sanitizeRenderHtml(`<p><img src="${uploadedImageUrl}" alt="editor.webp" width="320" height="180"></p>`),
     ).toContain('width="320"')
+    expect(
+      sanitizeRenderHtml(`<p><img src="${uploadedImageUrl}" alt="editor.webp" width="320" height="180"></p>`),
+    ).toContain('height="180"')
   })
 
   it('allows uploaded file images from configured files base url', async () => {

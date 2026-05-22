@@ -111,11 +111,12 @@ describe('ui helpers', () => {
 
   it('styles inline editor images for both authoring and public views', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const imageRule = css.match(/\.rich-content img,\s*[\r\n]+\s*\.tiptap img\s*\{[^}]*\}/)?.[0] ?? ''
 
     expect(css).toContain('.rich-content img')
     expect(css).toContain('.tiptap img')
     expect(css).toContain('max-width: 100%')
-    expect(css).toContain('height: auto')
+    expect(imageRule).not.toContain('height: auto')
   })
 
   it('styles selectable resizable editor images', () => {
@@ -124,5 +125,7 @@ describe('ui helpers', () => {
     expect(css).toContain('.resizable-image-node')
     expect(css).toContain('.resizable-image-node.is-selected')
     expect(css).toContain('.image-resize-handle')
+    expect(css).toContain('.image-resize-handle.top')
+    expect(css).toContain('.image-resize-handle.bottom-right')
   })
 })

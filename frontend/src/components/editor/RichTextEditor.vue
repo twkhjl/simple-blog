@@ -123,6 +123,16 @@ const InstantPreviewImage = TiptapImage.extend({
           ? { width: String(attributes.width) }
           : {},
       },
+      height: {
+        default: null,
+        parseHTML: element => {
+          const value = element.getAttribute('height')
+          return value && /^\d+$/.test(value) ? Number(value) : null
+        },
+        renderHTML: attributes => attributes.height
+          ? { height: String(attributes.height) }
+          : {},
+      },
     }
   },
   addNodeView() {

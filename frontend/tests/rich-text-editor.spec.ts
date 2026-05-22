@@ -367,21 +367,22 @@ describe('RichTextEditor', () => {
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
   })
 
-  it('preserves image width attributes in editor html', async () => {
+  it('preserves image width and height attributes in editor html', async () => {
     const i18n = createAppI18n()
     const wrapper = mount(RichTextEditor, {
       global: {
         plugins: [i18n],
       },
       props: {
-        modelValue: '<p><img src="https://cdn.example.com/files/posts/2026/05/editor.webp" alt="editor.webp" width="320"></p>',
+        modelValue: '<p><img src="https://cdn.example.com/files/posts/2026/05/editor.webp" alt="editor.webp" width="320" height="180"></p>',
       },
     })
 
     expect(getEditor(wrapper).getHTML()).toContain('width="320"')
+    expect(getEditor(wrapper).getHTML()).toContain('height="180"')
   })
 
-  it('updates image width when resize handle is dragged', async () => {
+  it('renders eight resize handles when image is selected', async () => {
     const updateAttributes = vi.fn()
     const setNodeSelection = vi.fn()
     const wrapper = mount(ResizableImageNodeView, {
@@ -409,6 +410,47 @@ describe('RichTextEditor', () => {
             src: 'https://cdn.example.com/files/posts/2026/05/editor.webp',
             alt: 'editor.webp',
             width: 320,
+            height: 180,
+          },
+        } as any,
+        selected: true,
+        updateAttributes,
+        getPos: () => 1,
+      },
+    })
+
+    expect(wrapper.findAll('[data-testid^="image-resize-handle-"]')).toHaveLength(8)
+  })
+
+  it('updates image width from side handle drag', async () => {
+    const updateAttributes = vi.fn()
+    const setNodeSelection = vi.fn()
+    const wrapper = mount(ResizableImageNodeView, {
+      attachTo: document.body,
+      global: {
+        provide: {
+          onDragStart: () => {},
+          decorationClasses: ref(''),
+        },
+      },
+      props: {
+        editor: {
+          commands: {
+            setNodeSelection,
+          },
+        } as any,
+        decorations: [] as any,
+        deleteNode: vi.fn(),
+        view: {} as any,
+        innerDecorations: {} as any,
+        extension: {} as any,
+        HTMLAttributes: {} as Record<string, any>,
+        node: {
+          attrs: {
+            src: 'https://cdn.example.com/files/posts/2026/05/editor.webp',
+            alt: 'editor.webp',
+            width: 320,
+            height: 180,
           },
         } as any,
         selected: true,
@@ -447,7 +489,7 @@ describe('RichTextEditor', () => {
       }),
     })
 
-    const handle = wrapper.get('[data-testid="image-resize-handle"]')
+    const handle = wrapper.get('[data-testid="image-resize-handle-right"]')
     await handle.trigger('pointerdown', { clientX: 320 })
     const pointerMove = new Event('pointermove')
     Object.defineProperty(pointerMove, 'clientX', { configurable: true, value: 420 })
@@ -458,5 +500,162 @@ describe('RichTextEditor', () => {
 
     expect(setNodeSelection).toHaveBeenCalledWith(1)
     expect(updateAttributes).toHaveBeenCalledWith({ width: 420 })
+  })
+
+  it('updates image height from vertical handle drag', async () => {
+    const updateAttributes = vi.fn()
+    const wrapper = mount(ResizableImageNodeView, {
+      attachTo: document.body,
+      global: {
+        provide: {
+          onDragStart: () => {},
+          decorationClasses: ref(''),
+        },
+      },
+      props: {
+        editor: {
+          commands: {
+            setNodeSelection: vi.fn(),
+          },
+        } as any,
+        decorations: [] as any,
+        deleteNode: vi.fn(),
+        view: {} as any,
+        innerDecorations: {} as any,
+        extension: {} as any,
+        HTMLAttributes: {} as Record<string, any>,
+        node: {
+          attrs: {
+            src: 'https://cdn.example.com/files/posts/2026/05/editor.webp',
+            alt: 'editor.webp',
+            width: 320,
+            height: 180,
+          },
+        } as any,
+        selected: true,
+        updateAttributes,
+        getPos: () => 1,
+      },
+    })
+
+    const image = wrapper.get('[data-testid="resizable-image"]')
+    Object.defineProperty(image.element, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        width: 320,
+        height: 180,
+        top: 0,
+        left: 0,
+        right: 320,
+        bottom: 180,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }),
+    })
+    Object.defineProperty(image.element.parentElement, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        width: 640,
+        height: 500,
+        top: 0,
+        left: 0,
+        right: 640,
+        bottom: 500,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }),
+    })
+
+    const handle = wrapper.get('[data-testid="image-resize-handle-bottom"]')
+    await handle.trigger('pointerdown', { clientY: 180 })
+    const pointerMove = new Event('pointermove')
+    Object.defineProperty(pointerMove, 'clientY', { configurable: true, value: 260 })
+    const pointerUp = new Event('pointerup')
+    window.dispatchEvent(pointerMove)
+    window.dispatchEvent(pointerUp)
+    await Promise.resolve()
+
+    expect(updateAttributes).toHaveBeenCalledWith({ height: 260 })
+  })
+
+  it('updates image width and height from corner handle drag', async () => {
+    const updateAttributes = vi.fn()
+    const wrapper = mount(ResizableImageNodeView, {
+      attachTo: document.body,
+      global: {
+        provide: {
+          onDragStart: () => {},
+          decorationClasses: ref(''),
+        },
+      },
+      props: {
+        editor: {
+          commands: {
+            setNodeSelection: vi.fn(),
+          },
+        } as any,
+        decorations: [] as any,
+        deleteNode: vi.fn(),
+        view: {} as any,
+        innerDecorations: {} as any,
+        extension: {} as any,
+        HTMLAttributes: {} as Record<string, any>,
+        node: {
+          attrs: {
+            src: 'https://cdn.example.com/files/posts/2026/05/editor.webp',
+            alt: 'editor.webp',
+            width: 320,
+            height: 180,
+          },
+        } as any,
+        selected: true,
+        updateAttributes,
+        getPos: () => 1,
+      },
+    })
+
+    const image = wrapper.get('[data-testid="resizable-image"]')
+    Object.defineProperty(image.element, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        width: 320,
+        height: 180,
+        top: 0,
+        left: 0,
+        right: 320,
+        bottom: 180,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }),
+    })
+    Object.defineProperty(image.element.parentElement, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        width: 640,
+        height: 500,
+        top: 0,
+        left: 0,
+        right: 640,
+        bottom: 500,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }),
+    })
+
+    const handle = wrapper.get('[data-testid="image-resize-handle-bottom-right"]')
+    await handle.trigger('pointerdown', { clientX: 320, clientY: 180 })
+    const pointerMove = new Event('pointermove')
+    Object.defineProperty(pointerMove, 'clientX', { configurable: true, value: 420 })
+    Object.defineProperty(pointerMove, 'clientY', { configurable: true, value: 260 })
+    const pointerUp = new Event('pointerup')
+    window.dispatchEvent(pointerMove)
+    window.dispatchEvent(pointerUp)
+    await Promise.resolve()
+
+    expect(updateAttributes).toHaveBeenCalledWith({ width: 420, height: 260 })
   })
 })
