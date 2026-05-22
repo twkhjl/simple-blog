@@ -117,4 +117,12 @@ describe('ui helpers', () => {
     expect(css).toContain('max-width: 100%')
     expect(css).toContain('height: auto')
   })
+
+  it('styles selectable resizable editor images', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+
+    expect(css).toContain('.resizable-image-node')
+    expect(css).toContain('.resizable-image-node.is-selected')
+    expect(css).toContain('.image-resize-handle')
+  })
 })

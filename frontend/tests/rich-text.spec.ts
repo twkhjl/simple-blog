@@ -32,6 +32,12 @@ describe('rich text helpers', () => {
     ).toContain('<img')
   })
 
+  it('preserves width on safe uploaded images during sanitize', () => {
+    expect(
+      sanitizeRenderHtml(`<p><img src="${uploadedImageUrl}" alt="editor.webp" width="320"></p>`),
+    ).toContain('width="320"')
+  })
+
   it('allows uploaded file images from configured files base url', async () => {
     vi.stubEnv('VITE_FILES_BASE_URL', cdnFilesBaseUrl)
     vi.resetModules()

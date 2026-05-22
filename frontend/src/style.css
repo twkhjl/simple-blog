@@ -843,6 +843,38 @@ img {
   border-radius: var(--radius-sm);
 }
 
+.resizable-image-node {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+  line-height: 0;
+  vertical-align: top;
+}
+
+.resizable-image-node img {
+  margin: 1rem 0;
+}
+
+.resizable-image-node.is-selected {
+  outline: 2px solid rgba(100, 231, 255, 0.72);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
+.image-resize-handle {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(20, 17, 25, 0.92);
+  cursor: nwse-resize;
+}
+
 .rich-content pre,
 .tiptap pre {
   margin: 0;

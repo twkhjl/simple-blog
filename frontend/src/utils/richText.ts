@@ -100,7 +100,12 @@ function replaceSafeImagesWithPlaceholders(input: string, safeImages: Map<string
 
     const safeImageId = createSafeImageId(template.innerHTML, safeImages)
     const alt = image.getAttribute('alt') ?? ''
-    safeImages.set(safeImageId, `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}">`)
+    const width = image.getAttribute('width')
+    const safeWidth = width && /^\d+$/.test(width) ? width : null
+    safeImages.set(
+      safeImageId,
+      `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}"${safeWidth ? ` width="${safeWidth}"` : ''}>`,
+    )
 
     const placeholder = document.createElement(safeImagePlaceholderTag)
     placeholder.setAttribute('safe-image-id', safeImageId)

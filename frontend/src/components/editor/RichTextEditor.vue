@@ -66,9 +66,10 @@ import TiptapImage from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import StarterKit from '@tiptap/starter-kit'
-import { Editor, EditorContent } from '@tiptap/vue-3'
+import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ResizableImageNodeView from './ResizableImageNodeView.vue'
 import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
 import { ACCEPTED_IMAGE_TYPES, createImageUploader, isSupportedImageType } from '../../services/uploads'
@@ -112,7 +113,20 @@ const InstantPreviewImage = TiptapImage.extend({
           ? { 'data-upload-id': attributes['data-upload-id'] }
           : {},
       },
+      width: {
+        default: null,
+        parseHTML: element => {
+          const value = element.getAttribute('width')
+          return value && /^\d+$/.test(value) ? Number(value) : null
+        },
+        renderHTML: attributes => attributes.width
+          ? { width: String(attributes.width) }
+          : {},
+      },
     }
+  },
+  addNodeView() {
+    return VueNodeViewRenderer(ResizableImageNodeView)
   },
 })
 
@@ -203,7 +217,7 @@ function hasPendingUploads() {
   return pendingImageUploads.size > 0
 }
 
-function insertImageNode(attrs: Record<string, string | null>) {
+function insertImageNode(attrs: Record<string, string | number | null>) {
   editorInstance.value?.chain().focus('end').insertContent({
     type: 'image',
     attrs,
