@@ -47,14 +47,14 @@ const wrapperRef = ref<InstanceType<typeof NodeViewWrapper> | null>(null)
 let stopResizeListeners: (() => void) | null = null
 
 const resizeHandles: ResizeHandle[] = [
-  { name: 'top-left', className: 'top left top-left', x: -1, y: -1 },
-  { name: 'top', className: 'top', x: 0, y: -1 },
-  { name: 'top-right', className: 'top right top-right', x: 1, y: -1 },
-  { name: 'right', className: 'right', x: 1, y: 0 },
-  { name: 'bottom-right', className: 'bottom right bottom-right', x: 1, y: 1 },
-  { name: 'bottom', className: 'bottom', x: 0, y: 1 },
-  { name: 'bottom-left', className: 'bottom left bottom-left', x: -1, y: 1 },
-  { name: 'left', className: 'left', x: -1, y: 0 },
+  { name: 'top-left', className: 'corner-top-left', x: -1, y: -1 },
+  { name: 'top', className: 'edge-top', x: 0, y: -1 },
+  { name: 'top-right', className: 'corner-top-right', x: 1, y: -1 },
+  { name: 'right', className: 'edge-right', x: 1, y: 0 },
+  { name: 'bottom-right', className: 'corner-bottom-right', x: 1, y: 1 },
+  { name: 'bottom', className: 'edge-bottom', x: 0, y: 1 },
+  { name: 'bottom-left', className: 'corner-bottom-left', x: -1, y: 1 },
+  { name: 'left', className: 'edge-left', x: -1, y: 0 },
 ]
 
 const displayWidth = computed<number | null>(() => {

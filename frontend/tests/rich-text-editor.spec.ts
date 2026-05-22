@@ -420,6 +420,9 @@ describe('RichTextEditor', () => {
     })
 
     expect(wrapper.findAll('[data-testid^="image-resize-handle-"]')).toHaveLength(8)
+    expect(wrapper.get('[data-testid="image-resize-handle-top-left"]').classes()).toContain('corner-top-left')
+    expect(wrapper.get('[data-testid="image-resize-handle-top"]').classes()).toContain('edge-top')
+    expect(wrapper.get('[data-testid="image-resize-handle-left"]').classes()).toContain('edge-left')
   })
 
   it('updates image width from side handle drag', async () => {
