@@ -129,4 +129,18 @@ describe('ui helpers', () => {
     expect(css).toContain('.image-resize-handle.corner-top-left')
     expect(css).toContain('.image-resize-handle.corner-bottom-right')
   })
+
+  it('styles rich editor toolbar like a grouped icon editor', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const editor = readFileSync(resolve(__dirname, '../src/components/editor/RichTextEditor.vue'), 'utf8')
+
+    expect(css).toContain('.rich-toolbar-group')
+    expect(css).toContain('.editor-tool')
+    expect(css).toContain('.editor-tool.is-active')
+    expect(css).toContain('.editor-tool svg')
+    expect(editor).toContain('data-testid="toggle-strike"')
+    expect(editor).toContain('data-testid="toggle-inline-code"')
+    expect(editor).toContain('data-testid="toggle-code-block"')
+    expect(editor).toContain('data-testid="insert-horizontal-rule"')
+  })
 })

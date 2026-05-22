@@ -115,6 +115,61 @@ describe('RichTextEditor', () => {
     expect(events[events.length - 1]?.[0]).toBe('<p><strong>Hello</strong></p>')
   })
 
+  it('renders icon toolbar buttons with markdown-style controls', async () => {
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Hello</p>',
+      },
+    })
+
+    expect(wrapper.get('[data-testid="toggle-bold"]').attributes('aria-label')).toBeTruthy()
+    expect(wrapper.find('[data-testid="toggle-bold"] svg').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="toggle-strike"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="toggle-inline-code"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="toggle-code-block"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="insert-horizontal-rule"]').exists()).toBe(true)
+    expect(wrapper.findAll('.rich-toolbar-group').length).toBeGreaterThan(2)
+  })
+
+  it('applies markdown strike formatting from toolbar', async () => {
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Hello</p>',
+      },
+    })
+    const editor = getEditor(wrapper)
+
+    editor.commands.setTextSelection({ from: 1, to: 6 })
+    await wrapper.get('[data-testid="toggle-strike"]').trigger('click')
+
+    const events = wrapper.emitted('update:modelValue') ?? []
+    expect(events[events.length - 1]?.[0]).toBe('<p><s>Hello</s></p>')
+  })
+
+  it('inserts markdown horizontal rules from toolbar', async () => {
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Hello</p>',
+      },
+    })
+
+    await wrapper.get('[data-testid="insert-horizontal-rule"]').trigger('click')
+
+    expect(getEditor(wrapper).getHTML()).toContain('<hr>')
+  })
+
   it('uploads an image through toolbar file picker', async () => {
     const i18n = createAppI18n()
     const wrapper = mount(RichTextEditor, {
