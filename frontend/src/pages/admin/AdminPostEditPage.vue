@@ -39,7 +39,7 @@
         <div class="neo-shell" style="padding: 1rem;">
           <div class="field" style="margin-top: 1rem;">
             <span class="field-label">{{ t('common.labels.content') }}</span>
-            <RichTextEditor v-model="form.content" />
+            <RichTextEditor ref="richTextEditor" v-model="form.content" />
           </div>
         </div>
       </div>
@@ -155,6 +155,10 @@ import type { AdminPostDetail } from '../../types'
 import { isHtmlLike, isMeaningfulEditorHtml, plainTextToHtml } from '../../utils/richText'
 import { formatDisplayDate } from '../../utils/ui'
 
+type RichTextEditorExpose = {
+  hasPendingUploads?: () => boolean
+}
+
 const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -165,6 +169,7 @@ const message = ref('')
 const isSuccess = ref(false)
 const previewImageUrl = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
+const richTextEditor = ref<RichTextEditorExpose | null>(null)
 let localPreviewUrl: string | null = null
 
 const form = reactive({
@@ -291,6 +296,12 @@ async function handleSave() {
   saving.value = true
   message.value = ''
   isSuccess.value = false
+
+  if (richTextEditor.value?.hasPendingUploads?.()) {
+    message.value = t('common.messages.inlineImagesStillUploading')
+    saving.value = false
+    return
+  }
 
   if (!isMeaningfulEditorHtml(form.content)) {
     message.value = t('common.messages.contentRequired')

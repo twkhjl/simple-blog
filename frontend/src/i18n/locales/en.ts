@@ -85,6 +85,7 @@ const en = {
       coverUploaded: 'Cover image uploaded.',
       inlineImageMustBeImage: 'Image file must be JPEG, PNG, WebP, or GIF.',
       inlineImageTooLarge: 'Image file must be 5MB or smaller.',
+      inlineImagesStillUploading: 'Inline images are still uploading. Please wait before saving.',
       contentRequired: 'Content must not be empty.',
       postCreated: 'Post created.',
       postUpdated: 'Post updated.',

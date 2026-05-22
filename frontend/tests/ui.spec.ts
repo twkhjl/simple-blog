@@ -56,7 +56,7 @@ describe('ui helpers', () => {
     const page = readFileSync(resolve(__dirname, '../src/pages/admin/AdminPostEditPage.vue'), 'utf8')
     expect(page).toContain('<div class="field" style="margin-top: 1rem;">')
     expect(page).toContain("{{ t('common.labels.content') }}")
-    expect(page).toContain('<RichTextEditor v-model="form.content" />')
+    expect(page).toContain('<RichTextEditor ref="richTextEditor" v-model="form.content" />')
     expect(page).not.toContain('<label class="field" style="margin-top: 1rem;">')
   })
 

@@ -66,10 +66,16 @@ const ReadyEditorStub = defineComponent({
 async function mountPage(editorStub: typeof PendingEditorStub | typeof ReadyEditorStub) {
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: [{
-      path: '/admin/posts/new',
-      component: AdminPostEditPage,
-    }],
+    routes: [
+      {
+        path: '/admin/posts/new',
+        component: AdminPostEditPage,
+      },
+      {
+        path: '/admin/posts/:id/edit',
+        component: AdminPostEditPage,
+      },
+    ],
   })
 
   router.push('/admin/posts/new')
@@ -105,7 +111,7 @@ describe('AdminPostEditPage', () => {
     await wrapper.find('form').trigger('submit.prevent')
 
     expect(postMock).not.toHaveBeenCalled()
-    expect(wrapper.text()).toContain('common.messages.inlineImagesStillUploading')
+    expect(wrapper.text()).toContain('Inline images are still uploading. Please wait before saving.')
   })
 
   it('allows save after inline uploads finish', async () => {

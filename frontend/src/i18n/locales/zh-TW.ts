@@ -85,6 +85,7 @@ const zhTW = {
       coverUploaded: '封面圖片已上傳。',
       inlineImageMustBeImage: '圖片檔案必須是 JPEG、PNG、WebP 或 GIF。',
       inlineImageTooLarge: '圖片檔案大小不能超過 5MB。',
+      inlineImagesStillUploading: '內文圖片仍在上傳中，請稍候再儲存。',
       contentRequired: '內容不得為空白。',
       postCreated: '文章已建立。',
       postUpdated: '文章已更新。',

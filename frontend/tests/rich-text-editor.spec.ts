@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createAppI18n } from '../src/i18n'
 import RichTextEditor from '../src/components/editor/RichTextEditor.vue'
 import type { Editor } from '@tiptap/vue-3'
+import type { UploadedFilePayload } from '../src/types'
 
 const uploadMock = vi.fn()
 
@@ -183,8 +184,8 @@ describe('RichTextEditor', () => {
   })
 
   it('shows a blob preview immediately when an image is pasted', async () => {
-    let resolveUpload: ((value: any) => void) | null = null
-    uploadMock.mockImplementationOnce(() => new Promise(resolve => {
+    let resolveUpload!: (value: UploadedFilePayload) => void
+    uploadMock.mockImplementationOnce(() => new Promise<UploadedFilePayload>(resolve => {
       resolveUpload = resolve
     }))
 
@@ -222,7 +223,7 @@ describe('RichTextEditor', () => {
     expect(emittedBeforeUpload[emittedBeforeUpload.length - 1]?.[0]).toContain('data-upload-id=')
     expect(createObjectUrlMock).toHaveBeenCalledWith(file)
 
-    resolveUpload?.({
+    resolveUpload({
       key: 'posts/2026/05/paste.png',
       url: 'https://cdn.example.com/files/posts/2026/05/paste.png',
       fileName: 'paste.png',
