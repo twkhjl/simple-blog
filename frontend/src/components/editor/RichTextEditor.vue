@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import Image from '@tiptap/extension-image'
+import TiptapImage from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import StarterKit from '@tiptap/starter-kit'
@@ -101,7 +101,7 @@ interface PendingImageUpload {
 
 const pendingImageUploads = new Map<string, PendingImageUpload>()
 
-const InstantPreviewImage = Image.extend({
+const InstantPreviewImage = TiptapImage.extend({
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -321,9 +321,19 @@ function removePendingImage(uploadId: string) {
   })
 }
 
+function waitForImageLoad(src: string) {
+  return new Promise<void>((resolve, reject) => {
+    const image = new window.Image()
+    image.onload = () => resolve()
+    image.onerror = () => reject(new Error('image preload failed'))
+    image.src = src
+  })
+}
+
 async function uploadAndReplaceImage(file: File, uploadId: string, objectUrl: string) {
   try {
     const uploaded = await imageUploader.upload(file)
+    await waitForImageLoad(uploaded.url)
     replacePendingImage(uploadId, uploaded)
   } catch (error) {
     removePendingImage(uploadId)

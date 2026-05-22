@@ -218,10 +218,20 @@ describe('RichTextEditor', () => {
     wrapper.get('[data-testid="rich-editor-surface"]').element.dispatchEvent(pasteEvent)
     await Promise.resolve()
 
-    const emittedBeforeUpload = wrapper.emitted('update:modelValue') ?? []
-    expect(emittedBeforeUpload[emittedBeforeUpload.length - 1]?.[0]).toContain('blob:preview-1')
-    expect(emittedBeforeUpload[emittedBeforeUpload.length - 1]?.[0]).toContain('data-upload-id=')
+    expect(getEditor(wrapper).getHTML()).toContain('blob:preview-1')
+    expect(getEditor(wrapper).getHTML()).toContain('data-upload-id=')
     expect(createObjectUrlMock).toHaveBeenCalledWith(file)
+
+    let pendingImageLoad!: () => void
+    class FakeImage {
+      onload: null | (() => void) = null
+      onerror: null | (() => void) = null
+
+      set src(_value: string) {
+        pendingImageLoad = this.onload ?? (() => {})
+      }
+    }
+    vi.stubGlobal('Image', FakeImage)
 
     resolveUpload({
       key: 'posts/2026/05/paste.png',
@@ -233,10 +243,15 @@ describe('RichTextEditor', () => {
     await Promise.resolve()
     await Promise.resolve()
 
-    const emittedAfterUpload = wrapper.emitted('update:modelValue') ?? []
-    expect(emittedAfterUpload[emittedAfterUpload.length - 1]?.[0]).toContain('https://cdn.example.com/files/posts/2026/05/paste.png')
-    expect(emittedAfterUpload[emittedAfterUpload.length - 1]?.[0]).not.toContain('blob:preview-1')
-    expect(emittedAfterUpload[emittedAfterUpload.length - 1]?.[0]).not.toContain('data-upload-id=')
+    expect(getEditor(wrapper).getHTML()).toContain('blob:preview-1')
+    expect(getEditor(wrapper).getHTML()).toContain('data-upload-id=')
+
+    pendingImageLoad()
+    await Promise.resolve()
+
+    expect(getEditor(wrapper).getHTML()).toContain('https://cdn.example.com/files/posts/2026/05/paste.png')
+    expect(getEditor(wrapper).getHTML()).not.toContain('blob:preview-1')
+    expect(getEditor(wrapper).getHTML()).not.toContain('data-upload-id=')
     expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:preview-1')
   })
 
