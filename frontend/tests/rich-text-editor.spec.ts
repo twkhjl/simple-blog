@@ -22,6 +22,20 @@ function getEditor(wrapper: ReturnType<typeof mount>) {
 
 describe('RichTextEditor', () => {
   beforeEach(() => {
+    if (!('createObjectURL' in URL)) {
+      Object.defineProperty(URL, 'createObjectURL', {
+        configurable: true,
+        value: vi.fn(),
+      })
+    }
+
+    if (!('revokeObjectURL' in URL)) {
+      Object.defineProperty(URL, 'revokeObjectURL', {
+        configurable: true,
+        value: vi.fn(),
+      })
+    }
+
     uploadMock.mockReset()
     uploadMock.mockResolvedValue({
       key: 'posts/2026/05/editor.webp',
@@ -30,6 +44,7 @@ describe('RichTextEditor', () => {
       mimeType: 'image/webp',
       size: 111,
     })
+    vi.restoreAllMocks()
   })
 
   it('emits updated html when content changes', async () => {
@@ -117,6 +132,7 @@ describe('RichTextEditor', () => {
     input.dispatchEvent(new Event('change'))
 
     await Promise.resolve()
+    await Promise.resolve()
 
     const emitted = wrapper.emitted('update:modelValue') ?? []
     expect(uploadMock).toHaveBeenCalledWith(file)
@@ -169,6 +185,135 @@ describe('RichTextEditor', () => {
     const emitted = wrapper.emitted('update:modelValue') ?? []
     expect(emitted[emitted.length - 1]?.[0]).toContain('<img')
     expect(emitted[emitted.length - 1]?.[0]).toContain('paste.png')
+  })
+
+  it('shows a blob preview immediately when an image is pasted', async () => {
+    let resolveUpload: ((value: any) => void) | null = null
+    uploadMock.mockImplementationOnce(() => new Promise(resolve => {
+      resolveUpload = resolve
+    }))
+
+    const createObjectUrlMock = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:preview-1')
+    const revokeObjectUrlMock = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Start</p>',
+      },
+    })
+
+    const file = new File(['abc'], 'paste.png', { type: 'image/png' })
+    const pasteEvent = new Event('paste', { bubbles: true, cancelable: true })
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      configurable: true,
+      value: {
+        items: [{
+          kind: 'file',
+          type: 'image/png',
+          getAsFile: () => file,
+        }],
+      },
+    })
+
+    wrapper.get('[data-testid="rich-editor-surface"]').element.dispatchEvent(pasteEvent)
+    await Promise.resolve()
+
+    const emittedBeforeUpload = wrapper.emitted('update:modelValue') ?? []
+    expect(emittedBeforeUpload[emittedBeforeUpload.length - 1]?.[0]).toContain('blob:preview-1')
+    expect(emittedBeforeUpload[emittedBeforeUpload.length - 1]?.[0]).toContain('data-upload-id=')
+    expect(createObjectUrlMock).toHaveBeenCalledWith(file)
+
+    resolveUpload?.({
+      key: 'posts/2026/05/paste.png',
+      url: 'https://cdn.example.com/files/posts/2026/05/paste.png',
+      fileName: 'paste.png',
+      mimeType: 'image/png',
+      size: 111,
+    })
+    await Promise.resolve()
+    await Promise.resolve()
+
+    const emittedAfterUpload = wrapper.emitted('update:modelValue') ?? []
+    expect(emittedAfterUpload[emittedAfterUpload.length - 1]?.[0]).toContain('https://cdn.example.com/files/posts/2026/05/paste.png')
+    expect(emittedAfterUpload[emittedAfterUpload.length - 1]?.[0]).not.toContain('blob:preview-1')
+    expect(emittedAfterUpload[emittedAfterUpload.length - 1]?.[0]).not.toContain('data-upload-id=')
+    expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:preview-1')
+  })
+
+  it('removes the blob preview and shows an error when upload fails', async () => {
+    uploadMock.mockRejectedValueOnce(new Error('upload failed'))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:preview-fail')
+    const revokeObjectUrlMock = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Start</p>',
+      },
+    })
+
+    const file = new File(['abc'], 'broken.png', { type: 'image/png' })
+    const pasteEvent = new Event('paste', { bubbles: true, cancelable: true })
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      configurable: true,
+      value: {
+        items: [{
+          kind: 'file',
+          type: 'image/png',
+          getAsFile: () => file,
+        }],
+      },
+    })
+
+    wrapper.get('[data-testid="rich-editor-surface"]').element.dispatchEvent(pasteEvent)
+    await Promise.resolve()
+    await Promise.resolve()
+
+    const emitted = wrapper.emitted('update:modelValue') ?? []
+    expect(emitted[emitted.length - 1]?.[0]).not.toContain('blob:preview-fail')
+    expect(wrapper.text()).toContain('upload failed')
+    expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:preview-fail')
+  })
+
+  it('exposes pending upload state while a pasted image is still uploading', async () => {
+    uploadMock.mockImplementationOnce(() => new Promise(() => {}))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:pending')
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Start</p>',
+      },
+    })
+
+    const file = new File(['abc'], 'pending.png', { type: 'image/png' })
+    const pasteEvent = new Event('paste', { bubbles: true, cancelable: true })
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      configurable: true,
+      value: {
+        items: [{
+          kind: 'file',
+          type: 'image/png',
+          getAsFile: () => file,
+        }],
+      },
+    })
+
+    wrapper.get('[data-testid="rich-editor-surface"]').element.dispatchEvent(pasteEvent)
+    await Promise.resolve()
+
+    expect((wrapper.vm as any).hasPendingUploads()).toBe(true)
   })
 
   it('does not intercept unsupported clipboard image formats', async () => {
