@@ -326,6 +326,35 @@ img {
   background: rgba(151, 239, 173, 0.08);
 }
 
+.save-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 40;
+  min-width: min(28rem, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  padding: 0.95rem 1.25rem;
+  border-radius: var(--radius-pill);
+  transform: translateX(-50%);
+  color: var(--success);
+  text-align: center;
+  background: rgba(21, 28, 24, 0.96);
+  border: 1px solid rgba(151, 239, 173, 0.24);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(151, 239, 173, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 0.5rem);
+}
+
 .status-badge,
 .chip {
   display: inline-flex;

@@ -8,7 +8,13 @@
       <p class="hero-copy">{{ t('admin.edit.copy') }}</p>
     </div>
 
-    <p v-if="message" class="status-message" :class="{ error: !isSuccess, success: isSuccess }">{{ message }}</p>
+    <p v-if="message" class="status-message error">{{ message }}</p>
+
+    <transition name="toast-fade">
+      <p v-if="saveToastMessage" data-testid="save-toast" class="save-toast">
+        {{ saveToastMessage }}
+      </p>
+    </transition>
 
     <form class="editor-layout" @submit.prevent="handleSave">
       <div class="stack-card">
@@ -170,7 +176,9 @@ const isSuccess = ref(false)
 const previewImageUrl = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const richTextEditor = ref<RichTextEditorExpose | null>(null)
+const saveToastMessage = ref('')
 let localPreviewUrl: string | null = null
+let saveToastTimer: ReturnType<typeof setTimeout> | null = null
 
 const form = reactive({
   title: '',
@@ -213,6 +221,23 @@ function clearLocalPreview() {
     URL.revokeObjectURL(localPreviewUrl)
     localPreviewUrl = null
   }
+}
+
+function clearSaveToast() {
+  if (saveToastTimer) {
+    clearTimeout(saveToastTimer)
+    saveToastTimer = null
+  }
+  saveToastMessage.value = ''
+}
+
+function showSaveToast(nextMessage: string) {
+  clearSaveToast()
+  saveToastMessage.value = nextMessage
+  saveToastTimer = setTimeout(() => {
+    saveToastMessage.value = ''
+    saveToastTimer = null
+  }, 3000)
 }
 
 function setPreviewImage(url: string | null, isLocal = false) {
@@ -323,14 +348,14 @@ async function handleSave() {
     if (isCreateMode.value) {
       const created = await getClient().post<AdminPostDetail>('/api/admin/posts', payload)
       isSuccess.value = true
-      message.value = t('common.messages.postCreated')
+      showSaveToast(t('common.messages.postCreated'))
       await router.replace(`/admin/posts/${created.id}/edit`)
       return
     }
 
     await getClient().put<AdminPostDetail>(`/api/admin/posts/${route.params.id}`, payload)
     isSuccess.value = true
-    message.value = t('common.messages.postUpdated')
+    showSaveToast(t('common.messages.postUpdated'))
   } catch (error) {
     message.value = error instanceof Error ? error.message : t('common.messages.failedToSavePost')
   } finally {
@@ -366,6 +391,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  clearSaveToast()
   clearLocalPreview()
 })
 </script>

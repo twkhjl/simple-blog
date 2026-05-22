@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { defineComponent, h } from 'vue'
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { createAppI18n } from '../src/i18n'
 import AdminPostEditPage from '../src/pages/admin/AdminPostEditPage.vue'
 
@@ -94,11 +94,16 @@ async function mountPage(editorStub: typeof PendingEditorStub | typeof ReadyEdit
 
 describe('AdminPostEditPage', () => {
   beforeEach(() => {
+    vi.useFakeTimers()
     getMock.mockReset()
     postMock.mockReset()
     putMock.mockReset()
     deleteMock.mockReset()
     postFormMock.mockReset()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it('blocks save when inline image uploads are still pending', async () => {
@@ -128,5 +133,11 @@ describe('AdminPostEditPage', () => {
     await wrapper.find('form').trigger('submit.prevent')
 
     expect(postMock).toHaveBeenCalledTimes(1)
+    expect(wrapper.text()).toContain('Post created.')
+    expect(wrapper.find('[data-testid="save-toast"]').exists()).toBe(true)
+
+    await vi.advanceTimersByTimeAsync(3000)
+
+    expect(wrapper.find('[data-testid="save-toast"]').exists()).toBe(false)
   })
 })
