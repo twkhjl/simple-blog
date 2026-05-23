@@ -36,6 +36,91 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      - name: Preflight Cloudflare access
+        working-directory: worker
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+
+          npx wrangler whoami
+
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.error
+          import urllib.request
+
+          account_id = os.environ["CLOUDFLARE_ACCOUNT_ID"]
+          token = os.environ["CLOUDFLARE_API_TOKEN"]
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Content-Type": "application/json",
+          }
+          endpoints = [
+              (
+                  "workers_subdomain",
+                  f"https://api.cloudflare.com/client/v4/accounts/{account_id}/workers/subdomain",
+              ),
+              (
+                  "worker_script",
+                  f"https://api.cloudflare.com/client/v4/accounts/{account_id}/workers/scripts/simple-blog-api/settings",
+              ),
+              (
+                  "r2_buckets",
+                  f"https://api.cloudflare.com/client/v4/accounts/{account_id}/r2/buckets",
+              ),
+          ]
+
+          for name, url in endpoints:
+              request = urllib.request.Request(url, headers=headers)
+              try:
+                  with urllib.request.urlopen(request) as response:
+                      payload = json.load(response)
+              except urllib.error.HTTPError as error:
+                  body = error.read().decode("utf-8", errors="replace")
+                  print(f"::error title=Cloudflare preflight failed::{name} HTTP {error.code}: {body}")
+                  sys.exit(1)
+
+              if not payload.get("success"):
+                  print(
+                      "::error title=Cloudflare preflight failed::"
+                      f"{name} returned errors: {payload.get('errors', [])}"
+                  )
+                  sys.exit(1)
+
+              if name == "workers_subdomain":
+                  subdomain = payload["result"].get("subdomain", "<missing>")
+                  print(f"Workers subdomain OK: {subdomain}")
+              elif name == "worker_script":
+                  bindings = payload["result"].get("bindings", [])
+                  has_bucket = any(
+                      binding.get("type") == "r2_bucket"
+                      and binding.get("bucket_name") == "simple-blog-files"
+                      for binding in bindings
+                  )
+                  if not has_bucket:
+                      print(
+                          "::error title=Cloudflare preflight failed::"
+                          "simple-blog-api is missing R2 binding simple-blog-files"
+                      )
+                      sys.exit(1)
+                  print("Worker script OK: simple-blog-api with R2 binding simple-blog-files")
+              elif name == "r2_buckets":
+                  buckets = payload.get("result", {}).get("buckets", [])
+                  bucket_names = {bucket["name"] for bucket in buckets}
+                  if "simple-blog-files" not in bucket_names:
+                      print(
+                          "::error title=Cloudflare preflight failed::"
+                          "R2 bucket simple-blog-files not found in target account"
+                      )
+                      sys.exit(1)
+                  print("R2 bucket OK: simple-blog-files")
+          PY
+
       - name: Deploy worker
         working-directory: worker
         run: >
