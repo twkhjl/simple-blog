@@ -3,7 +3,7 @@ import sanitizeHtml from 'sanitize-html'
 const allowedTags = ['p', 'br', 'strong', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'pre', 'code', 'img']
 const allowedAttributes = {
   a: ['href', 'target', 'rel'],
-  img: ['src', 'alt'],
+  img: ['src', 'alt', 'width', 'height'],
 } satisfies sanitizeHtml.IOptions['allowedAttributes']
 const allowedSchemes = ['http', 'https', 'mailto']
 const allowedImageSchemes = ['http', 'https']
@@ -45,9 +45,19 @@ export function sanitizeRichTextHtml(input: string): string {
       img: (tagName: string, attribs: Record<string, string>) => {
         const next = { ...attribs }
         const src = next.src?.trim()
+        const width = next.width?.trim()
+        const height = next.height?.trim()
 
         if (!src || !hasAllowedImageSource(src)) {
           delete next.src
+        }
+
+        if (!width || !/^\d+$/.test(width)) {
+          delete next.width
+        }
+
+        if (!height || !/^\d+$/.test(height)) {
+          delete next.height
         }
 
         return { tagName, attribs: next }

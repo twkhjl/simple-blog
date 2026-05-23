@@ -14,6 +14,12 @@ describe('rich text content helpers', () => {
     expect(sanitizeRichTextHtml(input)).toBe('<p>Hello</p><img src="https://cdn.example.com/files/posts/2026/05/editor.webp" alt="editor.webp" />')
   })
 
+  it('keeps numeric image width and height attributes', () => {
+    const input = '<p><img src="https://cdn.example.com/files/posts/2026/05/editor.webp" alt="editor.webp" width="320" height="180"></p>'
+
+    expect(sanitizeRichTextHtml(input)).toBe('<p><img src="https://cdn.example.com/files/posts/2026/05/editor.webp" alt="editor.webp" width="320" height="180" /></p>')
+  })
+
   it('normalizes empty blocks out of saved html', () => {
     expect(normalizeRichTextHtml('<p></p><p><br></p><p>Keep</p>')).toBe('<p>Keep</p>')
   })
