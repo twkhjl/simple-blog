@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import type { Session } from '@supabase/supabase-js'
 import { createApiClient } from '../services/api'
 import { extractAccessToken, hasAdminAccess } from '../services/auth'
@@ -55,6 +55,27 @@ export async function initializeAuth() {
   onAuthStateChange(async (_event, session) => {
     authState.session = session
     await refreshProfile()
+  })
+}
+
+export async function waitForAuthReady() {
+  if (authState.ready) {
+    return
+  }
+
+  await new Promise<void>(resolve => {
+    const stop = watch(
+      () => authState.ready,
+      ready => {
+        if (!ready) {
+          return
+        }
+
+        stop()
+        resolve()
+      },
+      { flush: 'sync' },
+    )
   })
 }
 
