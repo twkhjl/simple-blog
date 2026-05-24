@@ -193,6 +193,46 @@ describe('RichTextEditor', () => {
     expect(wrapper.text()).not.toContain('Failed to upload inline image')
   })
 
+  it('inserts pasted image at current cursor position instead of document end', async () => {
+    uploadMock.mockImplementationOnce(() => new Promise(() => {}))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:cursor-preview')
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Hello world</p>',
+      },
+    })
+    const file = new File(['abc'], 'editor.webp', { type: 'image/webp' })
+    const editor = getEditor(wrapper)
+    editor.commands.setTextSelection(7)
+
+    const pasteEvent = new Event('paste', { bubbles: true, cancelable: true })
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      configurable: true,
+      value: {
+        items: [{
+          kind: 'file',
+          type: 'image/webp',
+          getAsFile: () => file,
+        }],
+      },
+    })
+
+    wrapper.get('[data-testid="rich-editor-surface"]').element.dispatchEvent(pasteEvent)
+    await Promise.resolve()
+    await Promise.resolve()
+
+    const content = getEditor(wrapper).getJSON().content ?? []
+    expect(content[1]?.type).toBe('image')
+    expect(content[1]?.attrs?.alt).toBe('editor.webp')
+    expect(content[1]?.attrs?.src).toBe('blob:cursor-preview')
+  })
+
   it('uploads clipboard image blobs on paste', async () => {
     const i18n = createAppI18n()
     const wrapper = mount(RichTextEditor, {
@@ -420,6 +460,49 @@ describe('RichTextEditor', () => {
     expect(preventDefault).not.toHaveBeenCalled()
     expect(uploadMock).not.toHaveBeenCalled()
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
+
+  it('does not intercept mixed clipboard content that includes text and an image', async () => {
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Start</p>',
+      },
+    })
+
+    const file = new File(['abc'], 'paste.png', { type: 'image/png' })
+    const preventDefault = vi.fn()
+    const pasteEvent = new Event('paste', { bubbles: true, cancelable: true })
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      configurable: true,
+      value: {
+        items: [
+          {
+            kind: 'string',
+            type: 'text/plain',
+            getAsFile: () => null,
+          },
+          {
+            kind: 'file',
+            type: 'image/png',
+            getAsFile: () => file,
+          },
+        ],
+      },
+    })
+    Object.defineProperty(pasteEvent, 'preventDefault', {
+      configurable: true,
+      value: preventDefault,
+    })
+
+    wrapper.get('[data-testid="rich-editor-surface"]').element.dispatchEvent(pasteEvent)
+    await Promise.resolve()
+
+    expect(preventDefault).not.toHaveBeenCalled()
+    expect(uploadMock).not.toHaveBeenCalled()
   })
 
   it('preserves image width and height attributes in editor html', async () => {

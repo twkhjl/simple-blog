@@ -263,6 +263,7 @@ const linkUrl = ref('')
 const imageInput = ref<HTMLInputElement | null>(null)
 const uploadError = ref('')
 const currentHtml = ref(props.modelValue || '<p></p>')
+const pendingInsertSelection = ref<{ from: number; to: number } | null>(null)
 
 const normalizedInitialHtml = computed(() => props.modelValue || '<p></p>')
 
@@ -271,6 +272,15 @@ const editorInstance = shallowRef<Editor | null>(null)
 interface PendingImageUpload {
   uploadId: string
   objectUrl: string
+}
+
+interface EditorImageAttrs {
+  src: string
+  alt?: string | null
+  title?: string | null
+  width?: number | null
+  height?: number | null
+  'data-upload-id'?: string | null
 }
 
 const pendingImageUploads = new Map<string, PendingImageUpload>()
@@ -402,11 +412,36 @@ function hasPendingUploads() {
   return pendingImageUploads.size > 0
 }
 
-function insertImageNode(attrs: Record<string, string | number | null>) {
-  editorInstance.value?.chain().focus('end').insertContent({
-    type: 'image',
-    attrs,
-  }).run()
+function captureSelection() {
+  const selection = editorInstance.value?.state.selection
+  if (!selection) {
+    return null
+  }
+
+  return {
+    from: selection.from,
+    to: selection.to,
+  }
+}
+
+function rememberSelection() {
+  pendingInsertSelection.value = captureSelection()
+}
+
+function insertImageNode(
+  attrs: EditorImageAttrs,
+  selection: { from: number; to: number } | null = null,
+) {
+  const chain = editorInstance.value?.chain().focus()
+  if (!chain) {
+    return
+  }
+
+  if (selection) {
+    chain.setTextSelection(selection)
+  }
+
+  chain.setImage(attrs as { src: string; alt?: string; title?: string }).run()
   syncCurrentHtmlFromEditor()
 }
 
@@ -479,10 +514,11 @@ function toolbarLabel(key: string, fallback: string) {
 }
 
 function triggerImageBrowse() {
+  rememberSelection()
   imageInput.value?.click()
 }
 
-function insertPendingImage(file: File) {
+function insertPendingImage(file: File, selection: { from: number; to: number } | null = null) {
   const uploadId = createUploadId()
   const objectUrl = URL.createObjectURL(file)
 
@@ -495,7 +531,7 @@ function insertPendingImage(file: File) {
     src: objectUrl,
     alt: file.name,
     'data-upload-id': uploadId,
-  })
+  }, selection)
 
   return {
     uploadId,
@@ -584,11 +620,14 @@ async function insertImageFromFile(file: File) {
 
   try {
     const uploaded = await imageUploader.upload(file)
+    const selection = pendingInsertSelection.value
+    pendingInsertSelection.value = null
     insertImageNode({
       src: uploaded.url,
       alt: uploaded.fileName,
-    })
+    }, selection)
   } catch (error) {
+    pendingInsertSelection.value = null
     uploadError.value = error instanceof Error ? error.message : t('common.messages.failedToUploadInlineImage')
   }
 }
@@ -606,21 +645,24 @@ async function handleImageInputChange(event: Event) {
 }
 
 async function handlePaste(event: ClipboardEvent) {
-  const files = Array.from(event.clipboardData?.items ?? [])
+  const clipboardItems = Array.from(event.clipboardData?.items ?? [])
+  const files = clipboardItems
     .filter(item => item.kind === 'file' && item.type.startsWith('image/'))
     .map(item => item.getAsFile())
     .filter((file): file is File => file instanceof File)
     .filter(file => isSupportedImageType(file))
+  const hasNonImageClipboardContent = clipboardItems.some(item => item.kind !== 'file' || !item.type.startsWith('image/'))
 
-  if (files.length === 0) {
+  if (files.length === 0 || hasNonImageClipboardContent) {
     return
   }
 
+  const selection = captureSelection()
   event.preventDefault()
   uploadError.value = ''
 
   for (const file of files) {
-    const pending = insertPendingImage(file)
+    const pending = insertPendingImage(file, selection)
     void uploadAndReplaceImage(file, pending.uploadId, pending.objectUrl)
   }
 }
