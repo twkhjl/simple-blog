@@ -99,7 +99,7 @@ const en = {
       title: 'Simple Blog',
       headerCopy: 'Digital tactility for stories and editorial control.',
       footerLead: 'Sculpted posts, quiet chrome, no flat edges.',
-      footerCopy: '2026 twkhjl@gmail.com',
+      footerCopy: "2026 twkhjl{'@'}gmail.com",
     },
     nav: {
       explore: 'Explore',

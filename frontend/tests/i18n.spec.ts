@@ -63,4 +63,14 @@ describe('i18n locale helpers', () => {
     expect(i18n.global.t('auth.login.emailPlaceholder')).toBe('editor@demo.invalid')
     expect(i18n.global.t('auth.register.emailPlaceholder')).toBe('writer@example.com')
   })
+
+  it('renders literal at-signs in footer contact copy', async () => {
+    const { createAppI18n } = await import('../src/i18n')
+    const i18n = createAppI18n()
+
+    expect(i18n.global.t('public.brand.footerCopy')).toBe('2026 twkhjl@gmail.com')
+
+    i18n.global.locale.value = 'zh-TW'
+    expect(i18n.global.t('public.brand.footerCopy')).toBe('2026 twkhjl@gmail.com')
+  })
 })
