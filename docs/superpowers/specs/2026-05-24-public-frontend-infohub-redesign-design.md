@@ -12,12 +12,12 @@
 - `frontend/src/pages/auth/ProfilePage.vue`
 - `frontend/src/style.css`
 
-需求是將「整個公開前台」改成使用 `page_example/stitch_infohub/_1/code.html` 作為文章列表頁主參考、`page_example/stitch_infohub/infohub/code.html` 作為文章詳細頁主參考，並沿用 `infohub` 的品牌語言延伸其他公開頁。後台不在這次改版範圍內，且前後台樣式必須分離，避免互相污染。
+需求是將「整個公開前台」改成使用 `page_example/stitch_infohub/_1/code.html` 作為文章列表頁主參考、`page_example/stitch_infohub/_2/code.html` 作為文章詳細頁主參考，並沿用 `infohub` 的品牌語言延伸其他公開頁。後台不在這次改版範圍內，且前後台樣式必須分離，避免互相污染。
 
 使用者已明確確認：
 
 - 文章列表頁主參考為 `page_example/stitch_infohub/_1/code.html`
-- 文章詳細頁主參考為 `page_example/stitch_infohub/infohub/code.html`
+- 文章詳細頁主參考為 `page_example/stitch_infohub/_2/code.html`
 - 其他公開頁延伸 `infohub` 品牌語言
 - 改版範圍包含整個公開前台
 - 後台維持現狀
@@ -61,8 +61,8 @@
 ### 範本素材狀況
 
 - `_1/code.html` 提供資訊密度較高的文章列表頁、側欄、卡片節奏，應作為文章列表頁主參考
-- `infohub/code.html` 提供明亮暖色的品牌語言、首頁 hero、導覽、文章卡片與 editorial 細節，應作為文章詳細頁主參考，並作為其他公開頁的品牌母體
-- `_2/code.html` 若後續有可用段落節奏或細節，可作次要補充，但不再作主要版型來源
+- `infohub/code.html` 提供明亮暖色的品牌語言、首頁 hero、導覽、文章卡片與 editorial 細節，應作為其他公開頁的品牌母體
+- `_2/code.html` 提供長文型文章頁較完整的 editorial 結構，應作為文章詳細頁主參考
 - 終端目前讀取範本時出現亂碼，但使用者已確認原始檔為 UTF-8，因此應視為目前讀取/顯示環境問題，而非素材不可用
 
 ## 設計原則
@@ -80,12 +80,12 @@
 - 重新切出版型結構與 CSS，不把範本 HTML 生硬嵌進 Vue
 - 導覽、文章列表、文章內頁、登入/註冊/個人頁，全部保持現有功能意圖，只更新視覺與版面結構
 
-### 3. 列表頁用 `_1`，詳細頁與品牌語言用 `infohub`
+### 3. 列表頁用 `_1`，詳細頁用 `_2`，品牌語言用 `infohub`
 
 - 文章列表頁以 `_1` 的版面結構、資訊密度、側欄與卡片節奏為準
-- 文章詳細頁以 `infohub` 的視覺語言與 editorial 呈現為準
+- 文章詳細頁以 `_2` 的 editorial 結構與資訊節奏為準
 - 登入、註冊、個人頁沿用 `infohub` 的品牌語言延伸
-- `_2` 僅在必要時提供局部細節靈感，不作主視覺來源
+- `infohub` 負責整體品牌氣質、色彩、字體與前台共通語言
 
 ### 4. 不導入 Tailwind 作為正式依賴
 
@@ -210,7 +210,7 @@
 
 改版方向：
 
-- 整體風格以 `infohub` 為主
+- 整體風格以 `_2` 的文章頁結構為主，並套用 `infohub` 的品牌語言
 - 建立 editorial hero：
   - 標題
   - 摘要
@@ -397,4 +397,4 @@
 
 ## 設計結論
 
-這次需求屬於「公開前台整體換皮」，不是單純 CSS 覆蓋。最佳做法是以前台獨立視覺系統重切版面，保留現有 router、auth、API、i18n 與資料流程，同時把前後台樣式明確分離。文章列表頁以 `_1` 為主參考，文章詳細頁以 `infohub` 為主參考，登入/註冊/個人頁則延伸 `infohub` 的品牌語言設計。
+這次需求屬於「公開前台整體換皮」，不是單純 CSS 覆蓋。最佳做法是以前台獨立視覺系統重切版面，保留現有 router、auth、API、i18n 與資料流程，同時把前後台樣式明確分離。文章列表頁以 `_1` 為主參考，文章詳細頁以 `_2` 為主參考，登入/註冊/個人頁則延伸 `infohub` 的品牌語言設計。
