@@ -834,6 +834,33 @@ img {
   padding-left: 1.4rem;
 }
 
+.rich-content [data-size="small"],
+.tiptap [data-size="small"] {
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.rich-content [data-size="large"],
+.tiptap [data-size="large"] {
+  font-size: 1.15rem;
+  line-height: 1.95;
+}
+
+.rich-content [data-align="left"],
+.tiptap [data-align="left"] {
+  text-align: left;
+}
+
+.rich-content [data-align="center"],
+.tiptap [data-align="center"] {
+  text-align: center;
+}
+
+.rich-content [data-align="right"],
+.tiptap [data-align="right"] {
+  text-align: right;
+}
+
 .rich-content img,
 .tiptap img {
   display: block;
@@ -1002,6 +1029,13 @@ img {
 .rich-toolbar-group:last-child {
   padding: 0.3rem;
   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.editor-style-select {
+  width: auto;
+  min-width: 9.2rem;
+  max-width: 100%;
+  padding: 0.8rem 2.8rem 0.8rem 1rem;
 }
 
 .editor-tool {

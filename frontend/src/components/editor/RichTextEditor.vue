@@ -2,38 +2,62 @@
   <div class="rich-editor stack-card">
     <div class="rich-toolbar neo-inset">
       <div class="rich-toolbar-group">
+        <label class="visually-hidden" for="paragraph-style-select">
+          {{ toolbarLabel('editor.toolbar.paragraphStyle', 'Paragraph style') }}
+        </label>
+        <select
+          id="paragraph-style-select"
+          class="neo-select editor-style-select"
+          data-testid="paragraph-style-select"
+          :value="activeParagraphStyle()"
+          :aria-label="toolbarLabel('editor.toolbar.paragraphStyle', 'Paragraph style')"
+          @change="handleParagraphStyleChange"
+        >
+          <option value="paragraph">{{ toolbarLabel('editor.toolbar.paragraph', 'Paragraph') }}</option>
+          <option value="small">{{ toolbarLabel('editor.toolbar.smallText', 'Small text') }}</option>
+          <option value="large">{{ toolbarLabel('editor.toolbar.largeText', 'Large text') }}</option>
+          <option value="heading-1">{{ toolbarLabel('editor.toolbar.heading1', 'H1') }}</option>
+          <option value="heading-2">{{ toolbarLabel('editor.toolbar.heading2', 'H2') }}</option>
+          <option value="heading-3">{{ toolbarLabel('editor.toolbar.heading3', 'H3') }}</option>
+          <option value="heading-4">{{ toolbarLabel('editor.toolbar.heading4', 'H4') }}</option>
+          <option value="heading-5">{{ toolbarLabel('editor.toolbar.heading5', 'H5') }}</option>
+          <option value="heading-6">{{ toolbarLabel('editor.toolbar.heading6', 'H6') }}</option>
+        </select>
+      </div>
+
+      <div class="rich-toolbar-group">
         <button
           type="button"
           class="editor-tool"
-          :class="{ 'is-active': isHeadingActive(1) }"
-          :aria-label="toolbarLabel('editor.toolbar.heading1', 'Heading 1')"
-          :title="toolbarLabel('editor.toolbar.heading1', 'Heading 1')"
-          data-testid="toggle-heading-1"
-          @click="toggleHeading(1)"
+          :class="{ 'is-active': isBlockAlignActive('left') }"
+          :aria-label="toolbarLabel('editor.toolbar.alignLeft', 'Align left')"
+          :title="toolbarLabel('editor.toolbar.alignLeft', 'Align left')"
+          data-testid="align-left"
+          @click="setBlockAlign('left')"
         >
-          <span class="editor-tool-glyph">H1</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg>
         </button>
         <button
           type="button"
           class="editor-tool"
-          :class="{ 'is-active': isHeadingActive(2) }"
-          :aria-label="toolbarLabel('editor.toolbar.heading2', 'Heading 2')"
-          :title="toolbarLabel('editor.toolbar.heading2', 'Heading 2')"
-          data-testid="toggle-heading-2"
-          @click="toggleHeading(2)"
+          :class="{ 'is-active': isBlockAlignActive('center') }"
+          :aria-label="toolbarLabel('editor.toolbar.alignCenter', 'Align center')"
+          :title="toolbarLabel('editor.toolbar.alignCenter', 'Align center')"
+          data-testid="align-center"
+          @click="setBlockAlign('center')"
         >
-          <span class="editor-tool-glyph">H2</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12M4 12h16M6 17h12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg>
         </button>
         <button
           type="button"
           class="editor-tool"
-          :class="{ 'is-active': isHeadingActive(3) }"
-          :aria-label="toolbarLabel('editor.toolbar.heading3', 'Heading 3')"
-          :title="toolbarLabel('editor.toolbar.heading3', 'Heading 3')"
-          data-testid="toggle-heading-3"
-          @click="toggleHeading(3)"
+          :class="{ 'is-active': isBlockAlignActive('right') }"
+          :aria-label="toolbarLabel('editor.toolbar.alignRight', 'Align right')"
+          :title="toolbarLabel('editor.toolbar.alignRight', 'Align right')"
+          data-testid="align-right"
+          @click="setBlockAlign('right')"
         >
-          <span class="editor-tool-glyph">H3</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 12h10M4 17h16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg>
         </button>
       </div>
 
@@ -243,10 +267,12 @@ import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ResizableImageNodeView from './ResizableImageNodeView.vue'
+import { BlockFormattingExtension, applyBlockAlign, applyParagraphStyle, getActiveBlockAlign, getActiveParagraphStyle } from './extensions'
 import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
 import { ACCEPTED_IMAGE_TYPES, createImageUploader, isSupportedImageType } from '../../services/uploads'
 import { authState } from '../../stores/auth'
+import type { BlockAlignValue, ParagraphStyleValue } from '../../utils/richTextFormatting'
 import { isMeaningfulEditorHtml, plainTextToHtml } from '../../utils/richText'
 
 const props = defineProps<{
@@ -339,6 +365,7 @@ function createEditor(content: string) {
     content,
     extensions: [
       StarterKit,
+      BlockFormattingExtension,
       InstantPreviewImage.configure({
         inline: false,
         allowBase64: false,
@@ -453,10 +480,6 @@ function toggleItalic() {
   updateEditor(() => editorInstance.value?.chain().focus().toggleItalic().run())
 }
 
-function toggleHeading(level: 1 | 2 | 3) {
-  updateEditor(() => editorInstance.value?.chain().focus().toggleHeading({ level }).run())
-}
-
 function toggleStrike() {
   updateEditor(() => editorInstance.value?.chain().focus().toggleStrike().run())
 }
@@ -497,8 +520,26 @@ function isActive(name: string, attrs?: Record<string, unknown>) {
   return editorInstance.value?.isActive(name, attrs) ?? false
 }
 
-function isHeadingActive(level: 1 | 2 | 3) {
-  return isActive('heading', { level })
+function activeParagraphStyle(): ParagraphStyleValue {
+  return getActiveParagraphStyle(editorInstance.value)
+}
+
+function isBlockAlignActive(align: BlockAlignValue) {
+  return getActiveBlockAlign(editorInstance.value) === align
+}
+
+function handleParagraphStyleChange(event: Event) {
+  const target = event.target as HTMLSelectElement
+  const value = target.value as ParagraphStyleValue
+  updateEditor(() => {
+    applyParagraphStyle(editorInstance.value, value)
+  })
+}
+
+function setBlockAlign(align: BlockAlignValue) {
+  updateEditor(() => {
+    applyBlockAlign(editorInstance.value, align)
+  })
 }
 
 function canUndo() {

@@ -26,6 +26,18 @@ describe('rich text helpers', () => {
       .toBe('<h3>Title</h3><pre><code>const x = 1;</code></pre><p>Hello</p>')
   })
 
+  it('preserves safe paragraph size and block alignment attributes during render sanitize', () => {
+    expect(
+      sanitizeRenderHtml('<p data-size="large" data-align="center">Hello</p><h4 data-align="right">Title</h4>'),
+    ).toBe('<p data-size="large" data-align="center">Hello</p><h4 data-align="right">Title</h4>')
+  })
+
+  it('removes invalid paragraph size and alignment attributes during render sanitize', () => {
+    expect(
+      sanitizeRenderHtml('<p data-size="huge" data-align="sideways">Hello</p><h4 data-align="down">Title</h4>'),
+    ).toBe('<p>Hello</p><h4>Title</h4>')
+  })
+
   it('allows uploaded file images from configured API origin', () => {
     expect(
       sanitizeRenderHtml(`<p><img src="${uploadedImageUrl}" alt="editor.webp"></p>`),

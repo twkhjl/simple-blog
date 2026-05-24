@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify'
+import { sanitizeBlockAlignValue, sanitizeParagraphSizeValue } from './richTextFormatting'
 
 const htmlLikePattern = /<\/?[a-z][\s\S]*>/i
 const safeImagePlaceholderTag = 'safe-image-placeholder'
@@ -37,11 +38,11 @@ export function plainTextToHtml(input: string): string {
 
 export function sanitizeRenderHtml(input: string): string {
   const safeImages = new Map<string, string>()
-  const preparedInput = replaceSafeImagesWithPlaceholders(input, safeImages)
+  const preparedInput = sanitizeBlockFormattingHtml(replaceSafeImagesWithPlaceholders(input, safeImages))
   const sanitized = DOMPurify.sanitize(preparedInput, {
     ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'pre', 'code', safeImagePlaceholderTag],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'safe-image-id'],
-    ALLOW_DATA_ATTR: false,
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'safe-image-id', 'data-size', 'data-align'],
+    ALLOW_DATA_ATTR: true,
     FORBID_ATTR: ['style', 'class', 'onerror', 'onclick'],
   })
   return restoreSafeImagesFromPlaceholders(sanitized, safeImages)
@@ -85,6 +86,35 @@ function hasMeaningfulSafeImage(input: string): boolean {
   }
 
   return false
+}
+
+function sanitizeBlockFormattingHtml(input: string): string {
+  const template = document.createElement('template')
+  template.innerHTML = input
+
+  for (const block of template.content.querySelectorAll('p, h1, h2, h3, h4, h5, h6')) {
+    const safeAlign = sanitizeBlockAlignValue(block.getAttribute('data-align'))
+
+    if (safeAlign) {
+      block.setAttribute('data-align', safeAlign)
+    } else {
+      block.removeAttribute('data-align')
+    }
+
+    if (block.tagName.toLowerCase() === 'p') {
+      const safeSize = sanitizeParagraphSizeValue(block.getAttribute('data-size'))
+      if (safeSize) {
+        block.setAttribute('data-size', safeSize)
+      } else {
+        block.removeAttribute('data-size')
+      }
+      continue
+    }
+
+    block.removeAttribute('data-size')
+  }
+
+  return template.innerHTML
 }
 
 function replaceSafeImagesWithPlaceholders(input: string, safeImages: Map<string, string>): string {

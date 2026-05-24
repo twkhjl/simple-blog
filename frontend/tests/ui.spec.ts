@@ -145,9 +145,21 @@ describe('ui helpers', () => {
     expect(toolbarRule).not.toContain('overflow-x: auto')
     expect(toolbarGroupRule).toContain('flex-wrap: wrap')
     expect(mobileToolbarRule).toBe('')
-    expect(editor).toContain('data-testid="toggle-strike"')
+    expect(editor).toContain('data-testid="paragraph-style-select"')
+    expect(editor).toContain('data-testid="align-left"')
+    expect(editor).toContain('data-testid="align-center"')
+    expect(editor).toContain('data-testid="align-right"')
     expect(editor).toContain('data-testid="toggle-inline-code"')
     expect(editor).toContain('data-testid="toggle-code-block"')
     expect(editor).toContain('data-testid="insert-horizontal-rule"')
+  })
+
+  it('styles paragraph size and alignment output in editor and public content', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+
+    expect(css).toContain('.rich-content [data-size="small"]')
+    expect(css).toContain('.rich-content [data-size="large"]')
+    expect(css).toContain('.rich-content [data-align="center"]')
+    expect(css).toContain('.tiptap [data-align="right"]')
   })
 })

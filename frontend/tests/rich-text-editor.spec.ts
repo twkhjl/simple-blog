@@ -128,11 +128,57 @@ describe('RichTextEditor', () => {
 
     expect(wrapper.get('[data-testid="toggle-bold"]').attributes('aria-label')).toBeTruthy()
     expect(wrapper.find('[data-testid="toggle-bold"] svg').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="paragraph-style-select"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="align-left"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="align-center"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="align-right"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="toggle-strike"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="toggle-inline-code"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="toggle-code-block"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="insert-horizontal-rule"]').exists()).toBe(true)
     expect(wrapper.findAll('.rich-toolbar-group').length).toBeGreaterThan(2)
+  })
+
+  it('applies paragraph size presets and heading levels from style select', async () => {
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Hello</p>',
+      },
+    })
+    const editor = getEditor(wrapper)
+    editor.commands.setTextSelection({ from: 1, to: 6 })
+
+    await wrapper.get('[data-testid="paragraph-style-select"]').setValue('large')
+    expect(getEditor(wrapper).getHTML()).toContain('data-size="large"')
+    expect(getEditor(wrapper).getHTML()).toContain('<p')
+
+    await wrapper.get('[data-testid="paragraph-style-select"]').setValue('heading-6')
+    expect(getEditor(wrapper).getHTML()).toContain('<h6')
+    expect(getEditor(wrapper).getHTML()).toContain('Hello')
+  })
+
+  it('applies text alignment to paragraphs and headings', async () => {
+    const i18n = createAppI18n()
+    const wrapper = mount(RichTextEditor, {
+      global: {
+        plugins: [i18n],
+      },
+      props: {
+        modelValue: '<p>Hello</p>',
+      },
+    })
+
+    await wrapper.get('[data-testid="align-center"]').trigger('click')
+    expect(getEditor(wrapper).getHTML()).toContain('data-align="center"')
+
+    await wrapper.get('[data-testid="paragraph-style-select"]').setValue('heading-4')
+    await wrapper.get('[data-testid="align-right"]').trigger('click')
+    expect(getEditor(wrapper).getHTML()).toContain('<h4')
+    expect(getEditor(wrapper).getHTML()).toContain('data-align="right"')
   })
 
   it('applies markdown strike formatting from toolbar', async () => {

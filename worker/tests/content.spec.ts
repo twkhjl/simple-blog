@@ -20,6 +20,18 @@ describe('rich text content helpers', () => {
     expect(sanitizeRichTextHtml(input)).toBe('<p><img src="https://cdn.example.com/files/posts/2026/05/editor.webp" alt="editor.webp" width="320" height="180" /></p>')
   })
 
+  it('keeps safe paragraph size and block alignment attributes', () => {
+    const input = '<p data-size="small" data-align="center">Hello</p><h6 data-align="right">Title</h6>'
+
+    expect(sanitizeRichTextHtml(input)).toBe('<p data-size="small" data-align="center">Hello</p><h6 data-align="right">Title</h6>')
+  })
+
+  it('removes invalid paragraph size and block alignment attributes', () => {
+    const input = '<p data-size="giant" data-align="sideways">Hello</p><h6 data-align="down">Title</h6>'
+
+    expect(sanitizeRichTextHtml(input)).toBe('<p>Hello</p><h6>Title</h6>')
+  })
+
   it('normalizes empty blocks out of saved html', () => {
     expect(normalizeRichTextHtml('<p></p><p><br></p><p>Keep</p>')).toBe('<p>Keep</p>')
   })
