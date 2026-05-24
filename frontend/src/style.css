@@ -468,6 +468,7 @@ img {
 }
 
 .article-grid,
+.article-grid-single,
 .dashboard-grid {
   display: grid;
   gap: 1.5rem;
@@ -475,6 +476,10 @@ img {
 
 .article-grid {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.article-grid-single {
+  grid-template-columns: 1fr;
 }
 
 .post-card {

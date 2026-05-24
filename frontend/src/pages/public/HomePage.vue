@@ -23,7 +23,7 @@
       <p class="section-title">{{ t('public.home.emptyTitle') }}</p>
       <p class="section-copy">{{ t('public.home.emptyCopy') }}</p>
     </div>
-    <div v-else class="article-grid">
+    <div v-else class="article-grid-single">
       <article v-for="post in posts" :key="post.id" class="post-card neo-card">
         <div v-if="post.coverImageUrl" class="cover-frame neo-inset">
           <img :src="post.coverImageUrl" :alt="post.title">
