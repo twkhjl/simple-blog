@@ -99,7 +99,7 @@ const zhTW = {
       title: 'Simple Blog',
       headerCopy: '以數位觸感呈現故事與編輯控制。',
       footerLead: '雕塑化文章、安靜介面、拒絕平面邊角。',
-      footerCopy: '以 Vue、Supabase、Workers 與深色觸感介面打造。',
+      footerCopy: '2026 twkhjl@gmail.com',
     },
     nav: {
       explore: '探索文章',
