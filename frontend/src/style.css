@@ -777,9 +777,14 @@ img {
 
 .reading-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(250px, 0.75fr);
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   align-items: start;
+  justify-items: center;
+}
+
+.reading-layout > * {
+  width: min(100%, 820px);
 }
 
 .rich-content {

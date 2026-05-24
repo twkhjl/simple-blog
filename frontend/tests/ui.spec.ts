@@ -162,4 +162,14 @@ describe('ui helpers', () => {
     expect(css).toContain('.rich-content [data-align="center"]')
     expect(css).toContain('.tiptap [data-align="right"]')
   })
+
+  it('uses a single-column reading layout on desktop post pages', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const layoutRule = css.match(/\.reading-layout\s*\{[^}]*\}/)?.[0] ?? ''
+    const childRule = css.match(/\.reading-layout > \*\s*\{[^}]*\}/)?.[0] ?? ''
+
+    expect(layoutRule).toContain('grid-template-columns: 1fr')
+    expect(layoutRule).toContain('justify-items: center')
+    expect(childRule).toContain('width: min(100%, 820px)')
+  })
 })
