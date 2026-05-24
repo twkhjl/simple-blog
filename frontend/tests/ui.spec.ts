@@ -133,11 +133,18 @@ describe('ui helpers', () => {
   it('styles rich editor toolbar like a grouped icon editor', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
     const editor = readFileSync(resolve(__dirname, '../src/components/editor/RichTextEditor.vue'), 'utf8')
+    const toolbarRule = css.match(/\.rich-toolbar\s*\{[^}]*\}/)?.[0] ?? ''
+    const toolbarGroupRule = css.match(/\.rich-toolbar-group\s*\{[^}]*\}/)?.[0] ?? ''
+    const mobileToolbarRule = css.match(/\.rich-toolbar\s*\{\s*flex-wrap:\s*nowrap;[\s\S]*?justify-content:\s*flex-start;[\s\S]*?\}/)?.[0] ?? ''
 
     expect(css).toContain('.rich-toolbar-group')
     expect(css).toContain('.editor-tool')
     expect(css).toContain('.editor-tool.is-active')
     expect(css).toContain('.editor-tool svg')
+    expect(toolbarRule).toContain('flex-wrap: wrap')
+    expect(toolbarRule).not.toContain('overflow-x: auto')
+    expect(toolbarGroupRule).toContain('flex-wrap: wrap')
+    expect(mobileToolbarRule).toBe('')
     expect(editor).toContain('data-testid="toggle-strike"')
     expect(editor).toContain('data-testid="toggle-inline-code"')
     expect(editor).toContain('data-testid="toggle-code-block"')
