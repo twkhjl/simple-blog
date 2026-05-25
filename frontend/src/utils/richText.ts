@@ -36,6 +36,23 @@ export function plainTextToHtml(input: string): string {
     .join('')
 }
 
+export function renderRichContentHtml(input: string): string {
+  if (isHtmlLike(input)) {
+    return sanitizeRenderHtml(input)
+  }
+
+  const normalized = input.replace(/\r\n/g, '\n').trim()
+  if (!normalized) {
+    return sanitizeRenderHtml('<p></p>')
+  }
+
+  if (looksLikeMarkdown(normalized)) {
+    return sanitizeRenderHtml(markdownToHtml(normalized))
+  }
+
+  return sanitizeRenderHtml(plainTextToHtml(normalized))
+}
+
 export function sanitizeRenderHtml(input: string): string {
   const safeImages = new Map<string, string>()
   const preparedInput = sanitizeBlockFormattingHtml(replaceSafeImagesWithPlaceholders(input, safeImages))
@@ -200,4 +217,115 @@ function normalizeFilesBaseUrl(url: URL): URL {
     ? normalizedUrl.pathname
     : `${normalizedUrl.pathname}/`
   return normalizedUrl
+}
+
+function looksLikeMarkdown(input: string): boolean {
+  return /(^|\n)(#{1,6}\s|>\s|[-*]\s|\d+\.\s|```)|\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|`[^`]+`/.test(input)
+}
+
+function markdownToHtml(input: string): string {
+  const lines = input.split('\n')
+  const blocks: string[] = []
+  let index = 0
+
+  while (index < lines.length) {
+    const rawLine = lines[index]
+    const line = rawLine.trim()
+
+    if (!line) {
+      index += 1
+      continue
+    }
+
+    if (line.startsWith('```')) {
+      const codeLines: string[] = []
+      index += 1
+
+      while (index < lines.length && !lines[index].trim().startsWith('```')) {
+        codeLines.push(lines[index])
+        index += 1
+      }
+
+      if (index < lines.length) {
+        index += 1
+      }
+
+      blocks.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`)
+      continue
+    }
+
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/)
+    if (headingMatch) {
+      const level = headingMatch[1].length
+      blocks.push(`<h${level}>${renderInlineMarkdown(headingMatch[2])}</h${level}>`)
+      index += 1
+      continue
+    }
+
+    if (/^>\s?/.test(line)) {
+      const quoteLines: string[] = []
+
+      while (index < lines.length && /^>\s?/.test(lines[index].trim())) {
+        quoteLines.push(lines[index].trim().replace(/^>\s?/, ''))
+        index += 1
+      }
+
+      blocks.push(`<blockquote><p>${quoteLines.map(renderInlineMarkdown).join('<br>')}</p></blockquote>`)
+      continue
+    }
+
+    if (/^[-*]\s+/.test(line)) {
+      const items: string[] = []
+
+      while (index < lines.length && /^[-*]\s+/.test(lines[index].trim())) {
+        items.push(`<li>${renderInlineMarkdown(lines[index].trim().replace(/^[-*]\s+/, ''))}</li>`)
+        index += 1
+      }
+
+      blocks.push(`<ul>${items.join('')}</ul>`)
+      continue
+    }
+
+    if (/^\d+\.\s+/.test(line)) {
+      const items: string[] = []
+
+      while (index < lines.length && /^\d+\.\s+/.test(lines[index].trim())) {
+        items.push(`<li>${renderInlineMarkdown(lines[index].trim().replace(/^\d+\.\s+/, ''))}</li>`)
+        index += 1
+      }
+
+      blocks.push(`<ol>${items.join('')}</ol>`)
+      continue
+    }
+
+    const paragraphLines: string[] = []
+    while (index < lines.length && lines[index].trim()) {
+      paragraphLines.push(lines[index].trim())
+      index += 1
+    }
+
+    blocks.push(`<p>${renderInlineMarkdown(paragraphLines.join(' '))}</p>`)
+  }
+
+  return blocks.join('')
+}
+
+function renderInlineMarkdown(input: string): string {
+  const codeTokens: string[] = []
+  let output = escapeHtml(input).replace(/`([^`]+)`/g, (_, code: string) => {
+    const token = `__CODE_TOKEN_${codeTokens.length}__`
+    codeTokens.push(`<code>${escapeHtml(code)}</code>`)
+    return token
+  })
+
+  output = output
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_match, label: string, url: string) => `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+
+  for (const [index, tokenHtml] of codeTokens.entries()) {
+    output = output.replace(`__CODE_TOKEN_${index}__`, tokenHtml)
+  }
+
+  return output
 }

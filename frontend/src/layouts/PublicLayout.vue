@@ -1,130 +1,145 @@
 <template>
-  <div class="site-shell">
+  <div class="public-theme">
     <header class="public-header">
-      <div class="public-layout">
-        <div class="public-header-inner neo-shell">
-          <div class="brand-block">
-            <p class="brand-mark">{{ t('public.brand.title') }}</p>
-            <p class="brand-copy">{{ t('public.brand.headerCopy') }}</p>
-          </div>
-          <nav class="top-nav desktop-nav">
-            <RouterLink class="nav-link" :class="{ active: route.path === '/' }" to="/">{{ t('public.nav.explore') }}</RouterLink>
-            <RouterLink class="nav-link" :class="{ active: route.path === '/profile' }" to="/profile">{{ t('public.nav.profile') }}</RouterLink>
-            <RouterLink
-              v-if="canAdmin"
-              class="nav-link"
-              :class="{ active: route.path.startsWith('/admin') }"
-              to="/admin/posts"
-            >
-              {{ t('public.nav.admin') }}
-            </RouterLink>
-          </nav>
-          <div class="inline-actions desktop-actions">
-            <LocaleSwitcher />
-            <RouterLink v-if="!isLoggedIn" class="neo-button primary" to="/login">{{ t('common.actions.login') }}</RouterLink>
-            <RouterLink v-if="!isLoggedIn" class="neo-button" to="/register">{{ t('common.actions.register') }}</RouterLink>
-            <button v-else type="button" class="neo-button secondary" @click="handleLogout">{{ t('common.actions.logout') }}</button>
-          </div>
-          <button
-            type="button"
-            class="mobile-menu-toggle"
-            data-testid="mobile-menu-toggle"
-            :aria-expanded="isMobileMenuOpen ? 'true' : 'false'"
-            aria-controls="mobile-public-menu"
-            @click="toggleMobileMenu"
+      <div class="public-header-bar public-glass-card">
+        <RouterLink class="public-brand" to="/">{{ t('public.brand.title') }}</RouterLink>
+
+        <nav class="public-desktop-nav">
+          <RouterLink class="public-nav-link" :class="{ active: route.path === '/' }" data-testid="desktop-nav-home" to="/">
+            {{ t('public.nav.home') }}
+          </RouterLink>
+          <RouterLink
+            class="public-nav-link"
+            :class="{ active: route.path === '/articles' }"
+            data-testid="desktop-nav-articles"
+            to="/articles"
           >
-            <span class="visually-hidden">{{ t('common.messages.toggleNavigationMenu') }}</span>
-            <span class="mobile-menu-toggle-line" />
-            <span class="mobile-menu-toggle-line" />
-            <span class="mobile-menu-toggle-line" />
+            {{ t('public.nav.articles') }}
+          </RouterLink>
+          <RouterLink
+            class="public-nav-link"
+            :class="{ active: route.path === '/profile' }"
+            data-testid="desktop-nav-profile"
+            to="/profile"
+          >
+            {{ t('public.nav.profile') }}
+          </RouterLink>
+          <RouterLink
+            v-if="canAdmin"
+            class="public-nav-link"
+            :class="{ active: route.path.startsWith('/admin') }"
+            data-testid="desktop-nav-admin"
+            to="/admin/posts"
+          >
+            {{ t('public.nav.admin') }}
+          </RouterLink>
+        </nav>
+
+        <div class="public-header-actions">
+          <LocaleSwitcher />
+          <RouterLink v-if="!isLoggedIn" class="public-secondary-button" to="/login">
+            {{ t('common.actions.login') }}
+          </RouterLink>
+          <RouterLink v-if="!isLoggedIn" class="public-primary-button" to="/register">
+            {{ t('common.actions.register') }}
+          </RouterLink>
+          <button v-else type="button" class="public-secondary-button" @click="handleLogout">
+            {{ t('common.actions.logout') }}
           </button>
-          <div
-            id="mobile-public-menu"
-            v-show="isMobileMenuOpen"
-            class="mobile-menu-panel neo-shell"
-            data-testid="mobile-menu-panel"
-            :data-open="isMobileMenuOpen ? 'true' : 'false'"
+        </div>
+
+        <button
+          type="button"
+          class="public-mobile-toggle"
+          data-testid="mobile-menu-toggle"
+          :aria-expanded="isMobileMenuOpen ? 'true' : 'false'"
+          aria-controls="mobile-public-menu"
+          @click="toggleMobileMenu"
+        >
+          <span class="visually-hidden">{{ t('common.messages.toggleNavigationMenu') }}</span>
+          <span />
+          <span />
+          <span />
+        </button>
+
+        <div
+          id="mobile-public-menu"
+          class="public-mobile-panel public-glass-card"
+          v-show="isMobileMenuOpen"
+          data-testid="mobile-menu-panel"
+          :data-open="isMobileMenuOpen ? 'true' : 'false'"
+        >
+          <RouterLink
+            class="public-nav-link"
+            :class="{ active: route.path === '/' }"
+            data-testid="mobile-nav-home"
+            to="/"
+            @click="closeMobileMenu"
           >
-            <div class="mobile-menu-section">
-              <RouterLink
-                class="nav-link mobile-nav-link"
-                :class="{ active: route.path === '/' }"
-                data-testid="mobile-nav-explore"
-                to="/"
-                @click="closeMobileMenu"
-              >
-                {{ t('public.nav.explore') }}
-              </RouterLink>
-              <RouterLink
-                class="nav-link mobile-nav-link"
-                :class="{ active: route.path === '/profile' }"
-                data-testid="mobile-nav-profile"
-                to="/profile"
-                @click="closeMobileMenu"
-              >
-                {{ t('public.nav.profile') }}
-              </RouterLink>
-              <RouterLink
-                v-if="canAdmin"
-                class="nav-link mobile-nav-link"
-                :class="{ active: route.path.startsWith('/admin') }"
-                data-testid="mobile-nav-admin"
-                to="/admin/posts"
-                @click="closeMobileMenu"
-              >
-                {{ t('public.nav.admin') }}
-              </RouterLink>
-            </div>
-            <div class="mobile-menu-section mobile-menu-actions">
-              <LocaleSwitcher />
-              <RouterLink
-                v-if="!isLoggedIn"
-                class="neo-button primary"
-                data-testid="mobile-login"
-                to="/login"
-                @click="closeMobileMenu"
-              >
-                {{ t('common.actions.login') }}
-              </RouterLink>
-              <RouterLink
-                v-if="!isLoggedIn"
-                class="neo-button"
-                data-testid="mobile-register"
-                to="/register"
-                @click="closeMobileMenu"
-              >
-                {{ t('common.actions.register') }}
-              </RouterLink>
-              <button
-                v-else
-                type="button"
-                class="neo-button secondary"
-                data-testid="mobile-logout"
-                @click="handleLogout"
-              >
-                {{ t('common.actions.logout') }}
-              </button>
-            </div>
+            {{ t('public.nav.home') }}
+          </RouterLink>
+          <RouterLink
+            class="public-nav-link"
+            :class="{ active: route.path === '/articles' }"
+            data-testid="mobile-nav-articles"
+            to="/articles"
+            @click="closeMobileMenu"
+          >
+            {{ t('public.nav.articles') }}
+          </RouterLink>
+          <RouterLink
+            class="public-nav-link"
+            :class="{ active: route.path === '/profile' }"
+            data-testid="mobile-nav-profile"
+            to="/profile"
+            @click="closeMobileMenu"
+          >
+            {{ t('public.nav.profile') }}
+          </RouterLink>
+          <RouterLink
+            v-if="canAdmin"
+            class="public-nav-link"
+            :class="{ active: route.path.startsWith('/admin') }"
+            data-testid="mobile-nav-admin"
+            to="/admin/posts"
+            @click="closeMobileMenu"
+          >
+            {{ t('public.nav.admin') }}
+          </RouterLink>
+
+          <div class="public-mobile-actions">
+            <LocaleSwitcher />
+            <RouterLink v-if="!isLoggedIn" class="public-secondary-button" to="/login" @click="closeMobileMenu">
+              {{ t('common.actions.login') }}
+            </RouterLink>
+            <RouterLink v-if="!isLoggedIn" class="public-primary-button" to="/register" @click="closeMobileMenu">
+              {{ t('common.actions.register') }}
+            </RouterLink>
+            <button
+              v-else
+              type="button"
+              class="public-secondary-button"
+              data-testid="mobile-logout"
+              @click="handleLogout"
+            >
+              {{ t('common.actions.logout') }}
+            </button>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="page-body">
-      <div class="public-layout">
-        <RouterView />
-      </div>
+    <main class="public-main">
+      <RouterView />
     </main>
 
     <footer class="public-footer">
-      <div class="public-layout">
-        <div class="public-footer-inner neo-shell">
-          <div class="brand-block">
-            <p class="brand-mark">{{ t('public.brand.title') }}</p>
-            <p class="brand-copy">{{ t('public.brand.footerLead') }}</p>
-          </div>
-          <p class="brand-copy">{{ t('public.brand.footerCopy') }}</p>
+      <div class="public-footer-bar">
+        <div>
+          <p class="public-brand-footer">{{ t('public.brand.title') }}</p>
+          <p class="public-footer-copy">{{ t('public.brand.footerLead') }}</p>
         </div>
+        <p class="public-footer-copy">{{ t('public.brand.footerCopy') }}</p>
       </div>
     </footer>
   </div>

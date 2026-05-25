@@ -7,6 +7,7 @@ import RegisterPage from '../pages/auth/RegisterPage.vue'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.vue'
 import AdminPostEditPage from '../pages/admin/AdminPostEditPage.vue'
 import AdminPostListPage from '../pages/admin/AdminPostListPage.vue'
+import ArticleListPage from '../pages/public/ArticleListPage.vue'
 import HomePage from '../pages/public/HomePage.vue'
 import PostDetailPage from '../pages/public/PostDetailPage.vue'
 import { authState, canAccessAdmin, waitForAuthReady } from '../stores/auth'
@@ -33,6 +34,7 @@ export function createAppRouter(i18n?: I18nLike) {
         meta: { titleKey: 'seo.home.title' },
         children: [
           { path: '', component: HomePage, meta: { titleKey: 'seo.home.title' } },
+          { path: 'articles', component: ArticleListPage, meta: { titleKey: 'seo.articles.title' } },
           { path: 'post/:slug', component: PostDetailPage, meta: { titleKey: 'seo.post.title' } },
           { path: 'login', component: LoginPage, meta: { titleKey: 'seo.login.title' } },
           { path: 'register', component: RegisterPage, meta: { titleKey: 'seo.register.title' } },
