@@ -33,9 +33,12 @@ describe('router', () => {
     expect(paths).toContain('/')
     expect(paths).toContain('/articles')
     expect(paths).toContain('/post/:slug')
+    expect(paths).toContain('/about')
+    expect(paths).toContain('/contact')
     expect(paths).toContain('/login')
     expect(paths).toContain('/register')
     expect(paths).toContain('/profile')
+    expect(paths).toContain('/admin/login')
     expect(paths).toContain('/admin')
     expect(paths).toContain('/admin/posts')
     expect(paths).toContain('/admin/posts/new')
@@ -44,6 +47,9 @@ describe('router', () => {
 
   it('assigns title keys to key routes', () => {
     const routes = createAppRouter().getRoutes()
+    expect(routes.find(route => route.path === '/about')?.meta.titleKey).toBe('seo.about.title')
+    expect(routes.find(route => route.path === '/contact')?.meta.titleKey).toBe('seo.contact.title')
+    expect(routes.find(route => route.path === '/admin/login')?.meta.titleKey).toBe('seo.adminLogin.title')
     expect(routes.find(route => route.path === '/articles')?.meta.titleKey).toBe('seo.articles.title')
     expect(routes.find(route => route.path === '/login')?.meta.titleKey).toBe('seo.login.title')
     expect(routes.find(route => route.path === '/register')?.meta.titleKey).toBe('seo.register.title')
@@ -70,6 +76,17 @@ describe('router', () => {
     await navigation
 
     expect(router.currentRoute.value.path).toBe('/admin/posts')
+  })
+
+  it('redirects unauthenticated admin requests to /admin/login', async () => {
+    authState.session = null
+    authState.profile = null
+    authState.ready = true
+
+    const router = createAppRouter()
+    await router.push('/admin/posts')
+
+    expect(router.currentRoute.value.path).toBe('/admin/login')
   })
 
   it('does not bounce initial admin refresh to login before auth is ready', async () => {

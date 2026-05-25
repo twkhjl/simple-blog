@@ -16,10 +16,7 @@
         <section class="public-sidebar-card public-glass-card">
           <p class="public-card-label">{{ t('public.articles.filtersLabel') }}</p>
           <ul class="public-faux-filter-list">
-            <li>{{ t('public.articles.filterAll') }}</li>
-            <li>{{ t('public.articles.filterDesign') }}</li>
-            <li>{{ t('public.articles.filterProduct') }}</li>
-            <li>{{ t('public.articles.filterEngineering') }}</li>
+            <li v-for="lens in sidebarLenses" :key="lens">{{ lens }}</li>
           </ul>
         </section>
       </aside>
@@ -62,6 +59,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import PublicCoverMedia from '../../components/public/PublicCoverMedia.vue'
+import { publicStaticContent } from '../../content/publicStaticContent'
 import { createApiClient } from '../../services/api'
 import type { PublicPostListItem } from '../../types'
 import { formatDisplayDate } from '../../utils/ui'
@@ -70,6 +68,7 @@ const { locale, t } = useI18n()
 const posts = ref<PublicPostListItem[]>([])
 const loading = ref(true)
 const error = ref('')
+const sidebarLenses = publicStaticContent.articleSidebar.lenses
 
 onMounted(async () => {
   try {

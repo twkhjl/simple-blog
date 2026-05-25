@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -119,5 +121,37 @@ describe('public pages', () => {
 
     expect(loginWrapper.find('[data-testid="public-auth-shell"]').exists()).toBe(true)
     expect(profileWrapper.find('[data-testid="public-profile-shell"]').exists()).toBe(true)
+  })
+
+  it('defines dedicated about, contact, and admin login page files', () => {
+    const aboutPath = resolve(__dirname, '../src/pages/public/AboutPage.vue')
+    const contactPath = resolve(__dirname, '../src/pages/public/ContactPage.vue')
+    const adminLoginPath = resolve(__dirname, '../src/pages/auth/AdminLoginPage.vue')
+
+    expect(existsSync(aboutPath)).toBe(true)
+    expect(existsSync(contactPath)).toBe(true)
+    expect(existsSync(adminLoginPath)).toBe(true)
+  })
+
+  it('renders static about and contact shells plus dedicated admin login shell contracts', () => {
+    const contracts = [
+      {
+        path: resolve(__dirname, '../src/pages/public/AboutPage.vue'),
+        token: 'data-testid="public-about-shell"',
+      },
+      {
+        path: resolve(__dirname, '../src/pages/public/ContactPage.vue'),
+        token: 'data-testid="public-contact-shell"',
+      },
+      {
+        path: resolve(__dirname, '../src/pages/auth/AdminLoginPage.vue'),
+        token: 'data-testid="admin-login-shell"',
+      },
+    ]
+
+    for (const contract of contracts) {
+      const source = existsSync(contract.path) ? readFileSync(contract.path, 'utf8') : ''
+      expect(source).toContain(contract.token)
+    }
   })
 })

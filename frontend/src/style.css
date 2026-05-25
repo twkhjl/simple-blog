@@ -198,7 +198,9 @@
 .public-home-shell,
 .public-list-shell,
 .public-post-shell,
-.public-profile-shell {
+.public-profile-shell,
+.public-about-shell,
+.public-contact-shell {
   width: 100%;
 }
 
@@ -206,6 +208,28 @@
 .public-post-shell {
   display: grid;
   gap: 2rem;
+}
+
+.public-about-shell,
+.public-contact-shell {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.admin-login-shell {
+  min-height: calc(100vh - 240px);
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem 4rem;
+}
+
+.admin-login-card {
+  width: min(32rem, 100%);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--public-border);
+  box-shadow: 0 24px 60px rgba(34, 26, 20, 0.12);
 }
 
 .public-home-hero,
@@ -217,6 +241,12 @@
     rgba(255, 255, 255, 0.72);
   border: 1px solid var(--public-border);
   box-shadow: var(--public-shadow);
+  text-align: center;
+}
+
+.public-static-hero {
+  padding: clamp(1.75rem, 3vw, 3rem);
+  border-radius: calc(var(--public-radius-lg) + 4px);
   text-align: center;
 }
 
@@ -256,6 +286,17 @@
 .public-list-layout {
   display: grid;
   gap: 1.5rem;
+}
+
+.public-static-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.public-static-card {
+  padding: 1.5rem;
+  border-radius: var(--public-radius-md);
 }
 
 .public-home-section-header,

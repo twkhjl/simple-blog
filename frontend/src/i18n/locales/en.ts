@@ -104,6 +104,8 @@ const en = {
     nav: {
       home: 'Home',
       articles: 'Articles',
+      about: 'About',
+      contact: 'Contact',
       explore: 'Explore',
       profile: 'Profile',
       admin: 'Admin',
@@ -143,6 +145,16 @@ const en = {
       continue: 'Continue',
       continueCopy: 'Return to the latest grid and keep moving through published work.',
     },
+    about: {
+      eyebrow: 'About',
+      title: 'About This Workspace',
+      copy: 'A static front-end page that explains the editorial surface without introducing new backend dependencies.',
+    },
+    contact: {
+      eyebrow: 'Contact',
+      title: 'Contact',
+      copy: 'A static contact surface for the current release. Form submission is intentionally not wired yet.',
+    },
   },
   auth: {
     login: {
@@ -169,6 +181,12 @@ const en = {
       displaySettingsCopy: 'The profile endpoint currently exposes a compact account shape, so this screen focuses on clarity instead of extra chrome.',
       displayNamePlaceholder: 'How should your byline appear?',
       metadata: 'Account Metadata',
+    },
+    adminLogin: {
+      eyebrow: 'Admin Access',
+      title: 'Admin Login',
+      copy: 'Use an editor or admin account to enter the control surface.',
+      forbidden: 'This account does not have admin access.',
     },
   },
   admin: {
@@ -272,6 +290,12 @@ const en = {
     post: {
       title: 'Post',
     },
+    about: {
+      title: 'About',
+    },
+    contact: {
+      title: 'Contact',
+    },
     login: {
       title: 'Login',
     },
@@ -283,6 +307,9 @@ const en = {
     },
     adminDashboard: {
       title: 'Admin Dashboard',
+    },
+    adminLogin: {
+      title: 'Admin Login',
     },
     adminPosts: {
       title: 'Manage Posts',
