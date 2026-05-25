@@ -218,6 +218,18 @@
 
 .admin-login-shell {
   min-height: calc(100vh - 240px);
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem 4rem;
+}
+
+.admin-login-card {
+  width: min(32rem, 100%);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--public-border);
+  box-shadow: 0 24px 60px rgba(34, 26, 20, 0.12);
 }
 
 .public-home-hero,
