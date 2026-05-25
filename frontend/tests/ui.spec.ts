@@ -182,6 +182,9 @@ describe('ui helpers', () => {
     expect(css).toContain('.public-post-shell')
     expect(css).toContain('.public-auth-shell')
     expect(css).toContain('.public-profile-shell')
+    expect(css).toContain('.public-about-shell')
+    expect(css).toContain('.public-contact-shell')
+    expect(css).toContain('.admin-login-shell')
   })
 
   it('keeps public header and footer full width with inner responsive wrappers', () => {

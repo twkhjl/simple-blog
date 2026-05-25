@@ -25,6 +25,8 @@ function createTestRouter() {
     routes: [
       { path: '/', component: { template: '<div>home</div>' } },
       { path: '/articles', component: { template: '<div>articles</div>' } },
+      { path: '/about', component: { template: '<div>about</div>' } },
+      { path: '/contact', component: { template: '<div>contact</div>' } },
       { path: '/profile', component: { template: '<div>profile</div>' } },
       { path: '/login', component: { template: '<div>login</div>' } },
       { path: '/register', component: { template: '<div>register</div>' } },
@@ -135,6 +137,29 @@ describe('PublicLayout mobile menu', () => {
 
     expect(wrapper.find('[data-testid="desktop-nav-home"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="desktop-nav-articles"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="desktop-nav-about"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="desktop-nav-contact"]').exists()).toBe(true)
     expect(wrapper.text()).toContain('Simple Blog')
+  })
+
+  it('renders about and contact links in desktop and mobile nav', async () => {
+    const router = createTestRouter()
+    const i18n = createAppI18n()
+    await router.push('/')
+    await router.isReady()
+
+    const wrapper = mount(PublicLayout, {
+      global: {
+        plugins: [router, i18n],
+      },
+    })
+
+    expect(wrapper.find('[data-testid="desktop-nav-about"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="desktop-nav-contact"]').exists()).toBe(true)
+
+    await wrapper.get('[data-testid="mobile-menu-toggle"]').trigger('click')
+
+    expect(wrapper.find('[data-testid="mobile-nav-about"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="mobile-nav-contact"]').exists()).toBe(true)
   })
 })
