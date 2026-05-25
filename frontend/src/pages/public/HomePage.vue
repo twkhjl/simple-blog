@@ -54,6 +54,18 @@
         </article>
       </div>
     </section>
+
+    <section class="public-static-grid">
+      <article
+        v-for="section in homepageHighlights"
+        :key="section.title"
+        class="public-static-card public-glass-card"
+      >
+        <p class="public-card-label">{{ t('public.about.eyebrow') }}</p>
+        <h2 class="public-card-title">{{ section.title }}</h2>
+        <p class="public-card-copy">{{ section.body }}</p>
+      </article>
+    </section>
   </section>
 </template>
 
@@ -62,6 +74,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import PublicCoverMedia from '../../components/public/PublicCoverMedia.vue'
+import { publicStaticContent } from '../../content/publicStaticContent'
 import { createApiClient } from '../../services/api'
 import type { PublicPostListItem } from '../../types'
 import { formatDisplayDate } from '../../utils/ui'
@@ -71,6 +84,7 @@ const posts = ref<PublicPostListItem[]>([])
 const loading = ref(true)
 const error = ref('')
 const featuredPosts = computed(() => posts.value.slice(0, 3))
+const homepageHighlights = publicStaticContent.about.sections
 
 onMounted(async () => {
   try {
