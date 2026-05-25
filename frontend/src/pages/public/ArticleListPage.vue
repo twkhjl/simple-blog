@@ -1,56 +1,40 @@
 <template>
-  <section class="public-list-shell" data-testid="public-list-shell">
-    <header class="public-list-header">
-      <p class="public-section-kicker">{{ t('public.articles.eyebrow') }}</p>
-      <h1 class="public-section-title">{{ t('public.articles.title') }}</h1>
-      <p class="public-section-copy">{{ t('public.articles.copy') }}</p>
+  <section class="th-article-list-page" data-testid="th-article-list-page">
+    <header class="th-list-hero">
+      <h1 class="th-display">{{ t('public.articles.title') }}</h1>
+      <p class="th-lead">{{ t('public.articles.copy') }}</p>
     </header>
 
-    <div class="public-list-layout">
-      <aside class="public-list-sidebar" data-testid="public-list-sidebar">
-        <section class="public-sidebar-card public-glass-card">
-          <p class="public-card-label">{{ t('public.articles.feedLabel') }}</p>
-          <p class="public-card-copy">{{ t('public.articles.feedCopy') }}</p>
-        </section>
-
-        <section class="public-sidebar-card public-glass-card">
-          <p class="public-card-label">{{ t('public.articles.filtersLabel') }}</p>
-          <ul class="public-faux-filter-list">
-            <li v-for="lens in sidebarLenses" :key="lens">{{ lens }}</li>
-          </ul>
-        </section>
-      </aside>
-
-      <div class="public-list-main">
-        <p v-if="loading" class="public-status-message">{{ t('common.messages.loadingPosts') }}</p>
-        <p v-else-if="error" class="public-status-message error">{{ error }}</p>
-        <div v-else-if="!posts.length" class="public-empty-state public-glass-card">
-          <p class="public-card-title">{{ t('public.articles.emptyTitle') }}</p>
-          <p class="public-card-copy">{{ t('public.articles.emptyCopy') }}</p>
-        </div>
-        <div v-else class="public-article-grid" data-testid="public-article-grid">
-          <article v-for="post in posts" :key="post.id" class="public-article-card public-glass-card">
-            <PublicCoverMedia
-              v-if="post.coverImageUrl"
-              :src="post.coverImageUrl"
-              :alt="post.title"
-              :fallback-label="post.title"
-              variant="article"
-            />
-
-            <div class="public-article-meta">
-              <span>{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
-              <span>{{ post.slug }}</span>
-            </div>
-            <h2 class="public-article-title">{{ post.title }}</h2>
-            <p class="public-article-excerpt">{{ post.excerpt }}</p>
-            <RouterLink class="public-primary-link" :to="`/post/${post.slug}`">
-              {{ t('common.actions.readPost') }}
-            </RouterLink>
-          </article>
-        </div>
+    <div class="th-article-list-filters" data-testid="th-article-list-filters">
+      <div class="th-chip-row">
+        <span v-for="filter in publicStaticContent.articleSidebar.filters" :key="filter" class="th-chip">{{ filter }}</span>
+      </div>
+      <div class="th-chip-row">
+        <span v-for="sort in publicStaticContent.articleSidebar.sortOptions" :key="sort" class="th-chip subtle">{{ sort }}</span>
       </div>
     </div>
+
+    <section class="th-article-feed" data-testid="th-article-feed">
+      <p v-if="loading" class="th-status">{{ t('common.messages.loadingPosts') }}</p>
+      <p v-else-if="error" class="th-status error">{{ error }}</p>
+      <p v-else-if="!posts.length" class="th-status">{{ t('public.articles.emptyCopy') }}</p>
+
+      <article v-for="post in posts" :key="post.id" class="th-article-card th-panel">
+        <div class="th-article-card-media">
+          <img v-if="post.coverImageUrl" :src="post.coverImageUrl" :alt="post.title">
+          <div v-else class="th-media-fallback">{{ post.title }}</div>
+        </div>
+        <div class="th-article-card-copy">
+          <div class="th-meta-row">
+            <span class="th-badge">{{ post.slug }}</span>
+            <span>{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
+          </div>
+          <h2 class="th-section-title">{{ post.title }}</h2>
+          <p class="th-muted">{{ post.excerpt }}</p>
+          <RouterLink class="th-action-link" :to="`/post/${post.slug}`">{{ t('common.actions.readPost') }}</RouterLink>
+        </div>
+      </article>
+    </section>
   </section>
 </template>
 
@@ -58,7 +42,6 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
-import PublicCoverMedia from '../../components/public/PublicCoverMedia.vue'
 import { publicStaticContent } from '../../content/publicStaticContent'
 import { createApiClient } from '../../services/api'
 import type { PublicPostListItem } from '../../types'
@@ -68,7 +51,6 @@ const { locale, t } = useI18n()
 const posts = ref<PublicPostListItem[]>([])
 const loading = ref(true)
 const error = ref('')
-const sidebarLenses = publicStaticContent.articleSidebar.lenses
 
 onMounted(async () => {
   try {

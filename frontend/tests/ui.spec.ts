@@ -74,10 +74,10 @@ describe('ui helpers', () => {
   it('defines dedicated mobile public menu styles', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
 
-    expect(css).toContain('.public-mobile-toggle')
-    expect(css).toContain('.public-mobile-panel')
-    expect(css).toContain('.public-desktop-nav')
-    expect(css).toContain('.public-header-actions')
+    expect(css).toContain('.th-drawer')
+    expect(css).toContain('.th-topbar')
+    expect(css).toContain('.th-topbar-brand')
+    expect(css).toContain('.th-topbar-auth')
   })
 
   it('adds locale switcher styling and localized login template bindings', () => {
@@ -104,9 +104,9 @@ describe('ui helpers', () => {
   it('keeps public article action buttons from stretching to full card height', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
 
-    expect(css).toContain('.public-home-actions')
-    expect(css).toContain('.public-post-footer-actions')
-    expect(css).toContain('.public-primary-link')
+    expect(css).toContain('.th-home-actions')
+    expect(css).toContain('.th-post-actions')
+    expect(css).toContain('.th-action-link')
   })
 
   it('styles inline editor images for both authoring and public views', () => {
@@ -165,8 +165,8 @@ describe('ui helpers', () => {
 
   it('uses a single-column reading layout on desktop post pages', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
-    const layoutRule = css.match(/\.public-post-shell\s*\{[^}]*\}/)?.[0] ?? ''
-    const heroRule = css.match(/\.public-post-hero\s*\{[^}]*\}/)?.[0] ?? ''
+    const layoutRule = css.match(/\.th-post-page\s*\{[^}]*\}/)?.[0] ?? ''
+    const heroRule = css.match(/\.th-post-header\s*\{[^}]*\}/)?.[0] ?? ''
 
     expect(layoutRule).toContain('display: grid')
     expect(layoutRule).toContain('gap: 2rem')
@@ -176,27 +176,27 @@ describe('ui helpers', () => {
   it('defines public redesign shell selectors', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
 
-    expect(css).toContain('--public-bg')
-    expect(css).toContain('.public-theme')
-    expect(css).toContain('.public-home-shell')
-    expect(css).toContain('.public-list-shell')
-    expect(css).toContain('.public-post-shell')
-    expect(css).toContain('.public-auth-shell')
+    expect(css).toContain('--th-bg')
+    expect(css).toContain('.th-theme')
+    expect(css).toContain('.th-home-page')
+    expect(css).toContain('.th-article-list-page')
+    expect(css).toContain('.th-post-page')
+    expect(css).toContain('.th-login-page')
     expect(css).toContain('.public-profile-shell')
-    expect(css).toContain('.public-about-shell')
-    expect(css).toContain('.public-contact-shell')
-    expect(css).toContain('.admin-login-shell')
+    expect(css).toContain('.th-about-page')
+    expect(css).toContain('.th-contact-page')
+    expect(css).toContain('.th-admin-login-page')
   })
 
   it('keeps public header and footer full width with inner responsive wrappers', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
     const layout = readFileSync(resolve(__dirname, '../src/layouts/PublicLayout.vue'), 'utf8')
-    const headerRule = css.match(/\.public-header\s*\{[^}]*\}/)?.[0] ?? ''
-    const footerRule = css.match(/\.public-footer\s*\{[^}]*\}/)?.[0] ?? ''
-    const innerRule = css.match(/\.public-header-inner,\s*[\r\n]+\s*\.public-footer-inner\s*\{[^}]*\}/)?.[0] ?? ''
+    const headerRule = css.match(/\.th-topbar-shell\s*\{[^}]*\}/)?.[0] ?? ''
+    const footerRule = css.match(/\.th-footer\s*\{[^}]*\}/)?.[0] ?? ''
+    const innerRule = css.match(/\.th-topbar,\s*[\r\n]+\s*\.th-footer-inner\s*\{[^}]*\}/)?.[0] ?? ''
 
-    expect(layout).toContain('class="public-header-inner"')
-    expect(layout).toContain('class="public-footer-inner"')
+    expect(layout).toContain('class="th-topbar"')
+    expect(layout).toContain('class="th-footer-inner"')
     expect(headerRule).toContain('width: 100%')
     expect(footerRule).toContain('width: 100%')
     expect(innerRule).toContain('width: 100%')

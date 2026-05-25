@@ -1,69 +1,72 @@
 <template>
-  <section class="public-home-shell" data-testid="public-home-shell">
-    <div class="public-home-hero" data-testid="public-home-hero">
-      <p class="public-section-kicker">{{ t('public.home.eyebrow') }}</p>
-      <h1 class="public-home-title">{{ t('public.home.title') }}</h1>
-      <p class="public-home-copy">{{ t('public.home.copy') }}</p>
-      <div class="public-home-actions">
-        <RouterLink class="public-primary-button" data-testid="public-home-articles-cta" to="/articles">
-          {{ t('public.home.primaryCta') }}
-        </RouterLink>
-        <RouterLink
-          v-if="featuredPosts.length"
-          class="public-secondary-button"
-          :to="`/post/${featuredPosts[0].slug}`"
-        >
+  <section class="th-home-page" data-testid="th-home-page">
+    <section class="th-home-hero th-panel" data-testid="th-home-hero">
+      <p class="th-eyebrow">{{ t('public.home.eyebrow') }}</p>
+      <h1 class="th-display">{{ t('public.home.title') }}</h1>
+      <p class="th-lead">{{ t('public.home.copy') }}</p>
+
+      <div class="th-searchbar">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" :placeholder="t('public.home.primaryCta')" disabled>
+      </div>
+
+      <div class="th-home-actions">
+        <RouterLink class="th-button th-button-primary" to="/articles">{{ t('public.home.primaryCta') }}</RouterLink>
+        <RouterLink v-if="featuredPost" class="th-button th-button-ghost" :to="`/post/${featuredPost.slug}`">
           {{ t('public.home.secondaryCta') }}
         </RouterLink>
       </div>
-    </div>
 
-    <section class="public-home-highlights" data-testid="public-home-featured">
-      <header class="public-home-section-header">
-        <div>
-          <p class="public-card-label">{{ t('public.home.featuredLabel') }}</p>
-          <h2 class="public-section-title">{{ t('public.home.featuredTitle') }}</h2>
-        </div>
-        <RouterLink class="public-inline-link" to="/articles">{{ t('public.home.featuredLink') }}</RouterLink>
-      </header>
-
-      <p v-if="loading" class="public-status-message">{{ t('common.messages.loadingPosts') }}</p>
-      <p v-else-if="error" class="public-status-message error">{{ error }}</p>
-      <div v-else-if="!featuredPosts.length" class="public-empty-state public-glass-card">
-        <p class="public-card-title">{{ t('public.home.emptyTitle') }}</p>
-        <p class="public-card-copy">{{ t('public.home.emptyCopy') }}</p>
-      </div>
-      <div v-else class="public-featured-grid">
-        <article v-for="post in featuredPosts" :key="post.id" class="public-featured-card public-glass-card">
-          <PublicCoverMedia
-            v-if="post.coverImageUrl"
-            :src="post.coverImageUrl"
-            :alt="post.title"
-            :fallback-label="post.title"
-            variant="featured"
-          />
-          <div class="public-article-meta">
-            <span>{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
-            <span>{{ post.slug }}</span>
-          </div>
-          <h3 class="public-card-title">{{ post.title }}</h3>
-          <p class="public-card-copy">{{ post.excerpt }}</p>
-          <RouterLink class="public-primary-link" :to="`/post/${post.slug}`">
-            {{ t('common.actions.readPost') }}
-          </RouterLink>
-        </article>
+      <div class="th-chip-row">
+        <span v-for="tag in publicStaticContent.home.heroTags" :key="tag" class="th-chip">{{ tag }}</span>
       </div>
     </section>
 
-    <section class="public-static-grid">
-      <article
-        v-for="section in homepageHighlights"
-        :key="section.title"
-        class="public-static-card public-glass-card"
-      >
-        <p class="public-card-label">{{ t('public.about.eyebrow') }}</p>
-        <h2 class="public-card-title">{{ section.title }}</h2>
-        <p class="public-card-copy">{{ section.body }}</p>
+    <section class="th-home-featured" data-testid="th-home-featured">
+      <p v-if="loading" class="th-status">{{ t('common.messages.loadingPosts') }}</p>
+      <p v-else-if="error" class="th-status error">{{ error }}</p>
+      <article v-else-if="featuredPost" class="th-feature-card th-panel">
+        <div class="th-feature-media">
+          <img v-if="featuredPost.coverImageUrl" :src="featuredPost.coverImageUrl" :alt="featuredPost.title">
+          <div v-else class="th-media-fallback">{{ featuredPost.title }}</div>
+        </div>
+        <div class="th-feature-copy">
+          <span class="th-badge">{{ featuredPost.slug }}</span>
+          <h2 class="th-section-title">{{ featuredPost.title }}</h2>
+          <p class="th-muted">{{ featuredPost.excerpt }}</p>
+          <div class="th-meta-row">
+            <span>{{ formatDisplayDate(featuredPost.publishedAt, locale, t('common.status.unscheduled')) }}</span>
+            <span v-for="metric in publicStaticContent.home.quickMetrics" :key="metric.icon">
+              {{ metric.label }}
+            </span>
+          </div>
+          <RouterLink class="th-action-link" :to="`/post/${featuredPost.slug}`">{{ t('common.actions.readPost') }}</RouterLink>
+        </div>
+      </article>
+    </section>
+
+    <section class="th-latest-list">
+      <header class="th-section-head">
+        <h2 class="th-section-title">{{ t('public.articles.title') }}</h2>
+        <RouterLink class="th-action-link" to="/articles">{{ t('public.home.featuredLink') }}</RouterLink>
+      </header>
+
+      <p v-if="!loading && !posts.length" class="th-status">{{ t('public.home.emptyCopy') }}</p>
+
+      <article v-for="post in latestPosts" :key="post.id" class="th-list-row th-panel">
+        <div class="th-list-row-media">
+          <img v-if="post.coverImageUrl" :src="post.coverImageUrl" :alt="post.title">
+          <div v-else class="th-media-fallback compact">{{ post.title }}</div>
+        </div>
+        <div class="th-list-row-copy">
+          <div class="th-meta-row">
+            <span class="th-badge">{{ post.slug }}</span>
+            <span>{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
+          </div>
+          <h3 class="th-card-title">{{ post.title }}</h3>
+          <p class="th-muted">{{ post.excerpt }}</p>
+        </div>
+        <RouterLink class="th-action-link" :to="`/post/${post.slug}`">{{ t('common.actions.readPost') }}</RouterLink>
       </article>
     </section>
   </section>
@@ -73,7 +76,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
-import PublicCoverMedia from '../../components/public/PublicCoverMedia.vue'
 import { publicStaticContent } from '../../content/publicStaticContent'
 import { createApiClient } from '../../services/api'
 import type { PublicPostListItem } from '../../types'
@@ -83,8 +85,8 @@ const { locale, t } = useI18n()
 const posts = ref<PublicPostListItem[]>([])
 const loading = ref(true)
 const error = ref('')
-const featuredPosts = computed(() => posts.value.slice(0, 3))
-const homepageHighlights = publicStaticContent.about.sections
+const featuredPost = computed(() => posts.value[0] ?? null)
+const latestPosts = computed(() => posts.value.slice(1, 5))
 
 onMounted(async () => {
   try {

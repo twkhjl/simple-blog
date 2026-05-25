@@ -1,34 +1,30 @@
 <template>
-  <section class="public-auth-shell" data-testid="public-auth-shell">
-    <div class="public-auth-card">
-      <div class="stack-card" style="margin-bottom: 1.25rem;">
-        <p class="public-section-kicker">{{ t('auth.login.eyebrow') }}</p>
-        <h1 class="public-section-title">{{ t('auth.login.title') }}</h1>
-        <p class="public-section-copy">{{ t('auth.login.copy') }}</p>
+  <section class="th-login-page" data-testid="th-login-page">
+    <div class="th-auth-card">
+      <div class="th-auth-head">
+        <h1 class="th-display">{{ t('auth.login.title') }}</h1>
+        <p class="th-muted">{{ t('auth.login.copy') }}</p>
       </div>
 
-      <form @submit.prevent="handleLogin">
-        <label class="public-field">
+      <form class="th-auth-form" @submit.prevent="handleLogin">
+        <label class="th-field">
           <span>{{ t('common.labels.email') }}</span>
-          <input v-model="email" class="public-input" type="email" autocomplete="email" required :placeholder="t('auth.login.emailPlaceholder')">
+          <input v-model="email" type="email" autocomplete="email" required :placeholder="t('auth.login.emailPlaceholder')">
         </label>
-        <label class="public-field">
+        <label class="th-field">
           <span>{{ t('common.labels.password') }}</span>
           <input
             v-model="password"
-            class="public-input"
             type="password"
             autocomplete="current-password"
             required
             :placeholder="t('auth.login.passwordPlaceholder')"
           >
         </label>
-        <button type="submit" class="public-primary-button" :disabled="submitting">{{ t('common.actions.login') }}</button>
+        <button type="submit" class="th-button th-button-primary" :disabled="submitting">{{ t('common.actions.login') }}</button>
       </form>
 
-      <p v-if="message" class="public-status-message" :class="{ error: !isSuccess }" style="margin-top: 1rem;">
-        {{ message }}
-      </p>
+      <p v-if="message" class="th-status" :class="{ error: !isSuccess }">{{ message }}</p>
     </div>
   </section>
 </template>

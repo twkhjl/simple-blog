@@ -77,22 +77,22 @@ describe('PublicLayout mobile menu', () => {
       },
     })
 
-    await wrapper.get('[data-testid="mobile-menu-toggle"]').trigger('click')
-    expect(wrapper.get('[data-testid="mobile-menu-panel"]').attributes('data-open')).toBe('true')
+    await wrapper.get('[data-testid="th-drawer-toggle"]').trigger('click')
+    expect(wrapper.get('[data-testid="th-drawer"]').attributes('data-open')).toBe('true')
 
-    await wrapper.get('[data-testid="mobile-nav-profile"]').trigger('click')
+    await wrapper.get('[data-testid="th-drawer-link-profile"]').trigger('click')
     await nextTick()
 
-    expect(wrapper.get('[data-testid="mobile-menu-panel"]').attributes('data-open')).toBe('false')
+    expect(wrapper.get('[data-testid="th-drawer"]').attributes('data-open')).toBe('false')
 
-    await wrapper.get('[data-testid="mobile-menu-toggle"]').trigger('click')
-    expect(wrapper.get('[data-testid="mobile-menu-panel"]').attributes('data-open')).toBe('true')
+    await wrapper.get('[data-testid="th-drawer-toggle"]').trigger('click')
+    expect(wrapper.get('[data-testid="th-drawer"]').attributes('data-open')).toBe('true')
 
     await router.push('/profile')
     await flushPromises()
 
     expect(router.currentRoute.value.path).toBe('/profile')
-    expect(wrapper.get('[data-testid="mobile-menu-panel"]').attributes('data-open')).toBe('false')
+    expect(wrapper.get('[data-testid="th-drawer"]').attributes('data-open')).toBe('false')
   })
 
   it('shows auth actions inside mobile menu and closes after logout', async () => {
@@ -109,17 +109,17 @@ describe('PublicLayout mobile menu', () => {
       },
     })
 
-    await wrapper.get('[data-testid="mobile-menu-toggle"]').trigger('click')
+    await wrapper.get('[data-testid="th-drawer-toggle"]').trigger('click')
 
     expect(wrapper.text()).toContain('Logout')
     expect(wrapper.text()).toContain('Admin')
 
-    await wrapper.get('[data-testid="mobile-logout"]').trigger('click')
+    await wrapper.get('[data-testid="th-drawer-logout"]').trigger('click')
     await nextTick()
 
     expect(logout).toHaveBeenCalledTimes(1)
     expect(authState.session).toBeNull()
-    expect(wrapper.get('[data-testid="mobile-menu-panel"]').attributes('data-open')).toBe('false')
+    expect(wrapper.get('[data-testid="th-drawer"]').attributes('data-open')).toBe('false')
   })
 
   it('renders localized public nav labels', async () => {
@@ -135,14 +135,14 @@ describe('PublicLayout mobile menu', () => {
       },
     })
 
-    expect(wrapper.find('[data-testid="desktop-nav-home"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="desktop-nav-articles"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="desktop-nav-about"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="desktop-nav-contact"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-topbar-link-home"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-drawer-link-articles"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-topbar-brand"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-topbar-auth"]').exists()).toBe(true)
     expect(wrapper.text()).toContain('Simple Blog')
   })
 
-  it('renders about and contact links in desktop and mobile nav', async () => {
+  it('renders about and contact links in drawer and desktop surfaces', async () => {
     const router = createTestRouter()
     const i18n = createAppI18n()
     await router.push('/')
@@ -154,12 +154,11 @@ describe('PublicLayout mobile menu', () => {
       },
     })
 
-    expect(wrapper.find('[data-testid="desktop-nav-about"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="desktop-nav-contact"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-topbar-auth"]').exists()).toBe(true)
 
-    await wrapper.get('[data-testid="mobile-menu-toggle"]').trigger('click')
+    await wrapper.get('[data-testid="th-drawer-toggle"]').trigger('click')
 
-    expect(wrapper.find('[data-testid="mobile-nav-about"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="mobile-nav-contact"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-drawer-link-about"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-drawer-link-contact"]').exists()).toBe(true)
   })
 })

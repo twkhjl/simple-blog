@@ -79,9 +79,9 @@ describe('public pages', () => {
 
     await flushPromises()
 
-    expect(wrapper.find('[data-testid="public-home-shell"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="public-home-hero"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="public-home-featured"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-home-page"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-home-hero"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-home-featured"]').exists()).toBe(true)
   })
 
   it('renders the article list shell separately from the homepage shell', async () => {
@@ -91,9 +91,9 @@ describe('public pages', () => {
 
     await flushPromises()
 
-    expect(wrapper.find('[data-testid="public-list-shell"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="public-list-sidebar"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="public-article-grid"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-article-list-page"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-article-list-filters"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-article-feed"]').exists()).toBe(true)
   })
 
   it('renders the public post detail page shell', async () => {
@@ -108,9 +108,9 @@ describe('public pages', () => {
 
     await flushPromises()
 
-    expect(wrapper.find('[data-testid="public-post-shell"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="public-post-hero"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="public-post-body"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-post-page"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-post-header"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="th-post-content"]').exists()).toBe(true)
   })
 
   it('renders public auth and profile shells', () => {
@@ -119,7 +119,7 @@ describe('public pages', () => {
     const loginWrapper = mount(LoginPage, { global: { plugins: [router, i18n] } })
     const profileWrapper = mount(ProfilePage, { global: { plugins: [i18n] } })
 
-    expect(loginWrapper.find('[data-testid="public-auth-shell"]').exists()).toBe(true)
+    expect(loginWrapper.find('[data-testid="th-login-page"]').exists()).toBe(true)
     expect(profileWrapper.find('[data-testid="public-profile-shell"]').exists()).toBe(true)
   })
 
@@ -137,15 +137,15 @@ describe('public pages', () => {
     const contracts = [
       {
         path: resolve(__dirname, '../src/pages/public/AboutPage.vue'),
-        token: 'data-testid="public-about-shell"',
+        token: 'data-testid="th-about-page"',
       },
       {
         path: resolve(__dirname, '../src/pages/public/ContactPage.vue'),
-        token: 'data-testid="public-contact-shell"',
+        token: 'data-testid="th-contact-page"',
       },
       {
         path: resolve(__dirname, '../src/pages/auth/AdminLoginPage.vue'),
-        token: 'data-testid="admin-login-shell"',
+        token: 'data-testid="th-admin-login-page"',
       },
     ]
 

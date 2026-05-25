@@ -1,183 +1,112 @@
 <template>
-  <div class="public-theme">
-    <header class="public-header">
-      <div class="public-header-inner">
-        <div class="public-header-bar public-glass-card">
-          <RouterLink class="public-brand" to="/">{{ t('public.brand.title') }}</RouterLink>
+  <div class="th-theme">
+    <div
+      class="th-drawer-backdrop"
+      :class="{ open: isDrawerOpen }"
+      data-testid="th-drawer-backdrop"
+      @click="closeDrawer"
+    />
 
-          <nav class="public-desktop-nav">
-            <RouterLink class="public-nav-link" :class="{ active: route.path === '/' }" data-testid="desktop-nav-home" to="/">
-              {{ t('public.nav.home') }}
-            </RouterLink>
-            <RouterLink
-              class="public-nav-link"
-              :class="{ active: route.path === '/articles' }"
-              data-testid="desktop-nav-articles"
-              to="/articles"
-            >
-              {{ t('public.nav.articles') }}
-            </RouterLink>
-            <RouterLink
-              class="public-nav-link"
-              :class="{ active: route.path === '/about' }"
-              data-testid="desktop-nav-about"
-              to="/about"
-            >
-              {{ t('public.nav.about') }}
-            </RouterLink>
-            <RouterLink
-              class="public-nav-link"
-              :class="{ active: route.path === '/contact' }"
-              data-testid="desktop-nav-contact"
-              to="/contact"
-            >
-              {{ t('public.nav.contact') }}
-            </RouterLink>
-            <RouterLink
-              class="public-nav-link"
-              :class="{ active: route.path === '/profile' }"
-              data-testid="desktop-nav-profile"
-              to="/profile"
-            >
-              {{ t('public.nav.profile') }}
-            </RouterLink>
-            <RouterLink
-              v-if="canAdmin"
-              class="public-nav-link"
-              :class="{ active: route.path.startsWith('/admin') }"
-              data-testid="desktop-nav-admin"
-              to="/admin/posts"
-            >
-              {{ t('public.nav.admin') }}
-            </RouterLink>
+    <aside class="th-drawer" :class="{ open: isDrawerOpen }" :data-open="isDrawerOpen ? 'true' : 'false'" data-testid="th-drawer">
+      <div class="th-drawer-header">
+        <div>
+          <p class="th-drawer-title">Menu</p>
+          <p class="th-drawer-copy">{{ t('public.brand.title') }}</p>
+        </div>
+        <button type="button" class="th-icon-button" data-testid="th-drawer-close" @click="closeDrawer">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <nav class="th-drawer-nav">
+        <RouterLink class="th-drawer-link" data-testid="th-drawer-link-home" to="/" @click="closeDrawer">
+          <span class="material-symbols-outlined">home</span>
+          <span>{{ t('public.nav.home') }}</span>
+        </RouterLink>
+        <RouterLink class="th-drawer-link" data-testid="th-drawer-link-articles" to="/articles" @click="closeDrawer">
+          <span class="material-symbols-outlined">article</span>
+          <span>{{ t('public.nav.articles') }}</span>
+        </RouterLink>
+        <RouterLink class="th-drawer-link" data-testid="th-drawer-link-about" to="/about" @click="closeDrawer">
+          <span class="material-symbols-outlined">person</span>
+          <span>{{ t('public.nav.about') }}</span>
+        </RouterLink>
+        <RouterLink class="th-drawer-link" data-testid="th-drawer-link-contact" to="/contact" @click="closeDrawer">
+          <span class="material-symbols-outlined">mail</span>
+          <span>{{ t('public.nav.contact') }}</span>
+        </RouterLink>
+        <RouterLink class="th-drawer-link" data-testid="th-drawer-link-profile" to="/profile" @click="closeDrawer">
+          <span class="material-symbols-outlined">account_circle</span>
+          <span>{{ t('public.nav.profile') }}</span>
+        </RouterLink>
+        <RouterLink
+          v-if="canAdmin"
+          class="th-drawer-link"
+          data-testid="th-drawer-link-admin"
+          to="/admin/posts"
+          @click="closeDrawer"
+        >
+          <span class="material-symbols-outlined">admin_panel_settings</span>
+          <span>{{ t('public.nav.admin') }}</span>
+        </RouterLink>
+      </nav>
+
+      <div class="th-drawer-footer">
+        <LocaleSwitcher />
+        <RouterLink v-if="!isLoggedIn" class="th-drawer-link" to="/login" @click="closeDrawer">
+          <span class="material-symbols-outlined">login</span>
+          <span>{{ t('common.actions.login') }}</span>
+        </RouterLink>
+        <button v-else type="button" class="th-drawer-link" data-testid="th-drawer-logout" @click="handleLogout">
+          <span class="material-symbols-outlined">logout</span>
+          <span>{{ t('common.actions.logout') }}</span>
+        </button>
+      </div>
+    </aside>
+
+    <header class="th-topbar-shell">
+      <div class="th-topbar">
+        <button type="button" class="th-icon-button" data-testid="th-drawer-toggle" @click="toggleDrawer">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <RouterLink class="th-topbar-brand" data-testid="th-topbar-brand" to="/">{{ t('public.brand.title') }}</RouterLink>
+        <div class="th-topbar-actions">
+          <nav class="th-desktop-nav">
+            <RouterLink class="th-inline-link" data-testid="th-topbar-link-home" to="/">{{ t('public.nav.home') }}</RouterLink>
+            <RouterLink class="th-inline-link" to="/articles">{{ t('public.nav.articles') }}</RouterLink>
+            <RouterLink class="th-inline-link" to="/about">{{ t('public.nav.about') }}</RouterLink>
+            <RouterLink class="th-inline-link" to="/contact">{{ t('public.nav.contact') }}</RouterLink>
           </nav>
-
-          <div class="public-header-actions">
-            <LocaleSwitcher />
-            <RouterLink v-if="!isLoggedIn" class="public-secondary-button" to="/login">
-              {{ t('common.actions.login') }}
-            </RouterLink>
-            <RouterLink v-if="!isLoggedIn" class="public-primary-button" to="/register">
-              {{ t('common.actions.register') }}
-            </RouterLink>
-            <button v-else type="button" class="public-secondary-button" @click="handleLogout">
-              {{ t('common.actions.logout') }}
-            </button>
-          </div>
-
-          <button
-            type="button"
-            class="public-mobile-toggle"
-            data-testid="mobile-menu-toggle"
-            :aria-expanded="isMobileMenuOpen ? 'true' : 'false'"
-            aria-controls="mobile-public-menu"
-            @click="toggleMobileMenu"
+          <LocaleSwitcher />
+          <RouterLink
+            v-if="!isLoggedIn"
+            class="th-topbar-auth"
+            data-testid="th-topbar-auth"
+            to="/login"
           >
-            <span class="visually-hidden">{{ t('common.messages.toggleNavigationMenu') }}</span>
-            <span />
-            <span />
-            <span />
+            {{ t('common.actions.login') }}
+          </RouterLink>
+          <button v-else class="th-topbar-auth" data-testid="th-topbar-auth" type="button" @click="handleLogout">
+            {{ t('common.actions.logout') }}
           </button>
-
-          <div
-            id="mobile-public-menu"
-            class="public-mobile-panel public-glass-card"
-            v-show="isMobileMenuOpen"
-            data-testid="mobile-menu-panel"
-            :data-open="isMobileMenuOpen ? 'true' : 'false'"
-          >
-            <RouterLink
-              class="public-nav-link"
-              :class="{ active: route.path === '/' }"
-              data-testid="mobile-nav-home"
-              to="/"
-              @click="closeMobileMenu"
-            >
-              {{ t('public.nav.home') }}
-            </RouterLink>
-            <RouterLink
-              class="public-nav-link"
-              :class="{ active: route.path === '/articles' }"
-              data-testid="mobile-nav-articles"
-              to="/articles"
-              @click="closeMobileMenu"
-            >
-              {{ t('public.nav.articles') }}
-            </RouterLink>
-            <RouterLink
-              class="public-nav-link"
-              :class="{ active: route.path === '/about' }"
-              data-testid="mobile-nav-about"
-              to="/about"
-              @click="closeMobileMenu"
-            >
-              {{ t('public.nav.about') }}
-            </RouterLink>
-            <RouterLink
-              class="public-nav-link"
-              :class="{ active: route.path === '/contact' }"
-              data-testid="mobile-nav-contact"
-              to="/contact"
-              @click="closeMobileMenu"
-            >
-              {{ t('public.nav.contact') }}
-            </RouterLink>
-            <RouterLink
-              class="public-nav-link"
-              :class="{ active: route.path === '/profile' }"
-              data-testid="mobile-nav-profile"
-              to="/profile"
-              @click="closeMobileMenu"
-            >
-              {{ t('public.nav.profile') }}
-            </RouterLink>
-            <RouterLink
-              v-if="canAdmin"
-              class="public-nav-link"
-              :class="{ active: route.path.startsWith('/admin') }"
-              data-testid="mobile-nav-admin"
-              to="/admin/posts"
-              @click="closeMobileMenu"
-            >
-              {{ t('public.nav.admin') }}
-            </RouterLink>
-
-            <div class="public-mobile-actions">
-              <LocaleSwitcher />
-              <RouterLink v-if="!isLoggedIn" class="public-secondary-button" to="/login" @click="closeMobileMenu">
-                {{ t('common.actions.login') }}
-              </RouterLink>
-              <RouterLink v-if="!isLoggedIn" class="public-primary-button" to="/register" @click="closeMobileMenu">
-                {{ t('common.actions.register') }}
-              </RouterLink>
-              <button
-                v-else
-                type="button"
-                class="public-secondary-button"
-                data-testid="mobile-logout"
-                @click="handleLogout"
-              >
-                {{ t('common.actions.logout') }}
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </header>
 
-    <main class="public-main">
+    <main class="th-main">
       <RouterView />
     </main>
 
-    <footer class="public-footer">
-      <div class="public-footer-inner">
-        <div class="public-footer-bar">
-          <div>
-            <p class="public-brand-footer">{{ t('public.brand.title') }}</p>
-            <p class="public-footer-copy">{{ t('public.brand.footerLead') }}</p>
-          </div>
-          <p class="public-footer-copy">{{ t('public.brand.footerCopy') }}</p>
+    <footer class="th-footer">
+      <div class="th-footer-inner">
+        <p class="th-footer-brand">{{ t('public.brand.title') }}</p>
+        <p class="th-footer-copy">{{ t('public.brand.footerLead') }}</p>
+        <div class="th-footer-links">
+          <RouterLink class="th-footer-link" to="/about">{{ t('public.nav.about') }}</RouterLink>
+          <RouterLink class="th-footer-link" to="/contact">{{ t('public.nav.contact') }}</RouterLink>
+          <RouterLink class="th-footer-link" to="/articles">{{ t('public.nav.articles') }}</RouterLink>
         </div>
+        <p class="th-footer-copy">{{ t('public.brand.footerCopy') }}</p>
       </div>
     </footer>
   </div>
@@ -192,27 +121,27 @@ import { authState, canAccessAdmin, logout } from '../stores/auth'
 
 const route = useRoute()
 const { t } = useI18n()
-const isMobileMenuOpen = ref(false)
+const isDrawerOpen = ref(false)
 const isLoggedIn = computed(() => Boolean(authState.session))
 const canAdmin = computed(() => canAccessAdmin())
 
-function toggleMobileMenu() {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value
+function toggleDrawer() {
+  isDrawerOpen.value = !isDrawerOpen.value
 }
 
-function closeMobileMenu() {
-  isMobileMenuOpen.value = false
+function closeDrawer() {
+  isDrawerOpen.value = false
 }
 
 async function handleLogout() {
-  closeMobileMenu()
+  closeDrawer()
   await logout()
 }
 
 watch(
   () => route.fullPath,
   () => {
-    closeMobileMenu()
+    closeDrawer()
   },
 )
 </script>

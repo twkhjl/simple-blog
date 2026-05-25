@@ -1,43 +1,31 @@
 <template>
-  <section class="admin-login-shell" data-testid="admin-login-shell">
-    <div class="admin-login-card">
-      <div class="stack-card" style="margin-bottom: 1.25rem;">
-        <p class="public-section-kicker">{{ t('auth.adminLogin.eyebrow') }}</p>
-        <h1 class="public-section-title">{{ t('auth.adminLogin.title') }}</h1>
-        <p class="public-section-copy">{{ t('auth.adminLogin.copy') }}</p>
+  <section class="th-admin-login-page" data-testid="th-admin-login-page">
+    <div class="th-auth-card dark">
+      <div class="th-auth-head">
+        <span class="material-symbols-outlined th-admin-icon">admin_panel_settings</span>
+        <h1 class="th-display">{{ t('auth.adminLogin.title') }}</h1>
+        <p class="th-muted">{{ t('auth.adminLogin.copy') }}</p>
       </div>
 
-      <form @submit.prevent="handleLogin">
-        <label class="public-field">
+      <form class="th-auth-form" @submit.prevent="handleLogin">
+        <label class="th-field">
           <span>{{ t('common.labels.email') }}</span>
-          <input
-            v-model="email"
-            class="public-input"
-            type="email"
-            autocomplete="email"
-            required
-            :placeholder="t('auth.login.emailPlaceholder')"
-          >
+          <input v-model="email" type="email" autocomplete="email" required :placeholder="t('auth.login.emailPlaceholder')">
         </label>
-        <label class="public-field">
+        <label class="th-field">
           <span>{{ t('common.labels.password') }}</span>
           <input
             v-model="password"
-            class="public-input"
             type="password"
             autocomplete="current-password"
             required
             :placeholder="t('auth.login.passwordPlaceholder')"
           >
         </label>
-        <button type="submit" class="public-primary-button" :disabled="submitting">
-          {{ t('auth.adminLogin.title') }}
-        </button>
+        <button type="submit" class="th-button th-button-primary" :disabled="submitting">{{ t('auth.adminLogin.title') }}</button>
       </form>
 
-      <p v-if="message" class="public-status-message" :class="{ error: !isSuccess }" style="margin-top: 1rem;">
-        {{ message }}
-      </p>
+      <p v-if="message" class="th-status" :class="{ error: !isSuccess }">{{ message }}</p>
     </div>
   </section>
 </template>

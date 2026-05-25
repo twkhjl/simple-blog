@@ -22,7 +22,7 @@ describe('auth helpers', () => {
 
     const source = existsSync(pagePath) ? readFileSync(pagePath, 'utf8') : ''
 
-    expect(source).toContain('data-testid="admin-login-shell"')
+    expect(source).toContain('data-testid="th-admin-login-page"')
     expect(source).toContain("t('auth.adminLogin.forbidden')")
     expect(source).toContain("router.push('/admin/posts')")
   })
