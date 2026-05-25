@@ -19,6 +19,22 @@
             </RouterLink>
             <RouterLink
               class="public-nav-link"
+              :class="{ active: route.path === '/about' }"
+              data-testid="desktop-nav-about"
+              to="/about"
+            >
+              {{ t('public.nav.about') }}
+            </RouterLink>
+            <RouterLink
+              class="public-nav-link"
+              :class="{ active: route.path === '/contact' }"
+              data-testid="desktop-nav-contact"
+              to="/contact"
+            >
+              {{ t('public.nav.contact') }}
+            </RouterLink>
+            <RouterLink
+              class="public-nav-link"
               :class="{ active: route.path === '/profile' }"
               data-testid="desktop-nav-profile"
               to="/profile"
@@ -87,6 +103,24 @@
               @click="closeMobileMenu"
             >
               {{ t('public.nav.articles') }}
+            </RouterLink>
+            <RouterLink
+              class="public-nav-link"
+              :class="{ active: route.path === '/about' }"
+              data-testid="mobile-nav-about"
+              to="/about"
+              @click="closeMobileMenu"
+            >
+              {{ t('public.nav.about') }}
+            </RouterLink>
+            <RouterLink
+              class="public-nav-link"
+              :class="{ active: route.path === '/contact' }"
+              data-testid="mobile-nav-contact"
+              to="/contact"
+              @click="closeMobileMenu"
+            >
+              {{ t('public.nav.contact') }}
             </RouterLink>
             <RouterLink
               class="public-nav-link"
