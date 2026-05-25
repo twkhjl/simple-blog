@@ -183,4 +183,18 @@ describe('ui helpers', () => {
     expect(css).toContain('.public-auth-shell')
     expect(css).toContain('.public-profile-shell')
   })
+
+  it('keeps public header and footer full width with inner responsive wrappers', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const layout = readFileSync(resolve(__dirname, '../src/layouts/PublicLayout.vue'), 'utf8')
+    const headerRule = css.match(/\.public-header\s*\{[^}]*\}/)?.[0] ?? ''
+    const footerRule = css.match(/\.public-footer\s*\{[^}]*\}/)?.[0] ?? ''
+    const innerRule = css.match(/\.public-header-inner,\s*[\r\n]+\s*\.public-footer-inner\s*\{[^}]*\}/)?.[0] ?? ''
+
+    expect(layout).toContain('class="public-header-inner"')
+    expect(layout).toContain('class="public-footer-inner"')
+    expect(headerRule).toContain('width: 100%')
+    expect(footerRule).toContain('width: 100%')
+    expect(innerRule).toContain('width: 100%')
+  })
 })
