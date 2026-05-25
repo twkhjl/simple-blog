@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { messages } from '../src/i18n'
 import { buildAdminPostStats, formatDisplayDate, getInitials } from '../src/utils/ui'
 
 describe('ui helpers', () => {
@@ -199,5 +200,14 @@ describe('ui helpers', () => {
     expect(headerRule).toContain('width: 100%')
     expect(footerRule).toContain('width: 100%')
     expect(innerRule).toContain('width: 100%')
+  })
+
+  it('defines i18n labels for about, contact, and admin login gating', () => {
+    expect(messages.en.public.nav.about).toBeTruthy()
+    expect(messages.en.public.nav.contact).toBeTruthy()
+    expect(messages.en.auth.adminLogin.forbidden).toBeTruthy()
+    expect(messages['zh-TW'].public.nav.about).toBeTruthy()
+    expect(messages['zh-TW'].public.nav.contact).toBeTruthy()
+    expect(messages['zh-TW'].auth.adminLogin.forbidden).toBeTruthy()
   })
 })

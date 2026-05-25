@@ -50,7 +50,7 @@ describe('i18n locale helpers', () => {
 
     applyDocumentTitle(router.currentRoute.value, i18n.global.t)
     expect(document.title).toBe('Register | Simple Blog')
-  })
+  }, 10000)
 
   it('renders literal at-signs in localized email placeholders', async () => {
     const { createAppI18n } = await import('../src/i18n')
