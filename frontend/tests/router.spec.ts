@@ -31,6 +31,7 @@ describe('router', () => {
   it('registers public, auth and admin routes', () => {
     const paths = createAppRouter().getRoutes().map(route => route.path)
     expect(paths).toContain('/')
+    expect(paths).toContain('/articles')
     expect(paths).toContain('/post/:slug')
     expect(paths).toContain('/login')
     expect(paths).toContain('/register')
@@ -43,6 +44,7 @@ describe('router', () => {
 
   it('assigns title keys to key routes', () => {
     const routes = createAppRouter().getRoutes()
+    expect(routes.find(route => route.path === '/articles')?.meta.titleKey).toBe('seo.articles.title')
     expect(routes.find(route => route.path === '/login')?.meta.titleKey).toBe('seo.login.title')
     expect(routes.find(route => route.path === '/register')?.meta.titleKey).toBe('seo.register.title')
     expect(routes.find(route => route.path === '/admin/posts')?.meta.titleKey).toBe('seo.adminPosts.title')

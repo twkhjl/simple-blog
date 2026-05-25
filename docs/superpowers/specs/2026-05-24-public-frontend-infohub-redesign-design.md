@@ -1,400 +1,344 @@
-# 前台 InfoHub 改版設計
-
-## 背景
-
-目前前台使用自訂深色 `neo-*` 風格，公開頁面集中在以下檔案：
-
-- `frontend/src/layouts/PublicLayout.vue`
-- `frontend/src/pages/public/HomePage.vue`
-- `frontend/src/pages/public/PostDetailPage.vue`
-- `frontend/src/pages/auth/LoginPage.vue`
-- `frontend/src/pages/auth/RegisterPage.vue`
-- `frontend/src/pages/auth/ProfilePage.vue`
-- `frontend/src/style.css`
-
-需求是將「整個公開前台」改成使用 `page_example/stitch_infohub/_1/code.html` 作為文章列表頁主參考、`page_example/stitch_infohub/_2/code.html` 作為文章詳細頁主參考，並沿用 `infohub` 的品牌語言延伸其他公開頁。後台不在這次改版範圍內，且前後台樣式必須分離，避免互相污染。
-
-使用者已明確確認：
-
-- 文章列表頁主參考為 `page_example/stitch_infohub/_1/code.html`
-- 文章詳細頁主參考為 `page_example/stitch_infohub/_2/code.html`
-- 其他公開頁延伸 `infohub` 品牌語言
-- 改版範圍包含整個公開前台
-- 後台維持現狀
-- 缺少靜態稿的前台頁面，依 `infohub` 主版風格自行延伸設計
+# Public Frontend Static-HTML Rewrite Spec
 
 ## 目標
 
-- 將公開前台整體視覺改為 `InfoHub` 的 warm editorial 風格
-- 保留現有資料流與功能：router、auth、API、i18n
-- 將前台與後台樣式系統拆開處理，避免共享視覺 class
-- 讓首頁、文章內頁、登入、註冊、個人頁具有一致的前台品牌感
-- 維持既有前台互動能力：手機選單、登入登出、管理入口、文章列表與文章內頁載入
+將 `simple-blog` 的公開前台，依照 2026-05-24 提供的靜態 HTML 版型重寫為 Vue 前端頁面。
+
+本次以「版型還原優先」為主軸，要求公開前台視覺盡量與靜態 HTML 一致，同時保留現有前台中「已存在且靜態稿也有對應」的功能。若靜態稿對應區塊缺少真實功能，允許先以假資料、假互動或純展示狀態補位。
+
+後台不在本次範圍內，且前後台樣式必須分離。
+
+## 靜態稿對應
+
+- 首頁：`page_example/stitch_infohub/infohub/code.html`
+- 文章列表頁：`page_example/stitch_infohub/_1/code.html`
+- 文章詳細頁：`page_example/stitch_infohub/_2/code.html`
+- 登入頁：無靜態稿，需依 `infohub` 品牌語言自行設計
+- 註冊頁：無靜態稿，需依 `infohub` 品牌語言自行設計
+- 個人資料頁：`header` 與 `footer` 必須與前台主版一致，中間內容可自行設計，但整體視覺仍需屬於公開前台品牌語言
+
+## 核心原則
+
+### 1. 版型優先
+
+公開前台樣式需盡量與靜態 HTML 對齊，包含但不限於：
+
+- 字級
+- 字重
+- 行高
+- 顏色
+- 區塊順序
+- 留白
+- 卡片比例
+- 圓角
+- 邊框
+- 陰影
+- header / footer 視覺
+- 桌機與手機版 RWD
+
+允許為了維持版型一致性而採用以下策略：
+
+- 文字截斷
+- 固定卡片高度
+- 固定圖片比例
+- 預設圖或 fallback 區塊
+- 純展示用假資料
+
+### 2. 功能保留原則
+
+前台「目前已存在，且靜態 HTML 有對應畫面語意」的功能不得拔除。
+
+例如：
+
+- 前台導覽
+- 文章列表頁可瀏覽文章
+- 文章詳細頁可開啟單篇文章
+- 登入 / 登出入口
+- 個人資料入口
+- 語系切換
+
+若某功能目前存在，但靜態稿沒有完整互動設計，需在不破壞版型前提下保留最低限度可用行為。
+
+### 3. 假資料補位原則
+
+若某區塊在靜態稿中存在，但目前系統沒有對應功能或資料來源，可先用假資料補位。
+
+例如：
+
+- 文章列表頁側欄的分類、篩選、精選資訊
+- 首頁中的品牌敘事卡、摘要資訊卡
+- profile 頁中的非核心展示區塊
+
+但以下資料應優先保留真實來源：
+
+- 首頁精選文章
+- 文章列表
+- 文章詳細內容
+
+## 路由與頁面範圍
+
+本次公開前台需覆蓋以下頁面：
+
+- `/`：首頁
+- `/articles`：文章列表頁
+- `/post/:slug`：文章詳細頁
+- `/login`：登入頁
+- `/register`：註冊頁
+- `/profile`：個人資料頁
+
+後台路由與頁面不在本次範圍：
+
+- `/admin/*`
+
+## 實作範圍
+
+### 必改檔案類型
+
+- 公開前台 layout
+- 公開前台頁面元件
+- 公開前台樣式
+- router 公開前台路由
+- 公開前台文案與 i18n key
+- 前台相關測試
+
+### 非本次重點
+
+- 後台視覺調整
+- 後台資訊架構調整
+- 後台功能流程調整
+- API schema 重構
+- auth 邏輯重寫
+
+## 前後台樣式隔離要求
+
+公開前台與後台樣式必須分離，避免互相污染。
+
+最低要求如下：
+
+- 公開前台需有獨立樣式命名空間
+- 不可讓公開前台樣式覆蓋 admin layout 或 admin page class
+- 不可為了前台切版而破壞後台既有外觀
+- 可共用 base reset，但不可共用會影響視覺呈現的 class 命名
+
+建議做法：
+
+- 公開前台使用 `public-*` 命名空間
+- 後台維持既有 `neo-*` / admin 相關 class
+
+## 頁面規格
+
+### 首頁 `/`
+
+參考主版：`infohub`
+
+#### 視覺要求
+
+- `header`、hero、內容區、footer 需對齊 `infohub`
+- 首頁與文章列表頁必須拆成兩個獨立頁面，不可共用同一個路由
+- 視覺語言需以 editorial / info hub 風格呈現，不可沿用舊版 dark/neo 首頁結構
+
+#### 功能要求
+
+- 首頁需吃真實文章資料
+- 顯示最新 3 篇精選文章
+- 每篇文章需可連到 `/post/:slug`
+- 提供明確 CTA 導向 `/articles`
+
+#### 版型容忍策略
+
+- 精選卡片標題可截斷
+- 摘要可截斷
+- 圖片可固定比例
+- 圖片失敗可顯示 fallback
+
+### 文章列表頁 `/articles`
+
+參考主版：`_1`
+
+#### 視覺要求
+
+- 整體版面需貼近 `_1`
+- 側欄、清單密度、卡片節奏需以 `_1` 為主
+- 上下頁整體品牌語言仍需與首頁 `infohub` 一致
+
+#### 功能要求
+
+- 吃真實文章列表資料
+- 每張卡片需可進入文章詳細頁
+- 顯示 loading / error / empty state
+
+#### 假資料補位
+
+- 側欄先保留
+- 側欄內容先放假資料
+- 側欄篩選先不串功能
+- 不可做出誤導使用者的假 API 行為
+
+#### 版型容忍策略
+
+- 列表卡片高度可固定
+- 卡片文字可截斷
+- 圖片固定比例
+- 圖片 404 時改 fallback
+
+### 文章詳細頁 `/post/:slug`
+
+參考主版：`_2`
+
+#### 視覺要求
+
+- hero、標題區、閱讀區塊、返回動線需貼近 `_2`
+- 頁面需維持單篇閱讀感，不可退回列表式佈局
+
+#### 功能要求
+
+- 依 `slug` 取得文章資料
+- 顯示 loading / error / not found state
+- 顯示標題、摘要、作者資訊、發佈時間、內文
+- 需保留內容 sanitize / render 安全性
+
+#### 內容格式要求
+
+- 若內容為 HTML，直接走 sanitize render
+- 若內容為 Markdown，需轉為可閱讀 HTML 後再 render
+- 若圖片失敗，封面需有 fallback
+
+### 登入頁 `/login`
+
+#### 視覺要求
+
+- 無靜態稿，需延伸 `infohub` 品牌語言自行設計
+- `header` / `footer` 與公開前台一致
+- 表單區塊風格需屬於同一品牌，不可看起來像後台頁
+
+#### 功能要求
+
+- 保留既有登入流程
+- 保留錯誤提示
+- 保留送出狀態
+
+### 註冊頁 `/register`
+
+#### 視覺要求
+
+- 無靜態稿，依 `infohub` 品牌語言延伸
+- 需與登入頁成對一致
+
+#### 功能要求
+
+- 保留既有註冊流程
+- 保留錯誤提示與送出狀態
+
+### 個人資料頁 `/profile`
+
+#### 視覺要求
+
+- `header` 與 `footer` 必須與公開前台主版一致
+- 中央內容可自行設計
+- 整體視覺不可帶有管理後台感
+
+#### 功能要求
+
+- 保留既有登入態與資料顯示能力
+- 保留基本個人資料資訊
+- 保留必要動作入口
+
+## 技術策略
+
+### 前端框架
+
+- 維持 `Vue 3 + Vite + vue-router + vue-i18n`
+
+### 樣式策略
+
+- 不要求導入 Tailwind
+- 可用現有 Vue SFC + CSS 重寫版型
+- 不可直接把靜態 HTML 原封不動貼進正式頁面後不整理
+- 應整理出可維護的前台元件與樣式結構
+
+### 資料策略
+
+- 真資料優先：首頁精選、文章列表、文章詳細
+- 假資料補位：靜態稿有但系統尚未支援的展示區塊
+- 不可因為要貼近版型而拔除既有前台核心功能
+
+## i18n 要求
+
+- 不可硬編大量文案在 template 中
+- 新增或調整的標題、按鈕、說明文字應整理到語系檔
+- 可接受少量與資料內容強耦合的 fallback 文案直接寫在程式中，但應盡量避免
+
+## 驗收標準
+
+### 視覺驗收
+
+- 首頁與 `infohub` 高度相似
+- 文章列表頁與 `_1` 高度相似
+- 文章詳細頁與 `_2` 高度相似
+- `header` / `footer` 在公開前台頁面中一致
+- 手機版可正常使用，且布局不崩壞
+
+### 功能驗收
+
+- `/` 可正常顯示首頁精選文章
+- `/articles` 可正常顯示文章列表
+- `/post/:slug` 可正常開啟文章詳細內容
+- `/login` 可登入
+- `/register` 可註冊
+- `/profile` 可顯示個人資訊
+- 語系切換仍可運作
+
+### 兼容驗收
+
+- 後台樣式不被破壞
+- admin 頁面不應套到公開前台視覺
+- 路由切換不應造成公開頁與後台頁互相污染
+
+## 測試要求
+
+至少涵蓋：
+
+- router 對 `/`、`/articles`、`/post/:slug` 的公開前台路由行為
+- `PublicLayout` 的公開前台 header / footer / 導覽行為
+- 首頁 shell 與精選區
+- 文章列表頁 shell、側欄、文章清單
+- 文章詳細頁 shell 與內容 render
+- 登入 / 註冊 / 個人資料頁的公開前台 shell
+- 圖片 fallback 行為
+- Markdown 內容 render 行為
 
 ## 非目標
 
-- 不改後台 `AdminLayout` 與 admin pages 的外觀
-- 不重做後台資訊架構、表單流程或元件樣式
-- 不把整個前端專案遷移成 Tailwind 專案
-- 不更動後端 API schema、auth 規則或資料表結構
-- 不在這次改版內新增搜尋、分類篩選、收藏、分享等新功能；範本若出現這些區塊，僅當作視覺參考，不承諾實作
-
-## 現況觀察
-
-### 前台技術結構
-
-- 專案為 `Vue 3 + Vite + vue-router + vue-i18n`
-- 公開前台與後台目前共用同一份 `frontend/src/style.css`
-- 現有公開頁含：
-  - 首頁文章列表
-  - 文章內頁
-  - 登入頁
-  - 註冊頁
-  - 個人頁
-- `PublicLayout.vue` 已包含：
-  - 公開導覽列
-  - 手機選單
-  - 語系切換
-  - 登入 / 註冊 / 登出
-  - 管理入口顯示條件
-
-### 範本素材狀況
-
-- `_1/code.html` 提供資訊密度較高的文章列表頁、側欄、卡片節奏，應作為文章列表頁主參考
-- `infohub/code.html` 提供明亮暖色的品牌語言、首頁 hero、導覽、文章卡片與 editorial 細節，應作為其他公開頁的品牌母體
-- `_2/code.html` 提供長文型文章頁較完整的 editorial 結構，應作為文章詳細頁主參考
-- 終端目前讀取範本時出現亂碼，但使用者已確認原始檔為 UTF-8，因此應視為目前讀取/顯示環境問題，而非素材不可用
-
-## 設計原則
-
-### 1. 前後台樣式隔離
-
-- 後台維持現有 `neo-*` / admin 相關樣式，不在這次改版內重命名或換皮
-- 前台新增獨立視覺命名空間，不直接覆蓋 admin 使用中的 class
-- 前台改版後，不要求後台同步沿用同一套 design tokens
-- 若需抽取少量共用 reset/base，僅保留真正通用的基礎樣式，其餘明確分到 public 或 admin
-
-### 2. 保留行為，替換視覺層
-
-- 不變動公開前台頁面的主要資料來源與路由規則
-- 重新切出版型結構與 CSS，不把範本 HTML 生硬嵌進 Vue
-- 導覽、文章列表、文章內頁、登入/註冊/個人頁，全部保持現有功能意圖，只更新視覺與版面結構
-
-### 3. 列表頁用 `_1`，詳細頁用 `_2`，品牌語言用 `infohub`
-
-- 文章列表頁以 `_1` 的版面結構、資訊密度、側欄與卡片節奏為準
-- 文章詳細頁以 `_2` 的 editorial 結構與資訊節奏為準
-- 登入、註冊、個人頁沿用 `infohub` 的品牌語言延伸
-- `infohub` 負責整體品牌氣質、色彩、字體與前台共通語言
-
-### 4. 不導入 Tailwind 作為正式依賴
-
-- 範本使用 Tailwind CDN，但正式實作採用既有 `Vue SFC + CSS`
-- 理由：
-  - 目前專案沒有 Tailwind build pipeline
-  - 這次需求是換前台視覺，不是整體前端技術棧遷移
-  - 若直接在正式頁面依賴 CDN Tailwind，後續維護、tree shaking、樣式治理都較差
-
-## 視覺系統設計
-
-### 品牌方向
-
-- 氣質：warm technical editorial
-- 基底：明亮暖白 / 米白背景
-- 點綴：銅色、暖灰、深炭文字
-- 材質：玻璃感 panel、柔和邊框、多層次低對比陰影
-- 字體：延續範本使用的 `Noto Sans TC`
-
-### 前台 design tokens
-
-前台會整理成一組獨立 CSS variables，至少包含：
-
-- 色彩
-  - `--public-bg`
-  - `--public-surface`
-  - `--public-surface-soft`
-  - `--public-text`
-  - `--public-text-muted`
-  - `--public-accent`
-  - `--public-accent-strong`
-  - `--public-border`
-- 圓角
-  - 按鈕
-  - input
-  - 卡片
-  - 大型容器
-- 陰影
-  - 導覽玻璃層
-  - 卡片 ambient shadow
-  - 浮層 / menu shadow
-- 間距
-  - container width
-  - desktop / mobile gutter
-  - section vertical spacing
-- 字級
-  - hero title
-  - section title
-  - body
-  - meta / label
-
-### 與後台的關係
-
-- 後台保留目前 dark `neo-*` tokens
-- 前台 tokens 不覆蓋 admin tokens
-- 同一份 `style.css` 若繼續存在，需拆出清楚區段：
-  - base/reset
-  - public theme
-  - admin theme
-
-## 頁面設計
-
-### PublicLayout
-
-`frontend/src/layouts/PublicLayout.vue`
-
-負責：
-
-- 前台 sticky header
-- 品牌字樣 / 首頁入口
-- 公開導覽項目
-- 語系切換
-- 登入 / 註冊 / 登出 / 管理入口
-- 手機選單
-- 主內容容器
-- 前台 footer
-
-改版方向：
-
-- 以 `infohub` header/footer 為主
-- 導覽改成輕量、明亮、玻璃感 sticky bar
-- 保留既有 route active 狀態
-- 保留 mobile menu 開關與 route 切換時自動收合
-- 登入狀態與管理權限邏輯保持不變
-
-### 首頁 / 文章列表頁
-
-`frontend/src/pages/public/HomePage.vue`
-
-保留現有功能：
-
-- 進入頁面後打 `/api/posts`
-- 顯示 loading / error / empty / list
-- 每篇文章可進入 `/post/:slug`
-
-改版方向：
-
-- 以 `_1` 的列表頁結構為主：
-  - 頁首標題區
-  - 側欄資訊或過濾視覺區
-  - 較高資訊密度的文章卡片網格
-- 頁面品牌語言仍對齊 `infohub` 的暖色系、字體、邊框與陰影
-- 文章卡片以 `_1` 的資訊節奏為主，並套用 `infohub` 色彩語言：
-  - 封面圖
-  - 日期
-  - slug 或次要 metadata
-  - title
-  - excerpt
-  - CTA
-- 若現有資料不足以支撐範本中的分類、閱讀時間、作者頭像、排序或過濾等欄位，僅呈現現有可用欄位，不造假資料，也不新增假互動
-
-### 文章內頁
-
-`frontend/src/pages/public/PostDetailPage.vue`
-
-保留現有功能：
-
-- 根據 slug 載入單篇文章
-- 顯示 loading / not found / error
-- 顯示封面圖、標題、摘要、內容
-- 內容依現有 rich text sanitize/render 流程處理
-
-改版方向：
-
-- 整體風格以 `_2` 的文章頁結構為主，並套用 `infohub` 的品牌語言
-- 建立 editorial hero：
-  - 標題
-  - 摘要
-  - 日期
-  - 作者顯示名稱
-  - slug 或文章狀態作次要 metadata
-- 封面圖改成高品質主視覺區
-- 正文區提高閱讀舒適度：
-  - 控制最大寬度
-  - 優化段落、標題、清單、blockquote、code block、連結樣式
-- 側欄資訊是否保留，以「不破壞長文閱讀流」為準；可保留簡化版 metadata / back CTA，但不強行複製現有結構
-
-### 登入頁
-
-`frontend/src/pages/auth/LoginPage.vue`
-
-改版方向：
-
-- 沒有靜態稿，依 `infohub` 主風格自行延伸
-- 採用 editorial brand shell + 單欄或雙欄登入卡
-- 保留目前登入流程、錯誤顯示與跳轉邏輯
-- 表單元件樣式切到前台暖色主題，不沿用後台 dark `neo-*` 外觀
-
-### 註冊頁
-
-`frontend/src/pages/auth/RegisterPage.vue`
-
-改版方向：
-
-- 與登入頁維持同套品牌語言
-- 保留目前註冊流程與驗證提示
-- 版面可與登入頁共用視覺骨架，避免重複設計與 CSS
-
-### 個人頁
-
-`frontend/src/pages/auth/ProfilePage.vue`
-
-改版方向：
-
-- 依前台品牌語言延伸成 profile editorial dashboard
-- 保留目前資料顯示與編輯功能
-- 讓個人資料區、狀態區、表單區有清楚資訊層次
-
-## 元件與樣式邊界
-
-### 要改的主要檔案
-
-- `frontend/src/layouts/PublicLayout.vue`
-- `frontend/src/pages/public/HomePage.vue`
-- `frontend/src/pages/public/PostDetailPage.vue`
-- `frontend/src/pages/auth/LoginPage.vue`
-- `frontend/src/pages/auth/RegisterPage.vue`
-- `frontend/src/pages/auth/ProfilePage.vue`
-- `frontend/src/style.css`
-
-### 原則上不改的檔案
-
-- `frontend/src/layouts/AdminLayout.vue`
-- `frontend/src/pages/admin/*`
-- `frontend/src/services/*`
-- `frontend/src/stores/auth.ts`
-- `frontend/src/router/index.ts` 的路由結構本身
-
-### 可能需要小幅配合的檔案
-
-- `frontend/src/i18n/locales/zh-TW.ts`
-- `frontend/src/i18n/locales/en.ts`
-
-僅在以下情況補文字：
-
-- 新增前台頁面所需標題或說明文案 key
-- 補齊登入/註冊/個人頁在新版版面中需要的新 label
-
-## 資料與內容規則
-
-- 一律使用現有 API / auth / profile 資料
-- 不為了貼近範本而加入假的作者頭像、閱讀時間、分類資料
-- 若設計需要某類 metadata，但目前沒有對應資料，優先：
-  1. 省略
-  2. 改成現有欄位
-  3. 改成中性 UI 區塊
-- 文案以 i18n 為主，不直接抄範本中文字
-
-## 互動規格
-
-### 保留的既有行為
-
-- header active route 標示
-- mobile menu 開關
-- route 切換時 mobile menu 自動收合
-- 已登入時顯示登出
-- admin 角色顯示管理入口
-- 首頁文章列表 loading / error / empty state
-- 文章頁 loading / error / not found state
-
-### 可接受的調整
-
-- DOM 結構可大改
-- class 名稱可全面重構
-- loading / error / empty 區塊視覺可全面更新
-- 文章卡片資訊排序可調整
-
-## 測試影響
-
-### 必然受影響的測試
-
-- `frontend/tests/public-layout.spec.ts`
-
-原因：
-
-- header DOM 結構會重做
-- 手機選單的選擇器與文字內容可能改變
-
-### 需要回歸檢查的測試
-
-- `frontend/tests/router.spec.ts`
-- `frontend/tests/ui.spec.ts`
-- 與 auth 頁面相關的測試
-
-### 測試策略
-
-- 優先保留行為驗證，不綁死舊 class 名稱
-- 若測試目前過度依賴舊 DOM，需改成測行為或較穩定的 selector
-- 必要時補 `data-testid` 到新前台結構，特別是：
-  - mobile menu toggle
-  - mobile menu panel
-  - auth actions
-  - 主要 public nav links
-
-## 驗證方式
-
-- `npm test`
-- `npm run build`
-- 視覺回歸至少覆蓋：
-  - 首頁桌機
-  - 首頁手機
-  - 文章內頁桌機
-  - 登入頁
-  - 註冊頁
-  - 個人頁
-  - 後台頁面未受前台樣式污染
-
-## 風險與對策
-
-### 1. 共用 `style.css` 造成樣式互相污染
-
-對策：
-
-- 重新分區前台 / 後台樣式
-- 前台 class 使用獨立命名空間
-- 驗證 admin 頁面視覺未退化
-
-### 2. 範本和現有資料欄位不對齊
-
-對策：
-
-- 僅保留可由現有資料支撐的資訊
-- 把多餘範本元素視為裝飾，不視為功能需求
-
-### 3. 測試只會驗舊 DOM
-
-對策：
-
-- 讓測試改驗行為與穩定 selector
-- 新 DOM 若需測試支撐，主動補 `data-testid`
-
-### 4. 前台頁面缺少完整靜態稿
-
-對策：
-
-- 明確以 `infohub` 作為品牌母體，並讓列表頁在版面結構上優先貼近 `_1`
-- 登入、註冊、個人頁採同套 design tokens 與版面語言延伸
-- 避免另外發明與主版風格衝突的次品牌
-
-## 實作順序建議
-
-1. 先整理前台 design tokens 與樣式分區策略
-2. 重做 `PublicLayout.vue`
-3. 重做首頁
-4. 重做文章內頁
-5. 重做登入 / 註冊 / 個人頁
-6. 更新受影響測試
-7. 執行測試與 build
-
-## 設計結論
-
-這次需求屬於「公開前台整體換皮」，不是單純 CSS 覆蓋。最佳做法是以前台獨立視覺系統重切版面，保留現有 router、auth、API、i18n 與資料流程，同時把前後台樣式明確分離。文章列表頁以 `_1` 為主參考，文章詳細頁以 `_2` 為主參考，登入/註冊/個人頁則延伸 `infohub` 的品牌語言設計。
+本次不要求：
+
+- 後台改版
+- 後台與前台統一設計系統
+- 側欄假篩選真正可用
+- 新增新的公開 API
+- 內容管理流程重做
+
+## AI Agent 執行指引
+
+### 執行順序建議
+
+1. 先建立公開前台 design tokens 與樣式命名空間
+2. 調整 router，確認首頁與文章列表頁拆分
+3. 重做 `PublicLayout`
+4. 重做首頁
+5. 重做文章列表頁
+6. 重做文章詳細頁
+7. 補齊登入 / 註冊 / 個人資料頁
+8. 更新 i18n
+9. 更新測試
+10. 執行 `npm test` 與 `npm run build`
+
+### 實作限制
+
+- 不可修改後台視覺作為捷徑
+- 不可用「直接複製靜態 HTML 不拆結構」作為最終交付
+- 不可因版型還原而移除既有公開前台核心功能
+- 不可讓公開前台 class 汙染 admin 頁面
+
+## 備註
+
+本 spec 為公開 repo 可見文件，不應包含真實帳號、密鑰、私有網域或可識別個資。若需要示例值，一律使用 placeholder。

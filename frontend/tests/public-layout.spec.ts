@@ -24,6 +24,7 @@ function createTestRouter() {
     history: createMemoryHistory(),
     routes: [
       { path: '/', component: { template: '<div>home</div>' } },
+      { path: '/articles', component: { template: '<div>articles</div>' } },
       { path: '/profile', component: { template: '<div>profile</div>' } },
       { path: '/login', component: { template: '<div>login</div>' } },
       { path: '/register', component: { template: '<div>register</div>' } },
@@ -132,7 +133,8 @@ describe('PublicLayout mobile menu', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('探索文章')
-    expect(wrapper.text()).toContain('登入')
+    expect(wrapper.find('[data-testid="desktop-nav-home"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="desktop-nav-articles"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Simple Blog')
   })
 })

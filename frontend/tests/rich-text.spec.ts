@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { isHtmlLike, isMeaningfulEditorHtml, plainTextToHtml, sanitizeRenderHtml } from '../src/utils/richText'
+import { isHtmlLike, isMeaningfulEditorHtml, plainTextToHtml, renderRichContentHtml, sanitizeRenderHtml } from '../src/utils/richText'
 
 const apiFilesBaseUrl = new URL('/files/', import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com')
 const uploadedImageUrl = new URL('posts/2026/05/editor.webp', apiFilesBaseUrl).toString()
@@ -19,6 +19,12 @@ describe('rich text helpers', () => {
 
   it('converts plain text paragraphs into html blocks', () => {
     expect(plainTextToHtml('First line\n\nSecond line')).toBe('<p>First line</p><p>Second line</p>')
+  })
+
+  it('renders markdown content into sanitized html', () => {
+    expect(
+      renderRichContentHtml('# Title\n\nParagraph with **bold** text.\n\n- One\n- Two'),
+    ).toBe('<h1>Title</h1><p>Paragraph with <strong>bold</strong> text.</p><ul><li>One</li><li>Two</li></ul>')
   })
 
   it('sanitizes render html', () => {

@@ -1,55 +1,34 @@
 <template>
-  <section class="page-stack">
-    <p v-if="loading" class="status-message">{{ t('common.messages.loadingPost') }}</p>
-    <p v-else-if="!post" class="status-message error">{{ error || t('common.messages.postNotFound', { slug }) }}</p>
+  <section class="public-post-shell" data-testid="public-post-shell">
+    <p v-if="loading" class="public-status-message">{{ t('common.messages.loadingPost') }}</p>
+    <p v-else-if="!post" class="public-status-message error">{{ error || t('common.messages.postNotFound', { slug }) }}</p>
     <template v-else>
-      <div class="page-hero neo-shell">
-        <p class="eyebrow">{{ t('public.post.eyebrow') }}</p>
-        <h1 class="hero-title" style="font-size: clamp(2.2rem, 5vw, 4rem);">{{ post.title }}</h1>
-        <p class="hero-copy">{{ post.excerpt }}</p>
-        <div class="toolbar">
-          <span class="chip">{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
-          <span v-if="post.author.displayName" class="chip">{{ post.author.displayName }}</span>
-          <span class="chip">{{ post.slug }}</span>
+      <header class="public-post-hero" data-testid="public-post-hero">
+        <div class="public-article-meta">
+          <span>{{ t('public.post.eyebrow') }}</span>
+          <span>{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
         </div>
-      </div>
+        <h1 class="public-post-title">{{ post.title }}</h1>
+        <p class="public-post-excerpt">{{ post.excerpt }}</p>
+        <div class="public-post-author-row">
+          <span>{{ post.author.displayName ?? t('common.status.editorialDesk') }}</span>
+          <span>{{ post.slug }}</span>
+        </div>
+      </header>
 
-      <div class="reading-layout">
-        <article class="stack-card neo-shell" style="padding: 1.4rem;">
-          <div v-if="post.coverImageUrl" class="cover-frame neo-inset" style="aspect-ratio: 16 / 9;">
-            <img :src="post.coverImageUrl" :alt="post.title">
-          </div>
+      <article class="public-post-body" data-testid="public-post-body">
+        <PublicCoverMedia
+          v-if="post.coverImageUrl"
+          :src="post.coverImageUrl"
+          :alt="post.title"
+          :fallback-label="post.title"
+          variant="post"
+        />
+        <div class="public-rich-content rich-content" v-html="renderedContent"></div>
+      </article>
 
-          <div class="rich-content" v-html="renderedContent"></div>
-        </article>
-
-        <aside class="stack-card">
-          <div class="neo-panel">
-            <p class="stat-label">{{ t('public.post.metadata') }}</p>
-            <div class="metadata-list">
-              <div class="metadata-row">
-                <span class="metadata-label">{{ t('common.labels.published') }}</span>
-                <span class="metadata-value">{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
-              </div>
-              <div class="metadata-row">
-                <span class="metadata-label">{{ t('common.labels.author') }}</span>
-                <span class="metadata-value">{{ post.author.displayName ?? t('common.status.editorialDesk') }}</span>
-              </div>
-              <div class="metadata-row">
-                <span class="metadata-label">{{ t('common.labels.status') }}</span>
-                <span class="metadata-value">{{ t(`common.statusValues.${post.status}`) }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="neo-panel">
-            <p class="stat-label">{{ t('public.post.continue') }}</p>
-            <p class="section-copy">{{ t('public.post.continueCopy') }}</p>
-            <div class="inline-actions" style="margin-top: 1rem;">
-              <RouterLink class="neo-button primary" to="/">{{ t('common.actions.backToExplore') }}</RouterLink>
-            </div>
-          </div>
-        </aside>
+      <div class="public-post-footer-actions">
+        <RouterLink class="public-primary-link" to="/articles">{{ t('common.actions.backToExplore') }}</RouterLink>
       </div>
     </template>
   </section>
@@ -59,9 +38,10 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
+import PublicCoverMedia from '../../components/public/PublicCoverMedia.vue'
 import { createApiClient } from '../../services/api'
 import type { PublicPostDetail } from '../../types'
-import { isHtmlLike, plainTextToHtml, sanitizeRenderHtml } from '../../utils/richText'
+import { renderRichContentHtml } from '../../utils/richText'
 import { formatDisplayDate } from '../../utils/ui'
 
 const { locale, t } = useI18n()
@@ -72,7 +52,7 @@ const loading = ref(true)
 const error = ref('')
 const renderedContent = computed(() => {
   const content = post.value?.content ?? ''
-  return sanitizeRenderHtml(isHtmlLike(content) ? content : plainTextToHtml(content))
+  return renderRichContentHtml(content)
 })
 
 onMounted(async () => {

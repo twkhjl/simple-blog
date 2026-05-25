@@ -73,11 +73,10 @@ describe('ui helpers', () => {
   it('defines dedicated mobile public menu styles', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
 
-    expect(css).toContain('.mobile-menu-toggle')
-    expect(css).toContain('.mobile-menu-panel')
-    expect(css).toContain('.mobile-menu-section')
-    expect(css).toContain('.desktop-nav')
-    expect(css).toContain('.desktop-actions')
+    expect(css).toContain('.public-mobile-toggle')
+    expect(css).toContain('.public-mobile-panel')
+    expect(css).toContain('.public-desktop-nav')
+    expect(css).toContain('.public-header-actions')
   })
 
   it('adds locale switcher styling and localized login template bindings', () => {
@@ -86,6 +85,7 @@ describe('ui helpers', () => {
 
     expect(css).toContain('.locale-switcher')
     expect(css).toContain('.locale-switcher-option')
+    expect(css).toContain('.public-theme .locale-switcher')
     expect(loginPage).toContain("t('auth.login.title')")
     expect(loginPage).toContain("t('common.actions.login')")
   })
@@ -103,10 +103,9 @@ describe('ui helpers', () => {
   it('keeps public article action buttons from stretching to full card height', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
 
-    expect(css).toContain('.post-card .inline-actions')
-    expect(css).toContain('align-self: end')
-    expect(css).toContain('.post-card .inline-actions .neo-button')
-    expect(css).toContain('width: auto')
+    expect(css).toContain('.public-home-actions')
+    expect(css).toContain('.public-post-footer-actions')
+    expect(css).toContain('.public-primary-link')
   })
 
   it('styles inline editor images for both authoring and public views', () => {
@@ -165,11 +164,23 @@ describe('ui helpers', () => {
 
   it('uses a single-column reading layout on desktop post pages', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
-    const layoutRule = css.match(/\.reading-layout\s*\{[^}]*\}/)?.[0] ?? ''
-    const childRule = css.match(/\.reading-layout > \*\s*\{[^}]*\}/)?.[0] ?? ''
+    const layoutRule = css.match(/\.public-post-shell\s*\{[^}]*\}/)?.[0] ?? ''
+    const heroRule = css.match(/\.public-post-hero\s*\{[^}]*\}/)?.[0] ?? ''
 
-    expect(layoutRule).toContain('grid-template-columns: 1fr')
-    expect(layoutRule).toContain('justify-items: center')
-    expect(childRule).toContain('width: min(100%, 820px)')
+    expect(layoutRule).toContain('display: grid')
+    expect(layoutRule).toContain('gap: 2rem')
+    expect(heroRule).toContain('text-align: center')
+  })
+
+  it('defines public redesign shell selectors', () => {
+    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+
+    expect(css).toContain('--public-bg')
+    expect(css).toContain('.public-theme')
+    expect(css).toContain('.public-home-shell')
+    expect(css).toContain('.public-list-shell')
+    expect(css).toContain('.public-post-shell')
+    expect(css).toContain('.public-auth-shell')
+    expect(css).toContain('.public-profile-shell')
   })
 })

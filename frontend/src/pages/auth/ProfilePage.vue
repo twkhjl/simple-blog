@@ -1,53 +1,43 @@
 <template>
-  <section class="page-stack">
-    <div class="page-hero neo-shell">
-      <p class="eyebrow">{{ t('auth.profile.eyebrow') }}</p>
-      <h1 class="hero-title" style="font-size: clamp(2rem, 5vw, 3.5rem);">{{ t('auth.profile.title') }}</h1>
-      <p class="hero-copy">{{ t('auth.profile.copy') }}</p>
-    </div>
-
-    <p v-if="!profile" class="status-message error">{{ t('common.messages.pleaseLoginFirst') }}</p>
-    <div v-else class="split-layout">
-      <div class="stack-card neo-shell" style="padding: 1.5rem;">
-        <div class="stack-card">
-          <p class="eyebrow">{{ t('auth.profile.editableField') }}</p>
-          <h2 class="section-title">{{ t('auth.profile.displaySettings') }}</h2>
-          <p class="section-copy">{{ t('auth.profile.displaySettingsCopy') }}</p>
-        </div>
-
-        <form class="stack-card" @submit.prevent="handleSave">
-          <label class="field">
-            <span class="field-label">{{ t('common.labels.displayName') }}</span>
-            <input v-model="displayName" class="neo-input" type="text" maxlength="50" :placeholder="t('auth.profile.displayNamePlaceholder')">
-          </label>
-          <div class="inline-actions">
-            <button type="submit" class="neo-button primary" :disabled="saving">{{ t('common.actions.save') }}</button>
-          </div>
-        </form>
-
-        <p v-if="message" class="status-message" :class="{ error: !isSuccess, success: isSuccess }">{{ message }}</p>
+  <section class="public-profile-shell" data-testid="public-profile-shell">
+    <div class="public-profile-main">
+      <div class="stack-card" style="margin-bottom: 1.25rem;">
+        <p class="public-section-kicker">{{ t('auth.profile.eyebrow') }}</p>
+        <h1 class="public-section-title">{{ t('auth.profile.title') }}</h1>
+        <p class="public-section-copy">{{ t('auth.profile.copy') }}</p>
       </div>
 
-      <aside class="stack-card">
-        <div class="neo-panel">
-          <p class="stat-label">{{ t('auth.profile.metadata') }}</p>
-          <div class="metadata-list">
-            <div class="metadata-row">
-              <span class="metadata-label">{{ t('common.labels.email') }}</span>
-              <span class="metadata-value">{{ profile.email }}</span>
-            </div>
-            <div class="metadata-row">
-              <span class="metadata-label">{{ t('common.labels.role') }}</span>
-              <span class="metadata-value">{{ t(`common.statusValues.${profile.role}`) }}</span>
-            </div>
-            <div class="metadata-row">
-              <span class="metadata-label">{{ t('common.labels.accountStatus') }}</span>
-              <span class="metadata-value">{{ t(`common.statusValues.${profile.status}`) }}</span>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <p v-if="!profile" class="public-status-message error">{{ t('common.messages.pleaseLoginFirst') }}</p>
+      <template v-else>
+        <form @submit.prevent="handleSave">
+          <label class="public-field">
+            <span>{{ t('common.labels.displayName') }}</span>
+            <input v-model="displayName" class="public-input" type="text" maxlength="50" :placeholder="t('auth.profile.displayNamePlaceholder')">
+          </label>
+          <button type="submit" class="public-primary-button" :disabled="saving">{{ t('common.actions.save') }}</button>
+        </form>
+
+        <p v-if="message" class="public-status-message" :class="{ error: !isSuccess }" style="margin-top: 1rem;">{{ message }}</p>
+      </template>
     </div>
+
+    <aside class="public-profile-meta">
+      <p class="public-card-label">{{ t('auth.profile.metadata') }}</p>
+      <div v-if="profile" class="metadata-list" style="margin-top: 1rem;">
+        <div class="metadata-row">
+          <span class="metadata-label">{{ t('common.labels.email') }}</span>
+          <span class="metadata-value">{{ profile.email }}</span>
+        </div>
+        <div class="metadata-row">
+          <span class="metadata-label">{{ t('common.labels.role') }}</span>
+          <span class="metadata-value">{{ t(`common.statusValues.${profile.role}`) }}</span>
+        </div>
+        <div class="metadata-row">
+          <span class="metadata-label">{{ t('common.labels.accountStatus') }}</span>
+          <span class="metadata-value">{{ t(`common.statusValues.${profile.status}`) }}</span>
+        </div>
+      </div>
+    </aside>
   </section>
 </template>
 

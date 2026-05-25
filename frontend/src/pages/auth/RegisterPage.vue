@@ -1,32 +1,32 @@
 <template>
-  <section class="auth-shell">
-    <div class="auth-card neo-shell">
-      <div class="stack-card" style="margin-bottom: 1.2rem;">
-        <p class="eyebrow">{{ t('auth.register.eyebrow') }}</p>
-        <h1 class="section-title">{{ t('auth.register.title') }}</h1>
-        <p class="section-copy">{{ t('auth.register.copy') }}</p>
+  <section class="public-auth-shell" data-testid="public-auth-shell">
+    <div class="public-auth-card">
+      <div class="stack-card" style="margin-bottom: 1.25rem;">
+        <p class="public-section-kicker">{{ t('auth.register.eyebrow') }}</p>
+        <h1 class="public-section-title">{{ t('auth.register.title') }}</h1>
+        <p class="public-section-copy">{{ t('auth.register.copy') }}</p>
       </div>
 
       <form @submit.prevent="handleRegister">
-        <label class="field">
-          <span class="field-label">{{ t('common.labels.email') }}</span>
-          <input v-model="email" class="neo-input" type="email" autocomplete="email" required :placeholder="t('auth.register.emailPlaceholder')">
+        <label class="public-field">
+          <span>{{ t('common.labels.email') }}</span>
+          <input v-model="email" class="public-input" type="email" autocomplete="email" required :placeholder="t('auth.register.emailPlaceholder')">
         </label>
-        <label class="field">
-          <span class="field-label">{{ t('common.labels.password') }}</span>
+        <label class="public-field">
+          <span>{{ t('common.labels.password') }}</span>
           <input
             v-model="password"
-            class="neo-input"
+            class="public-input"
             type="password"
             autocomplete="new-password"
             required
             :placeholder="t('auth.register.passwordPlaceholder')"
           >
         </label>
-        <button type="submit" class="neo-button primary" :disabled="submitting">{{ t('auth.register.submit') }}</button>
+        <button type="submit" class="public-primary-button" :disabled="submitting">{{ t('auth.register.submit') }}</button>
       </form>
 
-      <p v-if="message" class="status-message" :class="{ error: !isSuccess, success: isSuccess }" style="margin-top: 1rem;">
+      <p v-if="message" class="public-status-message" :class="{ error: !isSuccess }" style="margin-top: 1rem;">
         {{ message }}
       </p>
     </div>
