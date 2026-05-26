@@ -1,24 +1,10 @@
-import { mount } from '@vue/test-utils'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import PublicCoverMedia from '../src/components/public/PublicCoverMedia.vue'
 
-describe('PublicCoverMedia', () => {
-  it('falls back to placeholder when cover image fails to load', async () => {
-    const wrapper = mount(PublicCoverMedia, {
-      props: {
-        src: 'https://cdn.example.com/missing.webp',
-        alt: 'Missing cover',
-        fallbackLabel: 'Missing cover',
-        variant: 'featured',
-      },
-    })
-
-    expect(wrapper.find('img').exists()).toBe(true)
-
-    await wrapper.find('img').trigger('error')
-
-    expect(wrapper.find('img').exists()).toBe(false)
-    expect(wrapper.find('[data-testid="public-cover-fallback"]').exists()).toBe(true)
-    expect(wrapper.text()).toContain('Missing cover')
+describe('legacy public media component cleanup', () => {
+  it('removes the old PublicCoverMedia component', () => {
+    const componentPath = resolve(__dirname, '../src/components/public/PublicCoverMedia.vue')
+    expect(existsSync(componentPath)).toBe(false)
   })
 })

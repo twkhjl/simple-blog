@@ -46,10 +46,10 @@ describe('i18n locale helpers', () => {
 
     const i18n = createAppI18n()
     const router = createAppRouter(i18n)
-    await router.push('/register')
+    await router.push('/login')
 
     applyDocumentTitle(router.currentRoute.value, i18n.global.t)
-    expect(document.title).toBe('Register | Simple Blog')
+    expect(document.title).toBe('Login | Simple Blog')
   }, 10000)
 
   it('renders literal at-signs in localized email placeholders', async () => {
@@ -57,11 +57,9 @@ describe('i18n locale helpers', () => {
     const i18n = createAppI18n()
 
     expect(i18n.global.t('auth.login.emailPlaceholder')).toBe('editor@demo.invalid')
-    expect(i18n.global.t('auth.register.emailPlaceholder')).toBe('writer@example.com')
 
     i18n.global.locale.value = 'zh-TW'
     expect(i18n.global.t('auth.login.emailPlaceholder')).toBe('editor@demo.invalid')
-    expect(i18n.global.t('auth.register.emailPlaceholder')).toBe('writer@example.com')
   })
 
   it('renders literal at-signs in footer contact copy', async () => {

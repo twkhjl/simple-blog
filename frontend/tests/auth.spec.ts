@@ -1,5 +1,3 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { extractAccessToken, hasAdminAccess } from '../src/services/auth'
 
@@ -15,15 +13,16 @@ describe('auth helpers', () => {
     expect(hasAdminAccess('user')).toBe(false)
   })
 
-  it('defines a dedicated admin login page contract with role gate messaging', () => {
-    const pagePath = resolve(__dirname, '../src/pages/auth/AdminLoginPage.vue')
+  it('keeps public login static and admin-only auth helpers separate', async () => {
+    const { existsSync, readFileSync } = await import('node:fs')
+    const { resolve } = await import('node:path')
+    const loginPath = resolve(__dirname, '../src/pages/auth/LoginPage.vue')
+    const adminLayoutPath = resolve(__dirname, '../src/layouts/AdminLayout.vue')
+    const source = existsSync(loginPath) ? readFileSync(loginPath, 'utf8') : ''
+    const adminSource = existsSync(adminLayoutPath) ? readFileSync(adminLayoutPath, 'utf8') : ''
 
-    expect(existsSync(pagePath)).toBe(true)
-
-    const source = existsSync(pagePath) ? readFileSync(pagePath, 'utf8') : ''
-
-    expect(source).toContain('data-testid="th-admin-login-page"')
-    expect(source).toContain("t('auth.adminLogin.forbidden')")
-    expect(source).toContain("router.push('/admin/posts')")
+    expect(source).not.toContain('signInWithPassword')
+    expect(source).not.toContain("router.push('/admin/posts')")
+    expect(adminSource).not.toContain("to=\"/profile\"")
   })
 })

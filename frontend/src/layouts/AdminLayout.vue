@@ -8,7 +8,7 @@
             <p class="brand-copy">{{ t('admin.layout.brandCopy') }}</p>
           </div>
           <div class="inline-actions">
-            <LocaleSwitcher />
+            <AdminLocaleSwitcher />
             <RouterLink class="neo-button" to="/">{{ t('common.actions.backToSite') }}</RouterLink>
             <RouterLink class="neo-button primary" to="/admin/posts/new">{{ t('common.actions.newPost') }}</RouterLink>
           </div>
@@ -27,7 +27,6 @@
           <RouterLink class="nav-link" :class="{ active: route.path.startsWith('/admin/posts') }" to="/admin/posts">
             {{ t('admin.layout.posts') }}
           </RouterLink>
-          <RouterLink class="nav-link" :class="{ active: route.path === '/profile' }" to="/profile">{{ t('admin.layout.profile') }}</RouterLink>
         </nav>
       </aside>
 
@@ -39,9 +38,10 @@
 </template>
 
 <script setup lang="ts">
+import '../style.css'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import LocaleSwitcher from '../components/app/LocaleSwitcher.vue'
+import AdminLocaleSwitcher from '../components/admin/AdminLocaleSwitcher.vue'
 
 const route = useRoute()
 const { t } = useI18n()

@@ -1,10 +1,10 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import LocaleSwitcher from '../src/components/app/LocaleSwitcher.vue'
+import AdminLocaleSwitcher from '../src/components/admin/AdminLocaleSwitcher.vue'
 import { createAppI18n } from '../src/i18n'
 
-describe('LocaleSwitcher', () => {
+describe('AdminLocaleSwitcher', () => {
   afterEach(() => {
     localStorage.clear()
     document.documentElement.lang = 'zh-Hant'
@@ -21,7 +21,7 @@ describe('LocaleSwitcher', () => {
     await router.isReady()
 
     const i18n = createAppI18n()
-    const wrapper = mount(LocaleSwitcher, {
+    const wrapper = mount(AdminLocaleSwitcher, {
       global: {
         plugins: [i18n, router],
       },

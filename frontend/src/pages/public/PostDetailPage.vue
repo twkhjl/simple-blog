@@ -1,111 +1,64 @@
 <template>
-  <section class="th-post-page" data-testid="th-post-page">
-    <p v-if="loading" class="th-status">{{ t('common.messages.loadingPost') }}</p>
-    <p v-else-if="!post" class="th-status error">{{ error || t('common.messages.postNotFound', { slug }) }}</p>
-
-    <template v-else>
-      <aside class="th-post-toc th-panel">
-        <h3 class="th-card-title">Table of Contents</h3>
-        <a v-for="entry in publicStaticContent.postDetail.toc" :key="entry.id" class="th-toc-link" :href="`#${entry.id}`">
-          {{ entry.label }}
-        </a>
-      </aside>
-
-      <article class="th-post-article">
-        <header class="th-post-header" data-testid="th-post-header">
-          <div class="th-chip-row">
-            <span v-for="tag in publicStaticContent.postDetail.tags" :key="tag" class="th-chip">{{ tag }}</span>
-          </div>
-          <h1 class="th-display">{{ post.title }}</h1>
-          <div class="th-meta-row">
-            <span>{{ post.author.displayName ?? t('common.status.editorialDesk') }}</span>
-            <span>{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
-            <span v-for="metric in publicStaticContent.postDetail.stats" :key="metric.icon">{{ metric.label }}</span>
-          </div>
-        </header>
-
-        <div class="th-post-cover th-panel">
-          <img v-if="post.coverImageUrl" :src="post.coverImageUrl" :alt="post.title">
-          <div v-else class="th-media-fallback large">{{ post.title }}</div>
+  <section class="front-post-page" data-testid="front-post-page">
+    <template v-if="post">
+      <header class="front-panel front-hero" data-testid="front-post-hero">
+        <p class="front-eyebrow">{{ post.category }}</p>
+        <h1 class="front-title">{{ post.title }}</h1>
+        <p class="front-copy">{{ post.excerpt }}</p>
+        <div class="front-meta-row">
+          <span>{{ post.author }}</span>
+          <span>{{ post.publishedAt }}</span>
+          <span>{{ post.readTime }}</span>
         </div>
+      </header>
 
-        <section class="th-post-content th-panel" data-testid="th-post-content">
-          <p id="intro" class="th-intro-copy">{{ post.excerpt }}</p>
-          <div id="core" class="th-rich-content rich-content" v-html="renderedContent"></div>
-          <blockquote id="design" class="th-quote">
-            Design now follows static references first; real data only fills article-specific fields.
-          </blockquote>
-          <p id="conclusion" class="th-muted">
-            Sidebar, reactions, and comments remain presentational until dedicated APIs exist.
-          </p>
-        </section>
-
-        <div class="th-post-actions">
-          <button v-for="action in publicStaticContent.postDetail.actions" :key="action.icon" class="th-icon-button">
-            <span class="material-symbols-outlined">{{ action.icon }}</span>
-            <span>{{ action.label }}</span>
-          </button>
-        </div>
-
-        <nav class="th-prev-next">
-          <RouterLink class="th-panel th-nav-card" to="/articles">{{ t('common.actions.backToExplore') }}</RouterLink>
-          <RouterLink class="th-panel th-nav-card" :to="`/post/${post.slug}`">{{ t('public.post.continue') }}</RouterLink>
-        </nav>
-
-        <section class="th-comments th-panel">
-          <h2 class="th-section-title">Comments</h2>
-          <div class="th-comment-form">
-            <textarea rows="4" placeholder="Comment form is static in this release." disabled />
+      <section class="front-post-grid">
+        <article class="front-panel">
+          <div class="front-post-cover">
+            <img :src="post.coverImageUrl" :alt="post.title">
           </div>
-          <article v-for="comment in publicStaticContent.postDetail.comments" :key="comment.author + comment.date" class="th-comment-card">
-            <div class="th-meta-row">
-              <span>{{ comment.author }}</span>
-              <span>{{ comment.date }}</span>
-            </div>
-            <p class="th-muted">{{ comment.body }}</p>
-          </article>
-        </section>
-      </article>
+          <div class="front-rich-copy" data-testid="front-post-body">
+            <p v-for="paragraph in post.content" :key="paragraph">{{ paragraph }}</p>
+          </div>
+        </article>
 
-      <section class="th-related-posts" data-testid="th-related-posts">
-        <h2 class="th-section-title">Related Articles</h2>
-        <div class="th-related-grid">
-          <article v-for="related in publicStaticContent.postDetail.related" :key="related.title" class="th-panel">
-            <span class="th-badge">{{ related.category }}</span>
-            <h3 class="th-card-title">{{ related.title }}</h3>
-            <p class="th-muted">{{ related.excerpt }}</p>
-          </article>
-        </div>
+        <aside class="front-panel front-side-card">
+          <p class="front-eyebrow">Article Notes</p>
+          <div class="front-side-note">
+            <p class="front-card-title">這頁只做閱讀版型</p>
+            <p class="front-card-copy">沒有 reaction、沒有真留言、沒有登入權限判斷，全部回到純閱讀展示。</p>
+          </div>
+          <div class="front-side-note">
+            <p class="front-card-title">延伸閱讀</p>
+            <RouterLink v-for="item in relatedPosts" :key="item.slug" class="front-drawer-link" :to="`/post/${item.slug}`">
+              {{ item.title }}
+            </RouterLink>
+          </div>
+        </aside>
       </section>
+
+      <div class="front-post-actions">
+        <RouterLink class="front-subtle-button" to="/articles">回文章列表</RouterLink>
+        <RouterLink class="front-action-button" to="/">回首頁</RouterLink>
+      </div>
     </template>
+
+    <section v-else class="front-panel front-page-head">
+      <p class="front-eyebrow">Not Found</p>
+      <h1 class="front-title">找不到這篇假資料文章。</h1>
+      <p class="front-copy">目前只保留固定 mock slug。若路由 slug 不存在，就顯示這個靜態提示頁。</p>
+      <RouterLink class="front-action-button" to="/articles">回文章列表</RouterLink>
+    </section>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { publicStaticContent } from '../../content/publicStaticContent'
-import { createApiClient } from '../../services/api'
-import type { PublicPostDetail } from '../../types'
-import { renderRichContentHtml } from '../../utils/richText'
-import { formatDisplayDate } from '../../utils/ui'
+import { getMockPostBySlug, publicMockContent } from '../../content/publicMockContent'
 
-const { locale, t } = useI18n()
 const route = useRoute()
 const slug = computed(() => String(route.params.slug ?? ''))
-const post = ref<PublicPostDetail | null>(null)
-const loading = ref(true)
-const error = ref('')
-const renderedContent = computed(() => renderRichContentHtml(post.value?.content ?? ''))
-
-onMounted(async () => {
-  try {
-    post.value = await createApiClient().get<PublicPostDetail>(`/api/posts/${slug.value}`)
-  } catch (fetchError) {
-    error.value = fetchError instanceof Error ? fetchError.message : t('common.messages.failedToLoadPost')
-  } finally {
-    loading.value = false
-  }
-})
+const post = computed(() => getMockPostBySlug(slug.value))
+const relatedPosts = computed(() => publicMockContent.posts.filter(item => item.slug !== slug.value).slice(0, 3))
 </script>

@@ -3,8 +3,6 @@ import AdminLayout from '../layouts/AdminLayout.vue'
 import PublicLayout from '../layouts/PublicLayout.vue'
 import AdminLoginPage from '../pages/auth/AdminLoginPage.vue'
 import LoginPage from '../pages/auth/LoginPage.vue'
-import ProfilePage from '../pages/auth/ProfilePage.vue'
-import RegisterPage from '../pages/auth/RegisterPage.vue'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.vue'
 import AdminPostEditPage from '../pages/admin/AdminPostEditPage.vue'
 import AdminPostListPage from '../pages/admin/AdminPostListPage.vue'
@@ -13,7 +11,7 @@ import AboutPage from '../pages/public/AboutPage.vue'
 import ContactPage from '../pages/public/ContactPage.vue'
 import HomePage from '../pages/public/HomePage.vue'
 import PostDetailPage from '../pages/public/PostDetailPage.vue'
-import { authState, canAccessAdmin, waitForAuthReady } from '../stores/auth'
+import { authState, canAccessAdmin, ensureAuthInitialized, waitForAuthReady } from '../stores/auth'
 import { applyDocumentTitle, syncDocumentLanguage, type AppLocale } from '../i18n'
 
 interface I18nLike {
@@ -42,8 +40,6 @@ export function createAppRouter(i18n?: I18nLike) {
           { path: 'about', component: AboutPage, meta: { titleKey: 'seo.about.title' } },
           { path: 'contact', component: ContactPage, meta: { titleKey: 'seo.contact.title' } },
           { path: 'login', component: LoginPage, meta: { titleKey: 'seo.login.title' } },
-          { path: 'register', component: RegisterPage, meta: { titleKey: 'seo.register.title' } },
-          { path: 'profile', component: ProfilePage, meta: { requiresAuth: true, titleKey: 'seo.profile.title' } },
         ],
       },
       {
@@ -66,7 +62,11 @@ export function createAppRouter(i18n?: I18nLike) {
   })
 
   router.beforeEach(async to => {
-    if ((to.meta.requiresAuth || to.meta.requiresAdmin) && !authState.ready) {
+    if (to.meta.requiresAdmin && !authState.ready && !authState.initializing) {
+      await ensureAuthInitialized()
+    }
+
+    if ((to.meta.requiresAuth || to.meta.requiresAdmin) && authState.initializing) {
       await waitForAuthReady()
     }
 
@@ -75,7 +75,7 @@ export function createAppRouter(i18n?: I18nLike) {
     }
 
     if (to.meta.requiresAdmin && !canAccessAdmin()) {
-      return authState.session ? '/profile' : '/admin/login'
+      return '/admin/login'
     }
 
     return true

@@ -29,7 +29,6 @@ import { applyDocumentTitle, setAppLocale, type AppLocale } from '../../i18n'
 
 const { locale, t } = useI18n()
 const route = useRoute()
-
 const currentLocale = computed(() => locale.value as AppLocale)
 
 function handleSwitch(nextLocale: AppLocale) {

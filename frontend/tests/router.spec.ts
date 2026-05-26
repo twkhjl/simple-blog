@@ -10,6 +10,7 @@ function resetAuthState() {
   authState.session = null
   authState.profile = null
   authState.ready = true
+  authState.initializing = false
   authState.error = null
   window.location.hash = ''
 }
@@ -36,8 +37,8 @@ describe('router', () => {
     expect(paths).toContain('/about')
     expect(paths).toContain('/contact')
     expect(paths).toContain('/login')
-    expect(paths).toContain('/register')
-    expect(paths).toContain('/profile')
+    expect(paths).not.toContain('/register')
+    expect(paths).not.toContain('/profile')
     expect(paths).toContain('/admin/login')
     expect(paths).toContain('/admin')
     expect(paths).toContain('/admin/posts')
@@ -52,12 +53,12 @@ describe('router', () => {
     expect(routes.find(route => route.path === '/admin/login')?.meta.titleKey).toBe('seo.adminLogin.title')
     expect(routes.find(route => route.path === '/articles')?.meta.titleKey).toBe('seo.articles.title')
     expect(routes.find(route => route.path === '/login')?.meta.titleKey).toBe('seo.login.title')
-    expect(routes.find(route => route.path === '/register')?.meta.titleKey).toBe('seo.register.title')
     expect(routes.find(route => route.path === '/admin/posts')?.meta.titleKey).toBe('seo.adminPosts.title')
   })
 
   it('waits for auth initialization before redirecting admin routes', async () => {
     authState.ready = false
+    authState.initializing = true
 
     const router = createAppRouter()
     const navigation = router.push('/admin/posts')
@@ -71,6 +72,7 @@ describe('router', () => {
       role: 'admin',
       status: 'active',
     } satisfies CurrentUser
+    authState.initializing = false
     authState.ready = true
 
     await navigation
@@ -92,6 +94,7 @@ describe('router', () => {
   it('does not bounce initial admin refresh to login before auth is ready', async () => {
     window.location.hash = '#/admin/posts'
     authState.ready = false
+    authState.initializing = true
 
     const router = createAppRouter()
     const i18n = createAppI18n()
@@ -113,6 +116,7 @@ describe('router', () => {
       role: 'admin',
       status: 'active',
     } satisfies CurrentUser
+    authState.initializing = false
     authState.ready = true
 
     await flushPromises()

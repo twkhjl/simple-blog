@@ -9,6 +9,7 @@ interface AuthState {
   session: Session | null
   profile: CurrentUser | null
   ready: boolean
+  initializing: boolean
   error: string | null
 }
 
@@ -16,8 +17,12 @@ export const authState = reactive<AuthState>({
   session: null,
   profile: null,
   ready: false,
+  initializing: false,
   error: null,
 })
+
+let authInitializationPromise: Promise<void> | null = null
+let authSubscriptionBound = false
 
 function createAuthedApiClient() {
   return createApiClient(fetch, () => extractAccessToken(authState.session))
@@ -41,7 +46,7 @@ export async function refreshProfile() {
   }
 }
 
-export async function initializeAuth() {
+async function runAuthInitialization() {
   try {
     const { data } = await getCurrentSession()
     authState.session = data.session
@@ -49,13 +54,36 @@ export async function initializeAuth() {
   } catch (error) {
     authState.error = error instanceof Error ? error.message : 'Failed to initialize auth'
   } finally {
+    authState.initializing = false
     authState.ready = true
   }
 
-  onAuthStateChange(async (_event, session) => {
-    authState.session = session
-    await refreshProfile()
-  })
+  if (!authSubscriptionBound) {
+    onAuthStateChange(async (_event, session) => {
+      authState.session = session
+      await refreshProfile()
+    })
+    authSubscriptionBound = true
+  }
+}
+
+export async function ensureAuthInitialized() {
+  if (authState.ready) {
+    return
+  }
+
+  if (!authInitializationPromise) {
+    authState.initializing = true
+    authInitializationPromise = runAuthInitialization().finally(() => {
+      authInitializationPromise = null
+    })
+  }
+
+  await authInitializationPromise
+}
+
+export async function initializeAuth() {
+  await ensureAuthInitialized()
 }
 
 export async function waitForAuthReady() {

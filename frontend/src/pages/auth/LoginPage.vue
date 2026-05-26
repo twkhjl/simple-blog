@@ -1,69 +1,29 @@
 <template>
-  <section class="th-login-page" data-testid="th-login-page">
-    <div class="th-auth-card">
-      <div class="th-auth-head">
-        <h1 class="th-display">{{ t('auth.login.title') }}</h1>
-        <p class="th-muted">{{ t('auth.login.copy') }}</p>
-      </div>
+  <section class="front-login-page" data-testid="front-login-page">
+    <header class="front-panel front-page-head">
+      <p class="front-eyebrow">{{ content.login.eyebrow }}</p>
+      <h1 class="front-title">{{ content.login.title }}</h1>
+      <p class="front-copy">{{ content.login.copy }}</p>
+    </header>
 
-      <form class="th-auth-form" @submit.prevent="handleLogin">
-        <label class="th-field">
-          <span>{{ t('common.labels.email') }}</span>
-          <input v-model="email" type="email" autocomplete="email" required :placeholder="t('auth.login.emailPlaceholder')">
+    <div class="front-login-card">
+      <form class="front-contact-form">
+        <label class="front-field">
+          <span>Email</span>
+          <input class="front-input" type="email" autocomplete="email" placeholder="editor@demo.invalid" disabled>
         </label>
-        <label class="th-field">
-          <span>{{ t('common.labels.password') }}</span>
-          <input
-            v-model="password"
-            type="password"
-            autocomplete="current-password"
-            required
-            :placeholder="t('auth.login.passwordPlaceholder')"
-          >
+        <label class="front-field">
+          <span>密碼</span>
+          <input class="front-input" type="password" autocomplete="current-password" placeholder="這一版前台不處理登入" disabled>
         </label>
-        <button type="submit" class="th-button th-button-primary" :disabled="submitting">{{ t('common.actions.login') }}</button>
+        <button type="button" class="front-subtle-button" disabled>登入功能未啟用</button>
       </form>
-
-      <p v-if="message" class="th-status" :class="{ error: !isSuccess }">{{ message }}</p>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
-import { hasAdminAccess } from '../../services/auth'
-import { signInWithPassword } from '../../services/supabase'
-import { refreshProfile } from '../../stores/auth'
+import { publicMockContent } from '../../content/publicMockContent'
 
-const { t } = useI18n()
-const router = useRouter()
-const email = ref('')
-const password = ref('')
-const message = ref('')
-const submitting = ref(false)
-const isSuccess = ref(false)
-
-async function handleLogin() {
-  submitting.value = true
-  message.value = ''
-  isSuccess.value = false
-
-  try {
-    const { error } = await signInWithPassword(email.value, password.value)
-    if (error) {
-      throw error
-    }
-
-    const profile = await refreshProfile()
-    isSuccess.value = true
-    message.value = t('common.messages.loginSuccess')
-    await router.push(hasAdminAccess(profile?.role) ? '/admin/posts' : '/profile')
-  } catch (error) {
-    message.value = error instanceof Error ? error.message : t('common.messages.loginFailed')
-  } finally {
-    submitting.value = false
-  }
-}
+const content = publicMockContent
 </script>

@@ -1,129 +1,85 @@
 <template>
-  <div class="th-theme">
-    <div
-      class="th-drawer-backdrop"
-      :class="{ open: isDrawerOpen }"
-      data-testid="th-drawer-backdrop"
-      @click="closeDrawer"
-    />
+  <div class="front-theme">
+    <div class="front-drawer-backdrop" :class="{ open: isDrawerOpen }" data-testid="front-drawer-backdrop" @click="closeDrawer" />
 
-    <aside class="th-drawer" :class="{ open: isDrawerOpen }" :data-open="isDrawerOpen ? 'true' : 'false'" data-testid="th-drawer">
-      <div class="th-drawer-header">
+    <aside class="front-drawer" :class="{ open: isDrawerOpen }" :data-open="isDrawerOpen ? 'true' : 'false'" data-testid="front-drawer">
+      <div class="front-drawer-head">
         <div>
-          <p class="th-drawer-title">Menu</p>
-          <p class="th-drawer-copy">{{ t('public.brand.title') }}</p>
+          <p class="front-eyebrow">Menu</p>
+          <p class="front-brand">{{ content.site.brand }}</p>
         </div>
-        <button type="button" class="th-icon-button" data-testid="th-drawer-close" @click="closeDrawer">
+        <button type="button" class="front-icon-button" data-testid="front-drawer-close" @click="closeDrawer">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
-      <nav class="th-drawer-nav">
-        <RouterLink class="th-drawer-link" data-testid="th-drawer-link-home" to="/" @click="closeDrawer">
-          <span class="material-symbols-outlined">home</span>
-          <span>{{ t('public.nav.home') }}</span>
-        </RouterLink>
-        <RouterLink class="th-drawer-link" data-testid="th-drawer-link-articles" to="/articles" @click="closeDrawer">
-          <span class="material-symbols-outlined">article</span>
-          <span>{{ t('public.nav.articles') }}</span>
-        </RouterLink>
-        <RouterLink class="th-drawer-link" data-testid="th-drawer-link-about" to="/about" @click="closeDrawer">
-          <span class="material-symbols-outlined">person</span>
-          <span>{{ t('public.nav.about') }}</span>
-        </RouterLink>
-        <RouterLink class="th-drawer-link" data-testid="th-drawer-link-contact" to="/contact" @click="closeDrawer">
-          <span class="material-symbols-outlined">mail</span>
-          <span>{{ t('public.nav.contact') }}</span>
-        </RouterLink>
-        <RouterLink class="th-drawer-link" data-testid="th-drawer-link-profile" to="/profile" @click="closeDrawer">
-          <span class="material-symbols-outlined">account_circle</span>
-          <span>{{ t('public.nav.profile') }}</span>
-        </RouterLink>
+      <nav class="front-drawer-links">
         <RouterLink
-          v-if="canAdmin"
-          class="th-drawer-link"
-          data-testid="th-drawer-link-admin"
-          to="/admin/posts"
+          v-for="item in content.site.nav"
+          :key="item.to"
+          class="front-drawer-link"
+          :data-testid="`front-drawer-link-${itemTestId(item.to)}`"
+          :to="item.to"
           @click="closeDrawer"
         >
-          <span class="material-symbols-outlined">admin_panel_settings</span>
-          <span>{{ t('public.nav.admin') }}</span>
+          {{ item.label }}
         </RouterLink>
       </nav>
 
-      <div class="th-drawer-footer">
-        <LocaleSwitcher />
-        <RouterLink v-if="!isLoggedIn" class="th-drawer-link" to="/login" @click="closeDrawer">
-          <span class="material-symbols-outlined">login</span>
-          <span>{{ t('common.actions.login') }}</span>
-        </RouterLink>
-        <button v-else type="button" class="th-drawer-link" data-testid="th-drawer-logout" @click="handleLogout">
-          <span class="material-symbols-outlined">logout</span>
-          <span>{{ t('common.actions.logout') }}</span>
-        </button>
-      </div>
+      <RouterLink class="front-login-link" to="/login" @click="closeDrawer">前台登入</RouterLink>
     </aside>
 
-    <header class="th-topbar-shell">
-      <div class="th-topbar">
-        <button type="button" class="th-icon-button" data-testid="th-drawer-toggle" @click="toggleDrawer">
+    <header class="front-header">
+      <div class="front-header-bar">
+        <button type="button" class="front-icon-button" data-testid="front-drawer-toggle" @click="toggleDrawer">
           <span class="material-symbols-outlined">menu</span>
         </button>
-        <RouterLink class="th-topbar-brand" data-testid="th-topbar-brand" to="/">{{ t('public.brand.title') }}</RouterLink>
-        <div class="th-topbar-actions">
-          <nav class="th-desktop-nav">
-            <RouterLink class="th-inline-link" data-testid="th-topbar-link-home" to="/">{{ t('public.nav.home') }}</RouterLink>
-            <RouterLink class="th-inline-link" to="/articles">{{ t('public.nav.articles') }}</RouterLink>
-            <RouterLink class="th-inline-link" to="/about">{{ t('public.nav.about') }}</RouterLink>
-            <RouterLink class="th-inline-link" to="/contact">{{ t('public.nav.contact') }}</RouterLink>
-          </nav>
-          <LocaleSwitcher />
+
+        <RouterLink class="front-brand-block" data-testid="front-brand" to="/">
+          <span class="front-brand">{{ content.site.brand }}</span>
+          <span class="front-brand-copy">{{ content.site.tagline }}</span>
+        </RouterLink>
+
+        <nav class="front-nav">
           <RouterLink
-            v-if="!isLoggedIn"
-            class="th-topbar-auth"
-            data-testid="th-topbar-auth"
-            to="/login"
+            v-for="item in content.site.nav"
+            :key="item.to"
+            class="front-nav-link"
+            :data-testid="`front-nav-link-${itemTestId(item.to)}`"
+            :to="item.to"
           >
-            {{ t('common.actions.login') }}
+            {{ item.label }}
           </RouterLink>
-          <button v-else class="th-topbar-auth" data-testid="th-topbar-auth" type="button" @click="handleLogout">
-            {{ t('common.actions.logout') }}
-          </button>
-        </div>
+        </nav>
+
+        <RouterLink class="front-login-link" data-testid="front-login-link" to="/login">前台登入</RouterLink>
       </div>
     </header>
 
-    <main class="th-main">
+    <main class="front-main">
       <RouterView />
     </main>
 
-    <footer class="th-footer">
-      <div class="th-footer-inner">
-        <p class="th-footer-brand">{{ t('public.brand.title') }}</p>
-        <p class="th-footer-copy">{{ t('public.brand.footerLead') }}</p>
-        <div class="th-footer-links">
-          <RouterLink class="th-footer-link" to="/about">{{ t('public.nav.about') }}</RouterLink>
-          <RouterLink class="th-footer-link" to="/contact">{{ t('public.nav.contact') }}</RouterLink>
-          <RouterLink class="th-footer-link" to="/articles">{{ t('public.nav.articles') }}</RouterLink>
-        </div>
-        <p class="th-footer-copy">{{ t('public.brand.footerCopy') }}</p>
+    <footer class="front-footer">
+      <p class="front-brand">{{ content.site.brand }}</p>
+      <p class="front-muted">{{ content.site.footerLead }}</p>
+      <div class="front-footer-links">
+        <RouterLink v-for="item in content.site.nav.slice(1)" :key="item.to" :to="item.to">{{ item.label }}</RouterLink>
       </div>
+      <p class="front-muted">{{ content.site.footerCopy }}</p>
     </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import '../styles/public.css'
+import { ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import LocaleSwitcher from '../components/app/LocaleSwitcher.vue'
-import { authState, canAccessAdmin, logout } from '../stores/auth'
+import { publicMockContent } from '../content/publicMockContent'
 
 const route = useRoute()
-const { t } = useI18n()
 const isDrawerOpen = ref(false)
-const isLoggedIn = computed(() => Boolean(authState.session))
-const canAdmin = computed(() => canAccessAdmin())
+const content = publicMockContent
 
 function toggleDrawer() {
   isDrawerOpen.value = !isDrawerOpen.value
@@ -133,9 +89,8 @@ function closeDrawer() {
   isDrawerOpen.value = false
 }
 
-async function handleLogout() {
-  closeDrawer()
-  await logout()
+function itemTestId(path: string) {
+  return path === '/' ? 'home' : path.replace('/', '')
 }
 
 watch(

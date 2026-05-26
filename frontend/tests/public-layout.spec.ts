@@ -1,23 +1,10 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createAppI18n } from '../src/i18n'
 import PublicLayout from '../src/layouts/PublicLayout.vue'
-import { authState, logout } from '../src/stores/auth'
-import type { CurrentUser } from '../src/types'
-
-vi.mock('../src/stores/auth', async () => {
-  const actual = await vi.importActual<typeof import('../src/stores/auth')>('../src/stores/auth')
-
-  return {
-    ...actual,
-    logout: vi.fn(async () => {
-      actual.authState.session = null
-      actual.authState.profile = null
-    }),
-  }
-})
+import { authState } from '../src/stores/auth'
 
 function createTestRouter() {
   return createRouter({
@@ -27,9 +14,7 @@ function createTestRouter() {
       { path: '/articles', component: { template: '<div>articles</div>' } },
       { path: '/about', component: { template: '<div>about</div>' } },
       { path: '/contact', component: { template: '<div>contact</div>' } },
-      { path: '/profile', component: { template: '<div>profile</div>' } },
       { path: '/login', component: { template: '<div>login</div>' } },
-      { path: '/register', component: { template: '<div>register</div>' } },
       { path: '/admin/posts', component: { template: '<div>admin</div>' } },
     ],
   })
@@ -39,26 +24,13 @@ function setLoggedOutState() {
   authState.session = null
   authState.profile = null
   authState.ready = true
-  authState.error = null
-}
-
-function setLoggedInAdminState() {
-  authState.session = { access_token: 'token-1' } as never
-  authState.profile = {
-    id: 'user-1',
-    email: 'user@example.com',
-    displayName: 'User',
-    role: 'admin',
-    status: 'active',
-  } satisfies CurrentUser
-  authState.ready = true
+  authState.initializing = false
   authState.error = null
 }
 
 describe('PublicLayout mobile menu', () => {
   beforeEach(() => {
     setLoggedOutState()
-    vi.clearAllMocks()
   })
 
   afterEach(() => {
@@ -77,27 +49,25 @@ describe('PublicLayout mobile menu', () => {
       },
     })
 
-    await wrapper.get('[data-testid="th-drawer-toggle"]').trigger('click')
-    expect(wrapper.get('[data-testid="th-drawer"]').attributes('data-open')).toBe('true')
+    await wrapper.get('[data-testid="front-drawer-toggle"]').trigger('click')
+    expect(wrapper.get('[data-testid="front-drawer"]').attributes('data-open')).toBe('true')
 
-    await wrapper.get('[data-testid="th-drawer-link-profile"]').trigger('click')
+    await wrapper.get('[data-testid="front-drawer-link-about"]').trigger('click')
     await nextTick()
 
-    expect(wrapper.get('[data-testid="th-drawer"]').attributes('data-open')).toBe('false')
+    expect(wrapper.get('[data-testid="front-drawer"]').attributes('data-open')).toBe('false')
 
-    await wrapper.get('[data-testid="th-drawer-toggle"]').trigger('click')
-    expect(wrapper.get('[data-testid="th-drawer"]').attributes('data-open')).toBe('true')
+    await wrapper.get('[data-testid="front-drawer-toggle"]').trigger('click')
+    expect(wrapper.get('[data-testid="front-drawer"]').attributes('data-open')).toBe('true')
 
-    await router.push('/profile')
+    await router.push('/contact')
     await flushPromises()
 
-    expect(router.currentRoute.value.path).toBe('/profile')
-    expect(wrapper.get('[data-testid="th-drawer"]').attributes('data-open')).toBe('false')
+    expect(router.currentRoute.value.path).toBe('/contact')
+    expect(wrapper.get('[data-testid="front-drawer"]').attributes('data-open')).toBe('false')
   })
 
-  it('shows auth actions inside mobile menu and closes after logout', async () => {
-    setLoggedInAdminState()
-
+  it('renders a public-only shell without profile, logout, or admin actions', async () => {
     const router = createTestRouter()
     const i18n = createAppI18n()
     await router.push('/')
@@ -109,17 +79,10 @@ describe('PublicLayout mobile menu', () => {
       },
     })
 
-    await wrapper.get('[data-testid="th-drawer-toggle"]').trigger('click')
-
-    expect(wrapper.text()).toContain('Logout')
-    expect(wrapper.text()).toContain('Admin')
-
-    await wrapper.get('[data-testid="th-drawer-logout"]').trigger('click')
-    await nextTick()
-
-    expect(logout).toHaveBeenCalledTimes(1)
-    expect(authState.session).toBeNull()
-    expect(wrapper.get('[data-testid="th-drawer"]').attributes('data-open')).toBe('false')
+    expect(wrapper.find('[data-testid="front-login-link"]').exists()).toBe(true)
+    expect(wrapper.text()).not.toContain('Logout')
+    expect(wrapper.text()).not.toContain('Profile')
+    expect(wrapper.text()).not.toContain('Admin')
   })
 
   it('renders localized public nav labels', async () => {
@@ -135,10 +98,10 @@ describe('PublicLayout mobile menu', () => {
       },
     })
 
-    expect(wrapper.find('[data-testid="th-topbar-link-home"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="th-drawer-link-articles"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="th-topbar-brand"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="th-topbar-auth"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="front-nav-link-home"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="front-drawer-link-articles"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="front-brand"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="front-login-link"]').exists()).toBe(true)
     expect(wrapper.text()).toContain('Simple Blog')
   })
 
@@ -154,11 +117,13 @@ describe('PublicLayout mobile menu', () => {
       },
     })
 
-    expect(wrapper.find('[data-testid="th-topbar-auth"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="front-login-link"]').exists()).toBe(true)
 
-    await wrapper.get('[data-testid="th-drawer-toggle"]').trigger('click')
+    await wrapper.get('[data-testid="front-drawer-toggle"]').trigger('click')
 
-    expect(wrapper.find('[data-testid="th-drawer-link-about"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="th-drawer-link-contact"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="front-nav-link-about"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="front-nav-link-contact"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="front-drawer-link-about"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="front-drawer-link-contact"]').exists()).toBe(true)
   })
 })

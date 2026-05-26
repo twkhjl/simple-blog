@@ -72,23 +72,24 @@ describe('ui helpers', () => {
   })
 
   it('defines dedicated mobile public menu styles', () => {
-    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const css = readFileSync(resolve(__dirname, '../src/styles/public.css'), 'utf8')
 
-    expect(css).toContain('.th-drawer')
-    expect(css).toContain('.th-topbar')
-    expect(css).toContain('.th-topbar-brand')
-    expect(css).toContain('.th-topbar-auth')
+    expect(css).toContain('.front-drawer')
+    expect(css).toContain('.front-header-bar')
+    expect(css).toContain('.front-brand')
+    expect(css).toContain('.front-login-link')
   })
 
-  it('adds locale switcher styling and localized login template bindings', () => {
+  it('keeps locale switcher in admin surface and public login as static template', () => {
     const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const adminLocaleSwitcher = readFileSync(resolve(__dirname, '../src/components/admin/AdminLocaleSwitcher.vue'), 'utf8')
     const loginPage = readFileSync(resolve(__dirname, '../src/pages/auth/LoginPage.vue'), 'utf8')
 
     expect(css).toContain('.locale-switcher')
     expect(css).toContain('.locale-switcher-option')
-    expect(css).toContain('.public-theme .locale-switcher')
-    expect(loginPage).toContain("t('auth.login.title')")
-    expect(loginPage).toContain("t('common.actions.login')")
+    expect(adminLocaleSwitcher).toContain("t('common.locale.zhTW')")
+    expect(loginPage).toContain('data-testid="front-login-page"')
+    expect(loginPage).toContain('登入功能未啟用')
   })
 
   it('does not render public cover fallback blocks when posts have no image', () => {
@@ -97,16 +98,17 @@ describe('ui helpers', () => {
 
     expect(homePage).not.toContain('class="media-fallback"')
     expect(postDetailPage).not.toContain('class="media-fallback"')
-    expect(homePage).toContain('v-if="post.coverImageUrl"')
-    expect(postDetailPage).toContain('v-if="post.coverImageUrl"')
+    expect(homePage).toContain('featured.coverImageUrl')
+    expect(postDetailPage).toContain('<img :src="post.coverImageUrl" :alt="post.title">')
   })
 
   it('keeps public article action buttons from stretching to full card height', () => {
-    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const css = readFileSync(resolve(__dirname, '../src/styles/public.css'), 'utf8')
 
-    expect(css).toContain('.th-home-actions')
-    expect(css).toContain('.th-post-actions')
-    expect(css).toContain('.th-action-link')
+    expect(css).toContain('.front-home-actions')
+    expect(css).toContain('.front-post-actions')
+    expect(css).toContain('.front-action-button')
+    expect(css).toContain('.front-subtle-button')
   })
 
   it('styles inline editor images for both authoring and public views', () => {
@@ -164,42 +166,41 @@ describe('ui helpers', () => {
   })
 
   it('uses a single-column reading layout on desktop post pages', () => {
-    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
-    const layoutRule = css.match(/\.th-post-page\s*\{[^}]*\}/)?.[0] ?? ''
-    const heroRule = css.match(/\.th-post-header\s*\{[^}]*\}/)?.[0] ?? ''
+    const css = readFileSync(resolve(__dirname, '../src/styles/public.css'), 'utf8')
+    const layoutRule = css.match(/\.front-post-page,[\s\S]*?\.front-login-page\s*\{[^}]*\}/)?.[0] ?? ''
+    const gridRule = css.match(/\.front-post-grid\s*\{[^}]*\}/)?.[0] ?? ''
 
     expect(layoutRule).toContain('display: grid')
-    expect(layoutRule).toContain('gap: 2rem')
-    expect(heroRule).toContain('text-align: center')
+    expect(layoutRule).toContain('gap: 1.5rem')
+    expect(gridRule).toContain('grid-template-columns: minmax(0, 1.7fr) minmax(260px, 0.7fr)')
   })
 
   it('defines public redesign shell selectors', () => {
-    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const css = readFileSync(resolve(__dirname, '../src/styles/public.css'), 'utf8')
 
-    expect(css).toContain('--th-bg')
-    expect(css).toContain('.th-theme')
-    expect(css).toContain('.th-home-page')
-    expect(css).toContain('.th-article-list-page')
-    expect(css).toContain('.th-post-page')
-    expect(css).toContain('.th-login-page')
-    expect(css).toContain('.public-profile-shell')
-    expect(css).toContain('.th-about-page')
-    expect(css).toContain('.th-contact-page')
-    expect(css).toContain('.th-admin-login-page')
+    expect(css).toContain('--front-bg')
+    expect(css).toContain('.front-theme')
+    expect(css).toContain('.front-page')
+    expect(css).toContain('.front-article-list-page')
+    expect(css).toContain('.front-post-page')
+    expect(css).toContain('.front-login-page')
+    expect(css).toContain('.front-about-page')
+    expect(css).toContain('.front-contact-page')
+    expect(css).toContain('.front-drawer')
   })
 
   it('keeps public header and footer full width with inner responsive wrappers', () => {
-    const css = readFileSync(resolve(__dirname, '../src/style.css'), 'utf8')
+    const css = readFileSync(resolve(__dirname, '../src/styles/public.css'), 'utf8')
     const layout = readFileSync(resolve(__dirname, '../src/layouts/PublicLayout.vue'), 'utf8')
-    const headerRule = css.match(/\.th-topbar-shell\s*\{[^}]*\}/)?.[0] ?? ''
-    const footerRule = css.match(/\.th-footer\s*\{[^}]*\}/)?.[0] ?? ''
-    const innerRule = css.match(/\.th-topbar,\s*[\r\n]+\s*\.th-footer-inner\s*\{[^}]*\}/)?.[0] ?? ''
+    const headerRule = css.match(/\.front-header\s*\{[^}]*\}/)?.[0] ?? ''
+    const footerRule = css.match(/\.front-footer\s*\{[^}]*\}/)?.[0] ?? ''
+    const innerRule = css.match(/\.front-header-bar\s*\{[^}]*\}/)?.[0] ?? ''
 
-    expect(layout).toContain('class="th-topbar"')
-    expect(layout).toContain('class="th-footer-inner"')
-    expect(headerRule).toContain('width: 100%')
-    expect(footerRule).toContain('width: 100%')
-    expect(innerRule).toContain('width: 100%')
+    expect(layout).toContain('class="front-header-bar"')
+    expect(layout).toContain('class="front-footer"')
+    expect(headerRule).toContain('position: sticky')
+    expect(footerRule).toContain('width: var(--front-container)')
+    expect(innerRule).toContain('width: var(--front-container)')
   })
 
   it('defines i18n labels for about, contact, and admin login gating', () => {

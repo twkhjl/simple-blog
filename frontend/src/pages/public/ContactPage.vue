@@ -1,47 +1,38 @@
 <template>
-  <section class="th-contact-page" data-testid="th-contact-page">
-    <header class="th-contact-head">
-      <h1 class="th-display">{{ t('public.contact.title') }}</h1>
-      <p class="th-lead">{{ publicStaticContent.contact.intro }}</p>
+  <section class="front-contact-page" data-testid="front-contact-page">
+    <header class="front-panel front-page-head">
+      <p class="front-eyebrow">{{ content.contact.eyebrow }}</p>
+      <h1 class="front-title">{{ content.contact.title }}</h1>
+      <p class="front-copy">{{ content.contact.intro }}</p>
     </header>
 
-    <div class="th-contact-card th-panel">
-      <form class="th-auth-form">
-        <label class="th-field">
-          <span>Name</span>
-          <input type="text" placeholder="Your name" disabled>
-        </label>
-        <label class="th-field">
-          <span>{{ t('common.labels.email') }}</span>
-          <input type="email" placeholder="your.email@example.com" disabled>
-        </label>
-        <label class="th-field">
-          <span>Subject</span>
-          <input type="text" placeholder="Project or question" disabled>
-        </label>
-        <label class="th-field">
-          <span>Message</span>
-          <textarea rows="5" placeholder="Static form for layout only." disabled></textarea>
-        </label>
-        <button type="button" class="th-button th-button-primary" disabled>Send</button>
-      </form>
-    </div>
-
-    <div class="th-contact-methods">
-      <article v-for="method in publicStaticContent.contact.methods" :key="method.label" class="th-panel">
-        <div class="th-info-row">
-          <span class="material-symbols-outlined">{{ method.icon }}</span>
-          <span class="th-card-title">{{ method.label }}</span>
-        </div>
-        <p class="th-muted">{{ method.value }}</p>
+    <div class="front-contact-grid">
+      <article v-for="item in content.contact.cards" :key="item.label" class="front-panel front-static-card">
+        <p class="front-card-category">{{ item.label }}</p>
+        <p class="front-card-copy">{{ item.value }}</p>
       </article>
     </div>
+
+    <form class="front-contact-form">
+      <label class="front-field">
+        <span>姓名</span>
+        <input class="front-input" type="text" placeholder="這裡只做展示，不會送出" disabled>
+      </label>
+      <label class="front-field">
+        <span>Email</span>
+        <input class="front-input" type="email" placeholder="demo@example.invalid" disabled>
+      </label>
+      <label class="front-field">
+        <span>訊息</span>
+        <textarea class="front-textarea" rows="6" disabled>前台聯絡表單目前不串功能，只保留新版型。</textarea>
+      </label>
+      <button class="front-subtle-button" type="button" disabled>送出功能未啟用</button>
+    </form>
   </section>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
-import { publicStaticContent } from '../../content/publicStaticContent'
+import { publicMockContent } from '../../content/publicMockContent'
 
-const { t } = useI18n()
+const content = publicMockContent
 </script>

@@ -1,37 +1,42 @@
 <template>
-  <section class="th-article-list-page" data-testid="th-article-list-page">
-    <header class="th-list-hero">
-      <h1 class="th-display">{{ t('public.articles.title') }}</h1>
-      <p class="th-lead">{{ t('public.articles.copy') }}</p>
+  <section class="front-article-list-page" data-testid="front-article-list-page">
+    <header class="front-panel front-page-head">
+      <p class="front-eyebrow">Archive</p>
+      <h1 class="front-title">新版文章列表全部改走假資料。</h1>
+      <p class="front-copy">
+        每一張卡片都來自本地 mock content，目的是先把前台版型完整定稿，不讓 API 與舊內容結構繼續干擾切版。
+      </p>
     </header>
 
-    <div class="th-article-list-filters" data-testid="th-article-list-filters">
-      <div class="th-chip-row">
-        <span v-for="filter in publicStaticContent.articleSidebar.filters" :key="filter" class="th-chip">{{ filter }}</span>
+    <section class="front-panel front-side-card" data-testid="front-article-filters">
+      <p class="front-eyebrow">Filters</p>
+      <div class="front-filter-row">
+        <span
+          v-for="filter in content.articleFilters"
+          :key="filter"
+          class="front-filter-chip"
+          :class="{ active: filter === content.articleFilters[0] }"
+        >
+          {{ filter }}
+        </span>
       </div>
-      <div class="th-chip-row">
-        <span v-for="sort in publicStaticContent.articleSidebar.sortOptions" :key="sort" class="th-chip subtle">{{ sort }}</span>
-      </div>
-    </div>
+    </section>
 
-    <section class="th-article-feed" data-testid="th-article-feed">
-      <p v-if="loading" class="th-status">{{ t('common.messages.loadingPosts') }}</p>
-      <p v-else-if="error" class="th-status error">{{ error }}</p>
-      <p v-else-if="!posts.length" class="th-status">{{ t('public.articles.emptyCopy') }}</p>
-
-      <article v-for="post in posts" :key="post.id" class="th-article-card th-panel">
-        <div class="th-article-card-media">
-          <img v-if="post.coverImageUrl" :src="post.coverImageUrl" :alt="post.title">
-          <div v-else class="th-media-fallback">{{ post.title }}</div>
+    <section class="front-article-feed" data-testid="front-article-feed">
+      <article v-for="post in content.posts" :key="post.id" class="front-panel front-list-card">
+        <img class="front-list-cover" :src="post.coverImageUrl" :alt="post.title">
+        <div class="front-meta-row">
+          <span class="front-card-category">{{ post.category }}</span>
+          <span>{{ post.publishedAt }}</span>
+          <span>{{ post.readTime }}</span>
         </div>
-        <div class="th-article-card-copy">
-          <div class="th-meta-row">
-            <span class="th-badge">{{ post.slug }}</span>
-            <span>{{ formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }}</span>
-          </div>
-          <h2 class="th-section-title">{{ post.title }}</h2>
-          <p class="th-muted">{{ post.excerpt }}</p>
-          <RouterLink class="th-action-link" :to="`/post/${post.slug}`">{{ t('common.actions.readPost') }}</RouterLink>
+        <div>
+          <h2 class="front-card-title">{{ post.title }}</h2>
+          <p class="front-card-copy">{{ post.excerpt }}</p>
+        </div>
+        <div class="front-post-actions">
+          <RouterLink class="front-action-button" :to="`/post/${post.slug}`">查看文章</RouterLink>
+          <span class="front-muted">{{ post.author }}</span>
         </div>
       </article>
     </section>
@@ -39,27 +44,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
-import { publicStaticContent } from '../../content/publicStaticContent'
-import { createApiClient } from '../../services/api'
-import type { PublicPostListItem } from '../../types'
-import { formatDisplayDate } from '../../utils/ui'
+import { publicMockContent } from '../../content/publicMockContent'
 
-const { locale, t } = useI18n()
-const posts = ref<PublicPostListItem[]>([])
-const loading = ref(true)
-const error = ref('')
-
-onMounted(async () => {
-  try {
-    const data = await createApiClient().get<{ items: PublicPostListItem[] }>('/api/posts')
-    posts.value = data.items
-  } catch (fetchError) {
-    error.value = fetchError instanceof Error ? fetchError.message : t('common.messages.failedToLoadPosts')
-  } finally {
-    loading.value = false
-  }
-})
+const content = publicMockContent
 </script>
