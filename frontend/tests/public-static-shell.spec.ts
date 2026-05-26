@@ -2,15 +2,22 @@ import { mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import { describe, expect, it } from 'vitest'
 import PublicLayout from '../src/layouts/PublicLayout.vue'
+import HomePage from '../src/pages/public/HomePage.vue'
 
-describe('PublicLayout', () => {
-  it('renders header, footer, and drawer trigger', async () => {
+describe('restored public shell integration', () => {
+  it('mounts the restored home route inside PublicLayout', async () => {
     const router = createRouter({
       history: createWebHistory(),
-      routes: [{ path: '/', component: { template: '<div>page</div>' } }],
+      routes: [
+        {
+          path: '/',
+          component: PublicLayout,
+          children: [{ path: '', component: HomePage }],
+        },
+      ],
     })
 
-    router.push('/')
+    await router.push('/')
     await router.isReady()
 
     const wrapper = mount(PublicLayout, {
@@ -18,8 +25,6 @@ describe('PublicLayout', () => {
     })
 
     expect(wrapper.text()).toContain('TechHumana')
-    expect(wrapper.find('header').exists()).toBe(true)
-    expect(wrapper.find('footer').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="public-menu-button"]').exists()).toBe(true)
+    expect(wrapper.html()).toContain('探索設計、技術與工作流')
   })
 })

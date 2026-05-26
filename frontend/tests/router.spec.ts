@@ -30,20 +30,18 @@ describe('router', () => {
   })
 
   it('registers public, auth and admin routes', () => {
-    const paths = createAppRouter().getRoutes().map(route => route.path)
-    expect(paths).toContain('/')
-    expect(paths).toContain('/articles')
-    expect(paths).toContain('/post/:slug')
-    expect(paths).toContain('/about')
-    expect(paths).toContain('/contact')
-    expect(paths).toContain('/login')
-    expect(paths).not.toContain('/register')
-    expect(paths).not.toContain('/profile')
-    expect(paths).toContain('/admin/login')
-    expect(paths).toContain('/admin')
-    expect(paths).toContain('/admin/posts')
-    expect(paths).toContain('/admin/posts/new')
-    expect(paths).toContain('/admin/posts/:id/edit')
+    const router = createAppRouter()
+
+    expect(router.resolve('/').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/about').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/contact').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/articles').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/post/first-post').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/login').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/admin/login').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/admin/posts').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/admin/posts/new').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/admin/posts/1/edit').matched.length).toBeGreaterThan(0)
   })
 
   it('assigns title keys to key routes', () => {

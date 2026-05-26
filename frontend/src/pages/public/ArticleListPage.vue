@@ -1,51 +1,49 @@
-<template>
-  <section class="front-article-list-page" data-testid="front-article-list-page">
-    <header class="front-panel front-page-head">
-      <p class="front-eyebrow">Archive</p>
-      <h1 class="front-title">新版文章列表全部改走假資料。</h1>
-      <p class="front-copy">
-        每一張卡片都來自本地 mock content，目的是先把前台版型完整定稿，不讓 API 與舊內容結構繼續干擾切版。
-      </p>
-    </header>
+<script setup lang="ts">
+import { publicMockContent } from '../../content/publicMockContent'
+</script>
 
-    <section class="front-panel front-side-card" data-testid="front-article-filters">
-      <p class="front-eyebrow">Filters</p>
-      <div class="front-filter-row">
-        <span
-          v-for="filter in content.articleFilters"
-          :key="filter"
-          class="front-filter-chip"
-          :class="{ active: filter === content.articleFilters[0] }"
+<template>
+  <main class="flex-grow w-full max-w-container-max mx-auto px-gutter py-lg md:py-xl flex flex-col gap-xl">
+    <section class="flex flex-col gap-md">
+      <h1 class="font-display-lg text-display-lg text-on-surface">文章列表</h1>
+      <div class="neu-flat rounded-lg flex items-center p-1 gap-sm overflow-x-auto">
+        <button class="px-4 py-2 rounded-full bg-surface-container-high text-secondary font-label-md">全部</button>
+        <button
+          v-for="post in publicMockContent.posts"
+          :key="`${post.id}-chip`"
+          class="px-4 py-2 rounded-full text-on-surface-variant font-label-md whitespace-nowrap"
         >
-          {{ filter }}
-        </span>
+          {{ post.category }}
+        </button>
       </div>
     </section>
 
-    <section class="front-article-feed" data-testid="front-article-feed">
-      <article v-for="post in content.posts" :key="post.id" class="front-panel front-list-card">
-        <img class="front-list-cover" :src="post.coverImageUrl" :alt="post.title">
-        <div class="front-meta-row">
-          <span class="front-card-category">{{ post.category }}</span>
-          <span>{{ post.publishedAt }}</span>
-          <span>{{ post.readTime }}</span>
+    <section class="flex flex-col gap-md">
+      <article
+        v-for="post in publicMockContent.posts"
+        :key="post.id"
+        class="neu-card rounded-xl p-md md:p-lg flex flex-col md:flex-row gap-md items-start group cursor-pointer"
+      >
+        <div class="w-full md:w-1/3 aspect-video rounded-lg overflow-hidden bg-surface-container-low relative neu-pressed">
+          <img :src="post.coverImageUrl" :alt="post.title" class="w-full h-full object-cover" />
         </div>
-        <div>
-          <h2 class="front-card-title">{{ post.title }}</h2>
-          <p class="front-card-copy">{{ post.excerpt }}</p>
-        </div>
-        <div class="front-post-actions">
-          <RouterLink class="front-action-button" :to="`/post/${post.slug}`">查看文章</RouterLink>
-          <span class="front-muted">{{ post.author }}</span>
+        <div class="w-full md:flex-1 flex flex-col gap-sm">
+          <div class="flex items-center gap-sm text-outline">
+            <span class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-0.5 rounded-full border border-outline-variant/30">
+              {{ post.category }}
+            </span>
+            <span class="font-label-sm">{{ post.publishedAt }}</span>
+          </div>
+          <h2 class="font-headline-lg-mobile md:font-headline-lg text-on-surface">{{ post.title }}</h2>
+          <p class="font-body-md text-body-md text-on-surface-variant">{{ post.excerpt }}</p>
+          <div class="flex items-center gap-sm text-outline">
+            <span>{{ post.slug }}</span>
+            <span>•</span>
+            <span>{{ post.readTime }}</span>
+          </div>
+          <RouterLink :to="`/post/${post.slug}`" class="text-secondary font-label-md">閱讀全文</RouterLink>
         </div>
       </article>
     </section>
-  </section>
+  </main>
 </template>
-
-<script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import { publicMockContent } from '../../content/publicMockContent'
-
-const content = publicMockContent
-</script>

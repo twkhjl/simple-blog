@@ -1,76 +1,29 @@
-<template>
-  <section class="th-admin-login-page" data-testid="th-admin-login-page">
-    <div class="th-auth-card dark">
-      <div class="th-auth-head">
-        <span class="material-symbols-outlined th-admin-icon">admin_panel_settings</span>
-        <h1 class="th-display">{{ t('auth.adminLogin.title') }}</h1>
-        <p class="th-muted">{{ t('auth.adminLogin.copy') }}</p>
-      </div>
-
-      <form class="th-auth-form" @submit.prevent="handleLogin">
-        <label class="th-field">
-          <span>{{ t('common.labels.email') }}</span>
-          <input v-model="email" type="email" autocomplete="email" required :placeholder="t('auth.login.emailPlaceholder')">
-        </label>
-        <label class="th-field">
-          <span>{{ t('common.labels.password') }}</span>
-          <input
-            v-model="password"
-            type="password"
-            autocomplete="current-password"
-            required
-            :placeholder="t('auth.login.passwordPlaceholder')"
-          >
-        </label>
-        <button type="submit" class="th-button th-button-primary" :disabled="submitting">{{ t('auth.adminLogin.title') }}</button>
-      </form>
-
-      <p v-if="message" class="th-status" :class="{ error: !isSuccess }">{{ message }}</p>
-    </div>
-  </section>
-</template>
-
 <script setup lang="ts">
-import '../../style.css'
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
-import { hasAdminAccess } from '../../services/auth'
-import { signInWithPassword } from '../../services/supabase'
-import { logout, refreshProfile } from '../../stores/auth'
+import { publicMockContent } from '../../content/publicMockContent'
 
-const { t } = useI18n()
-const router = useRouter()
-const email = ref('')
-const password = ref('')
-const message = ref('')
-const submitting = ref(false)
-const isSuccess = ref(false)
-
-async function handleLogin() {
-  submitting.value = true
-  message.value = ''
-  isSuccess.value = false
-
-  try {
-    const { error } = await signInWithPassword(email.value, password.value)
-    if (error) {
-      throw error
-    }
-
-    const profile = await refreshProfile()
-    if (!hasAdminAccess(profile?.role)) {
-      await logout()
-      throw new Error(t('auth.adminLogin.forbidden'))
-    }
-
-    isSuccess.value = true
-    message.value = t('common.messages.loginSuccess')
-    await router.push('/admin/posts')
-  } catch (error) {
-    message.value = error instanceof Error ? error.message : t('common.messages.loginFailed')
-  } finally {
-    submitting.value = false
-  }
+function handleSubmit(event: Event) {
+  event.preventDefault()
 }
 </script>
+
+<template>
+  <main class="flex-grow flex items-center justify-center pt-[100px] pb-xl px-gutter relative overflow-hidden">
+    <form class="w-full max-w-md bg-primary-container rounded-[32px] p-8 md:p-12 neo-shadow" @submit="handleSubmit">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 rounded-full bg-surface-container-lowest flex items-center justify-center neo-pressed mb-4 mx-auto border border-tertiary-fixed/30">
+          <span class="material-symbols-outlined text-secondary text-[30px]">shield_lock</span>
+        </div>
+        <h1 class="font-display-lg text-display-lg text-on-surface mb-sm">{{ publicMockContent.adminLogin.title }}</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">{{ publicMockContent.adminLogin.copy }}</p>
+      </div>
+      <div class="space-y-5">
+        <input class="w-full bg-surface-dim text-on-surface rounded-lg py-3 pl-4 pr-4 font-body-md shadow-[inset_2px_2px_5px_#c2b5ac,inset_-2px_-2px_5px_#ffffff] border border-transparent neo-input-focus transition-all duration-300 placeholder:text-outline" type="email" placeholder="admin@techhumana.com" />
+        <input class="w-full bg-surface-dim text-on-surface rounded-lg py-3 pl-4 pr-4 font-body-md shadow-[inset_2px_2px_5px_#c2b5ac,inset_-2px_-2px_5px_#ffffff] border border-transparent neo-input-focus transition-all duration-300 placeholder:text-outline" type="password" placeholder="••••••••" />
+        <button class="w-full h-14 mt-4 rounded-xl bg-surface text-secondary font-label-md text-label-md tracking-widest neo-btn flex items-center justify-center gap-2 group" type="submit">
+          <span>管理員登入</span>
+          <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </button>
+      </div>
+    </form>
+  </main>
+</template>
