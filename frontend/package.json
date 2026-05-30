@@ -7,7 +7,8 @@
     "dev": "vite --host 127.0.0.1 --port 5173",
     "build": "vue-tsc --noEmit && vite build",
     "test": "vitest run --passWithNoTests",
-    "check": "npm test && npm run build"
+    "check:static-html": "node scripts/check-no-static-html-deps.mjs",
+    "check": "npm run check:static-html && npm test && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
