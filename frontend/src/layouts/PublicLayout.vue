@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../styles/public.css'
 import { ref } from 'vue'
 import { RouterView } from 'vue-router'
 import PublicDrawer from '../components/public/PublicDrawer.vue'
@@ -10,26 +11,27 @@ const drawerOpen = ref(false)
 </script>
 
 <template>
-  <div class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col pt-[72px]">
-    <div
-      :class="drawerOpen ? 'opacity-100' : 'hidden opacity-0'"
-      class="fixed inset-0 bg-on-surface/40 z-[60] transition-opacity duration-300"
-      @click="drawerOpen = false"
-    ></div>
+  <div data-testid="public-layout" class="front-theme">
+    <div class="front-drawer-backdrop" :class="{ open: drawerOpen }" @click="drawerOpen = false"></div>
     <PublicDrawer
+      :brand="publicMockContent.site.brand"
+      :sign-in-label="publicMockContent.site.signInLabel"
       :open="drawerOpen"
       :nav="publicMockContent.site.nav"
       @close="drawerOpen = false"
     />
-    <div class="front-header-bar">
+    <header class="front-header">
       <PublicHeader
+        :brand="publicMockContent.site.brand"
         :sign-in-label="publicMockContent.site.signInLabel"
         @toggle-menu="drawerOpen = !drawerOpen"
       />
-    </div>
+    </header>
     <RouterView />
-    <div class="front-footer">
-      <PublicFooter />
-    </div>
+    <PublicFooter
+      :brand="publicMockContent.site.brand"
+      :copy="publicMockContent.site.footerCopy"
+      :links="publicMockContent.site.footerLinks"
+    />
   </div>
 </template>

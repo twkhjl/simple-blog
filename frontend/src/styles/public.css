@@ -16,6 +16,11 @@
   --front-radius-sm: 18px;
 }
 
+.front-theme,
+.front-theme * {
+  box-sizing: border-box;
+}
+
 .front-theme {
   min-height: 100vh;
   color: var(--front-text);
@@ -51,6 +56,7 @@
 
 .front-header-bar {
   width: var(--front-container);
+  max-width: 100%;
   margin: 0 auto;
   border-radius: 999px;
   padding: 0.9rem 1.1rem;
@@ -132,6 +138,9 @@
 
 .front-login-link {
   margin-left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #fff;
   background: linear-gradient(135deg, var(--front-accent) 0%, #ab6632 100%);
   box-shadow: 0 16px 28px rgba(137, 80, 39, 0.22);
@@ -139,8 +148,14 @@
 
 .front-main {
   width: var(--front-container);
+  max-width: 100%;
   margin: 0 auto;
   padding: 2rem 0 4rem;
+  overflow-x: clip;
+}
+
+.front-main > * {
+  min-width: 0;
 }
 
 .front-drawer-backdrop {
@@ -231,6 +246,7 @@
   font-size: clamp(2.2rem, 6vw, 4.2rem);
   line-height: 1.06;
   letter-spacing: -0.04em;
+  word-break: break-word;
 }
 
 .front-copy {
@@ -289,6 +305,7 @@
 .front-list-card,
 .front-side-card,
 .front-static-card {
+  min-width: 0;
   padding: 1.2rem;
   border-radius: var(--front-radius-md);
 }
@@ -316,6 +333,7 @@
 .front-featured-image,
 .front-post-cover img,
 .front-list-cover {
+  max-width: 100%;
   width: 100%;
   border-radius: 24px;
   object-fit: cover;
@@ -377,6 +395,7 @@
   font-family: 'Noto Serif TC', serif;
   font-size: 1.35rem;
   line-height: 1.3;
+  word-break: break-word;
 }
 
 .front-card-copy,
@@ -385,6 +404,7 @@
 .front-textarea {
   color: var(--front-text-soft);
   line-height: 1.8;
+  overflow-wrap: anywhere;
 }
 
 .front-post-grid {
@@ -423,9 +443,18 @@
   gap: 0.9rem;
 }
 
+.front-contact-grid .front-contact-form {
+  grid-column: 1 / -1;
+}
+
 .front-field {
   display: grid;
   gap: 0.45rem;
+}
+
+.front-field label {
+  font-weight: 600;
+  color: var(--front-text);
 }
 
 .front-input,
@@ -447,6 +476,7 @@
 
 .front-footer {
   width: var(--front-container);
+  max-width: 100%;
   margin: 0 auto 1.5rem;
   padding: 1.4rem;
   border-radius: var(--front-radius-lg);
@@ -455,6 +485,8 @@
 }
 
 .front-footer-links {
+  display: flex;
+  flex-wrap: wrap;
   color: var(--front-text-soft);
 }
 
@@ -482,7 +514,8 @@
 
 @media (max-width: 640px) {
   .front-title {
-    font-size: 2.4rem;
+    font-size: 2rem;
+    line-height: 1.15;
   }
 
   .front-header-bar {
@@ -492,6 +525,13 @@
   .front-home-actions,
   .front-post-actions {
     display: grid;
+  }
+
+  .front-metric-grid,
+  .front-static-grid,
+  .front-contact-grid,
+  .front-article-feed {
+    grid-template-columns: 1fr;
   }
 
   .front-action-button,

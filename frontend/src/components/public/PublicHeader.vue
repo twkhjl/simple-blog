@@ -1,5 +1,6 @@
 <script setup lang="ts">
 defineProps<{
+  brand: string
   signInLabel: string
 }>()
 
@@ -9,21 +10,27 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-gutter py-sm max-w-container-max mx-auto bg-surface shadow-[4px_4px_10px_#e7d7cd,-4px_-4px_10px_#ffffff] border-b border-outline-variant/10">
+  <div data-testid="public-header" class="front-header-bar">
     <button
       data-testid="public-menu-button"
       type="button"
-      class="text-primary hover:bg-surface-container-high transition-all duration-300 active:neu-pressed scale-95 p-2 rounded-full flex items-center justify-center"
+      class="front-icon-button"
       @click="emit('toggleMenu')"
     >
       <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
     </button>
-    <div class="font-headline-lg-mobile text-headline-lg-mobile md:font-display-lg md:text-display-lg text-secondary">TechHumana</div>
-    <RouterLink
-      to="/login"
-      class="text-primary hover:bg-surface-container-high transition-all duration-300 active:neu-pressed scale-95 px-4 py-2 rounded-lg font-label-md text-label-md"
-    >
+    <div class="front-brand-block">
+      <RouterLink to="/" class="front-brand">{{ brand }}</RouterLink>
+      <p class="front-brand-copy">Readable systems, durable decisions.</p>
+    </div>
+    <nav class="front-nav" aria-label="Main">
+      <RouterLink to="/" class="front-nav-link">首頁</RouterLink>
+      <RouterLink to="/articles" class="front-nav-link">文章</RouterLink>
+      <RouterLink to="/about" class="front-nav-link">關於</RouterLink>
+      <RouterLink to="/contact" class="front-nav-link">聯絡</RouterLink>
+    </nav>
+    <RouterLink to="/login" class="front-login-link">
       {{ signInLabel }}
     </RouterLink>
-  </header>
+  </div>
 </template>

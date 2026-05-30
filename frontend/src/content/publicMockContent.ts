@@ -1,94 +1,154 @@
-export interface PublicMockPost {
-  id: string
-  title: string
-  slug: string
-  excerpt: string
-  publishedAt: string
-  coverImageUrl: string
-  category: string
-  readTime: string
-  author: string
-  content: string[]
-}
+import type {
+  PublicContactCard,
+  PublicContactField,
+  PublicFooterLink,
+  PublicMetric,
+  PublicMockPost,
+  PublicNavItem,
+  PublicSection,
+} from '../types/publicPages'
+
+const nav: PublicNavItem[] = [
+  { label: '首頁', to: '/' },
+  { label: '文章列表', to: '/articles' },
+  { label: '關於我們', to: '/about' },
+  { label: '聯絡我們', to: '/contact' },
+]
+
+const footerLinks: PublicFooterLink[] = [
+  { label: '首頁', to: '/' },
+  { label: '文章列表', to: '/articles' },
+  { label: '關於我們', to: '/about' },
+  { label: '聯絡我們', to: '/contact' },
+]
+
+const metrics: PublicMetric[] = [
+  { label: '已發布主題', value: '48+' },
+  { label: '深度教學', value: '12' },
+  { label: '每週更新', value: '2 次' },
+]
+
+const aboutSections: PublicSection[] = [
+  {
+    title: '我們寫什麼',
+    body: 'TechHumana 聚焦前端、後端、產品設計與協作流程，內容偏向實務總結與可落地的操作建議。',
+  },
+  {
+    title: '我們怎麼寫',
+    body: '每篇文章都盡量保留脈絡、決策理由與實作取捨，讓讀者不只知道怎麼做，也知道為什麼這樣做。',
+  },
+  {
+    title: '我們相信什麼',
+    body: '好的內容應該同時兼顧清楚、準確與可維護。這也是本次從靜態 HTML 回歸 Vue 元件化的核心原因。',
+  },
+]
+
+const contactCards: PublicContactCard[] = [
+  { label: 'Email', value: 'studio@example.invalid' },
+  { label: 'Office Hours', value: 'Mon - Fri / 10:00 - 18:00' },
+  { label: 'Location', value: 'Taipei / Remote-first' },
+]
+
+const contactFields: PublicContactField[] = [
+  { id: 'name', label: '姓名', placeholder: '請輸入你的姓名', type: 'text' },
+  { id: 'email', label: '電子郵件', placeholder: 'your.email@example.com', type: 'email' },
+  { id: 'subject', label: '主旨', placeholder: '這次想聊什麼？', type: 'text' },
+  { id: 'message', label: '內容', placeholder: '告訴我們你的需求或問題', type: 'textarea' },
+]
+
+const posts: PublicMockPost[] = [
+  {
+    id: 'post-1',
+    title: '把靜態頁改成 Vue 元件，先拆 layout 再拆內容',
+    slug: 'first-post',
+    excerpt: '當畫面只是把整份 HTML 透過 v-html 灌進去，長期維護成本會一路上升。這篇整理我們如何先抽共用殼層，再回收 page-specific main content。',
+    publishedAt: '2026-05-26',
+    coverImageUrl: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80',
+    category: '前端架構',
+    readTime: '5 分鐘',
+    author: 'TechHumana Studio',
+    content: [
+      '靜態 HTML 當作視覺參考很方便，但一旦直接進到執行期，就會失去 Vue 原本提供的結構、資料流與可測試性。',
+      '比較穩的做法是先找出 header、drawer、footer 這些跨頁共用區塊，把它們收斂到 layout，再讓每個頁面只留下自己真正負責的內容。',
+      '這樣做的好處不只是可維護，也讓日後接 API、改互動、補測試時，不需要再從大段字串 HTML 裡硬拆 DOM。',
+    ],
+  },
+  {
+    id: 'post-2',
+    title: '文章列表改版時，如何保住視覺一致性',
+    slug: 'article-grid-refresh',
+    excerpt: '想保留靜態稿的氛圍，又不想把整頁寫死，關鍵在於先抽視覺 token，再讓卡片與區塊吃同一套樣式語言。',
+    publishedAt: '2026-05-25',
+    coverImageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80',
+    category: '設計系統',
+    readTime: '4 分鐘',
+    author: 'TechHumana Studio',
+    content: [
+      '如果每個頁面都各自複製陰影、圓角與間距，最後很難維持一致。把樣式抽成可重用 class，才有辦法控制整體視覺密度。',
+    ],
+  },
+  {
+    id: 'post-3',
+    title: '當內容還沒接 API，先用 mock data 也要有邊界',
+    slug: 'reading-surface-only',
+    excerpt: 'Mock data 不是暫時亂塞字串就好。若資料結構先整理好，之後接真實資料源時，元件層才不會再重拆一次。',
+    publishedAt: '2026-05-24',
+    coverImageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
+    category: '內容建模',
+    readTime: '6 分鐘',
+    author: 'TechHumana Studio',
+    content: [
+      '內容先建模，頁面才知道自己要消費什麼資料，而不是反過來依賴一份龐大的 HTML 文本。',
+      '這也是讓測試可以只關注行為與結構，而不用去比對整頁字串的前提。',
+    ],
+  },
+]
 
 export const publicMockContent = {
   site: {
     brand: 'TechHumana',
-    signInLabel: 'Sign In',
-    nav: [
-      { label: '首頁', to: '/' },
-      { label: '文章列表', to: '/articles' },
-      { label: '關於我們', to: '/about' },
-      { label: '聯絡我們', to: '/contact' },
-    ],
+    signInLabel: '登入',
+    nav,
+    footerLinks,
+    footerCopy: '© 2026 TechHumana. All rights reserved.',
   },
   home: {
-    title: '探索設計、技術與工作流',
-    copy: '這一版前台只負責呈現靜態稿畫面，所有資料都使用集中假資料。',
+    eyebrow: 'Tech Notes',
+    title: '把技術決策寫清楚，讓團隊少走回頭路',
+    copy: '我們記錄前端重構、內容建模、產品協作與工程細節，讓每一次改版都建立在可追溯的設計與實作基礎上。',
+    metrics,
+    featuredPostSlug: 'first-post',
+    secondaryTitle: '本週關注',
+    secondaryCopy: '從畫面、內容到互動，挑出值得優先處理的品質議題。',
   },
   about: {
     title: '關於 TechHumana',
-    intro: '這個階段只處理視覺還原，不處理真實內容串接。',
-    sections: [
-      { title: '重建原則', body: '優先保留靜態 HTML 的階層、間距、字體與視覺節奏。' },
-      { title: '資料策略', body: '全部頁面統一由假資料模組供應，後續再替換成真資料來源。' },
-    ],
+    intro: '我們是一個以技術內容與產品實作為核心的團隊，專注在把抽象需求轉成清楚、可靠、可維護的系統。',
+    sections: aboutSections,
   },
   contact: {
     title: '聯絡我們',
-    intro: '這個聯絡頁面目前是展示用，表單不會送出資料。',
-    cards: [
-      { label: 'Email', value: 'studio@example.invalid' },
-      { label: 'Office Hours', value: 'Mon - Fri / 10:00 - 18:00' },
-      { label: 'Location', value: 'Taipei / Remote-first' },
-    ],
+    intro: '如果你想聊內容合作、工程顧問、前端重構或編輯流程設計，可以透過下面方式找到我們。',
+    cards: contactCards,
+    form: {
+      fields: contactFields,
+      submitLabel: '送出訊息',
+    },
   },
   login: {
-    title: '歡迎回來',
-    copy: '這個登入頁僅保留靜態外觀，不串接驗證。',
+    title: '會員登入',
+    copy: '登入後可以收藏文章、查看閱讀清單，並延續你在站上的工作流程。',
   },
   adminLogin: {
     title: 'Admin Sign In',
-    copy: '此頁面先維持靜態稿外觀，後續再接回真實驗證流程。',
+    copy: '後台登入保留給內容維運與編輯作業使用。',
   },
-  posts: [
-    {
-      id: 'post-1',
-      title: '在靜態稿與 Vue 元件之間維持 1:1 視覺一致',
-      slug: 'first-post',
-      excerpt: '以最少抽象還原視覺，避免樣式系統重刻造成偏差。',
-      publishedAt: '2026-05-26',
-      coverImageUrl: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80',
-      category: '設計系統',
-      readTime: '5 min',
-      author: 'TechHumana Studio',
-      content: ['第一段示意文章內容。', '第二段示意文章內容。', '第三段示意文章內容。'],
-    },
-    {
-      id: 'post-2',
-      title: '文章列表卡片的層級要與靜態稿一致',
-      slug: 'article-grid-refresh',
-      excerpt: '列表頁測試用文章，提供卡片、日期、作者與標籤區塊。',
-      publishedAt: '2026-05-25',
-      coverImageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80',
-      category: '內容展示',
-      readTime: '4 min',
-      author: 'TechHumana Studio',
-      content: ['列表示意內容。'],
-    },
-    {
-      id: 'post-3',
-      title: '閱讀頁面只做視覺還原，不做 API 串接',
-      slug: 'reading-surface-only',
-      excerpt: '詳細頁測試用文章，提供標題、摘要、段落、作者與封面圖。',
-      publishedAt: '2026-05-24',
-      coverImageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
-      category: '前台重建',
-      readTime: '6 min',
-      author: 'TechHumana Studio',
-      content: ['詳細頁第一段。', '詳細頁第二段。'],
-    },
-  ] satisfies PublicMockPost[],
+  articleList: {
+    title: '文章列表',
+    intro: '整理我們近期發布的教學、重構筆記與設計決策，讓你可以快速找到最相關的內容。',
+    filters: ['全部', '前端架構', '設計系統', '內容建模'],
+  },
+  posts,
 } as const
 
 export function getMockPostBySlug(slug: string) {
