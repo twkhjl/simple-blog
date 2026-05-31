@@ -39,4 +39,31 @@ describe('AdminForgotPasswordPage', () => {
     expect(requestAdminPasswordReset).toHaveBeenCalledWith('admin@demo.invalid')
     expect(wrapper.text()).toContain('Check your inbox')
   })
+
+  it('shows rate-limit message when reset request is throttled', async () => {
+    requestAdminPasswordReset.mockRejectedValueOnce(new Error('Password reset email rate limit reached. Please try again later.'))
+
+    const router = createRouter({
+      history: createWebHashHistory(),
+      routes: [{ path: '/admin/forgot-password', component: AdminForgotPasswordPage }],
+    })
+
+    await router.push('/admin/forgot-password')
+    await router.isReady()
+
+    const wrapper = mount(AdminForgotPasswordPage, {
+      global: {
+        plugins: [
+          router,
+          createI18n({ legacy: false, locale: 'en', messages: { en } }),
+        ],
+      },
+    })
+
+    await wrapper.get('input[name="email"]').setValue('admin@demo.invalid')
+    await wrapper.get('form').trigger('submit.prevent')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Please try again later')
+  })
 })

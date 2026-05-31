@@ -165,7 +165,11 @@ async function requestPasswordRecovery(email: string, redirectTo: string, env: W
     }),
   })
 
-  return response.ok
+  return {
+    ok: response.ok,
+    status: response.status,
+    errorCode: response.headers.get('x-sb-error-code'),
+  }
 }
 
 adminAuthRoutes.post('/admin/auth/login', async c => {
@@ -226,8 +230,12 @@ adminAuthRoutes.post('/admin/auth/forgot-password', async c => {
     return fail('NOT_FOUND', 'Email address not found.', 404)
   }
 
-  const sent = await requestPasswordRecovery(email, redirectTo, c.env)
-  if (!sent) {
+  const recovery = await requestPasswordRecovery(email, redirectTo, c.env)
+  if (!recovery.ok) {
+    if (recovery.status === 429 || recovery.errorCode === 'over_email_send_rate_limit') {
+      return fail('RATE_LIMITED', 'Password reset email rate limit reached. Please try again later.', 429)
+    }
+
     return fail('DELIVERY_FAILED', 'Unable to send password reset email.', 502)
   }
 
