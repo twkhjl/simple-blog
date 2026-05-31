@@ -40,7 +40,7 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  padding: 0.9rem 1rem 0;
+  padding: 0;
 }
 
 .front-header-bar,
@@ -55,10 +55,10 @@
 }
 
 .front-header-bar {
-  width: var(--front-container);
-  max-width: 100%;
-  margin: 0 auto;
-  border-radius: 999px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
   padding: 0.9rem 1.1rem;
   display: flex;
   align-items: center;
@@ -500,7 +500,6 @@
     display: none;
   }
 
-  .front-header-bar,
   .front-main,
   .front-footer {
     width: calc(100vw - 2rem);
