@@ -53,7 +53,13 @@ function buildRecoveryRedirectUrl(env: WorkerBindings) {
     return null
   }
 
-  return `${origin.replace(/\/+$/, '')}/?admin_reset=1`
+  const normalizedOrigin = origin.replace(/\/+$/, '')
+  const basePath = env.PUBLIC_APP_BASE_PATH?.trim() || '/'
+  const normalizedBasePath = basePath === '/'
+    ? '/'
+    : `/${basePath.replace(/^\/+|\/+$/g, '')}/`
+
+  return `${normalizedOrigin}${normalizedBasePath}?admin_reset=1`
 }
 
 async function readJson(request: Request) {

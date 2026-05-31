@@ -14,6 +14,7 @@ const env: WorkerBindings = {
   SUPABASE_ANON_KEY: 'anon-key',
   SUPABASE_SERVICE_ROLE_KEY: 'service-role-key',
   PUBLIC_APP_ORIGIN: 'http://localhost:5173',
+  PUBLIC_APP_BASE_PATH: '/simple-blog/',
 }
 
 afterEach(() => {
@@ -170,7 +171,7 @@ describe('admin username auth api', () => {
         expect(init?.method).toBe('POST')
         expect(init?.body).toBe(JSON.stringify({
           email: 'admin@demo.invalid',
-          redirect_to: 'http://localhost:5173/?admin_reset=1',
+          redirect_to: 'http://localhost:5173/simple-blog/?admin_reset=1',
         }))
         return createJsonResponse({})
       }
