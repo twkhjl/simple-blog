@@ -221,4 +221,41 @@ describe('admin username auth api', () => {
 
     expect(res.status).toBe(502)
   })
+
+  it('returns 429 when recovery dispatch is rate limited upstream', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input)
+
+      if (url.includes('/rest/v1/profiles')) {
+        return createJsonResponse([{ id: 'admin-1', email: 'admin@demo.invalid', role: 'admin', status: 'active' }])
+      }
+
+      if (url.includes('/auth/v1/recover')) {
+        return new Response('', {
+          status: 429,
+          headers: {
+            'x-sb-error-code': 'over_email_send_rate_limit',
+          },
+        })
+      }
+
+      return createJsonResponse({ message: 'unexpected' }, 500)
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await app.request('/api/admin/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin@demo.invalid' }),
+    }, env)
+
+    expect(res.status).toBe(429)
+    expect(await res.json()).toMatchObject({
+      success: false,
+      error: {
+        code: 'RATE_LIMITED',
+      },
+    })
+  })
 })
