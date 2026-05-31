@@ -1,4 +1,5 @@
 create extension if not exists pgcrypto;
+create extension if not exists citext;
 
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -7,6 +8,15 @@ create table public.profiles (
   avatar_key text,
   role text not null default 'user' check (role in ('user', 'editor', 'admin', 'super_admin')),
   status text not null default 'active' check (status in ('active', 'disabled')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.admin_accounts (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  username citext not null unique,
+  display_name text not null default '',
+  is_active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

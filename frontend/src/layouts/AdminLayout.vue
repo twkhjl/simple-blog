@@ -1,33 +1,39 @@
 <template>
-  <div class="site-shell">
+  <div class="admin-theme">
     <header class="admin-header">
       <div class="container">
-        <div class="admin-header-inner neo-shell">
+        <div class="admin-header-inner admin-surface">
           <div class="brand-block">
             <p class="brand-mark">{{ t('admin.layout.brandTitle') }}</p>
             <p class="brand-copy">{{ t('admin.layout.brandCopy') }}</p>
           </div>
-          <div class="inline-actions">
+
+          <div class="admin-topbar-actions">
             <AdminLocaleSwitcher />
-            <RouterLink class="neo-button" to="/">{{ t('common.actions.backToSite') }}</RouterLink>
-            <RouterLink class="neo-button primary" to="/admin/posts/new">{{ t('common.actions.newPost') }}</RouterLink>
+            <RouterLink class="admin-shell-button secondary" to="/">{{ t('common.actions.backToSite') }}</RouterLink>
+            <RouterLink class="admin-shell-button primary" to="/admin/posts/new">{{ t('common.actions.newPost') }}</RouterLink>
           </div>
         </div>
       </div>
     </header>
 
     <main class="admin-shell">
-      <aside class="admin-sidebar neo-shell">
-        <div class="brand-block" style="margin-bottom: 1rem;">
-          <p class="eyebrow">{{ t('admin.layout.workspace') }}</p>
-          <p class="section-title" style="font-size: 1.3rem;">{{ t('admin.layout.panel') }}</p>
+      <aside class="admin-sidebar">
+        <div class="admin-surface admin-sidebar-panel">
+          <div class="brand-block admin-sidebar-intro">
+            <p class="eyebrow">{{ t('admin.layout.workspace') }}</p>
+            <p class="section-title admin-panel-title">{{ t('admin.layout.panel') }}</p>
+          </div>
+
+          <nav class="sidebar-nav">
+            <RouterLink class="nav-link" :class="{ active: route.path === '/admin' }" to="/admin">
+              {{ t('admin.layout.dashboard') }}
+            </RouterLink>
+            <RouterLink class="nav-link" :class="{ active: route.path.startsWith('/admin/posts') }" to="/admin/posts">
+              {{ t('admin.layout.posts') }}
+            </RouterLink>
+          </nav>
         </div>
-        <nav class="sidebar-nav">
-          <RouterLink class="nav-link" :class="{ active: route.path === '/admin' }" to="/admin">{{ t('admin.layout.dashboard') }}</RouterLink>
-          <RouterLink class="nav-link" :class="{ active: route.path.startsWith('/admin/posts') }" to="/admin/posts">
-            {{ t('admin.layout.posts') }}
-          </RouterLink>
-        </nav>
       </aside>
 
       <section class="admin-main">

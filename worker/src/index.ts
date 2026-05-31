@@ -1,6 +1,7 @@
 import { cors } from 'hono/cors'
 import { Hono } from 'hono'
 import adminRoutes from './routes/admin'
+import adminAuthRoutes from './routes/adminAuth'
 import authRoutes from './routes/auth'
 import fileRoutes from './routes/files'
 import publicRoutes from './routes/public'
@@ -62,6 +63,7 @@ app.get('/files/*', async c => {
 
 app.route('/api', publicRoutes)
 app.route('/api', authRoutes)
+app.route('/api', adminAuthRoutes)
 app.route('/api/admin', adminRoutes)
 app.route('/api/files', fileRoutes)
 
