@@ -7,6 +7,8 @@ describe('admin router guards', () => {
     const router = createAppRouter()
 
     expect(router.resolve('/admin/login').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/admin/forgot-password').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/admin/reset-password').matched.length).toBeGreaterThan(0)
     expect(router.resolve('/admin').matched.length).toBeGreaterThan(0)
     expect(router.resolve('/admin/posts').matched.length).toBeGreaterThan(0)
   })

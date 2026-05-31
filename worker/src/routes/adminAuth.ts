@@ -16,6 +16,10 @@ interface ProfileRoleRow {
   status: UserStatus
 }
 
+interface ForgotPasswordProfileRow extends ProfileRoleRow {
+  email: string
+}
+
 interface SupabaseSessionPayload {
   access_token: string
   refresh_token: string
@@ -37,6 +41,19 @@ function getServiceHeaders(env: WorkerBindings) {
 
 function getFetchImpl() {
   return fetch
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+}
+
+function buildRecoveryRedirectUrl(env: WorkerBindings) {
+  const origin = env.PUBLIC_APP_ORIGIN?.trim()
+  if (!origin) {
+    return null
+  }
+
+  return `${origin.replace(/\/+$/, '')}/?admin_reset=1`
 }
 
 async function readJson(request: Request) {
@@ -76,6 +93,16 @@ async function resolveAdminProfile(userId: string, env: WorkerBindings) {
   url.searchParams.set('id', `eq.${userId}`)
   url.searchParams.set('limit', '1')
   return querySingleRow<ProfileRoleRow>(url, env)
+}
+
+async function resolveAdminProfileByEmail(email: string, env: WorkerBindings) {
+  const url = new URL('/rest/v1/profiles', env.SUPABASE_URL)
+  url.searchParams.set('select', 'id,email,role,status')
+  url.searchParams.set('email', `eq.${email}`)
+  url.searchParams.set('role', 'in.(editor,admin,super_admin)')
+  url.searchParams.set('status', 'eq.active')
+  url.searchParams.set('limit', '1')
+  return querySingleRow<ForgotPasswordProfileRow>(url, env)
 }
 
 async function resolveAuthEmail(userId: string, env: WorkerBindings) {
@@ -119,6 +146,22 @@ async function signInWithEmail(email: string, password: string, env: WorkerBindi
   return payload
 }
 
+async function requestPasswordRecovery(email: string, redirectTo: string, env: WorkerBindings) {
+  const response = await getFetchImpl()(new URL('/auth/v1/recover', env.SUPABASE_URL), {
+    method: 'POST',
+    headers: {
+      apikey: env.SUPABASE_ANON_KEY ?? '',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      email,
+      redirect_to: redirectTo,
+    }),
+  })
+
+  return response.ok
+}
+
 adminAuthRoutes.post('/admin/auth/login', async c => {
   if (!c.env.SUPABASE_URL || !c.env.SUPABASE_ANON_KEY || !c.env.SUPABASE_SERVICE_ROLE_KEY) {
     return fail('UNAUTHORIZED', GENERIC_LOGIN_ERROR, 401)
@@ -153,6 +196,36 @@ adminAuthRoutes.post('/admin/auth/login', async c => {
   }
 
   return ok({ session })
+})
+
+adminAuthRoutes.post('/admin/auth/forgot-password', async c => {
+  if (!c.env.SUPABASE_URL || !c.env.SUPABASE_ANON_KEY || !c.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return fail('UNAUTHORIZED', 'Password reset is unavailable.', 401)
+  }
+
+  const redirectTo = buildRecoveryRedirectUrl(c.env)
+  if (!redirectTo) {
+    return fail('CONFIG_ERROR', 'Password reset is unavailable.', 500)
+  }
+
+  const body = await readJson(c.req.raw)
+  const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
+
+  if (!isValidEmail(email)) {
+    return fail('INVALID_EMAIL', 'Please enter a valid email address.', 400)
+  }
+
+  const profile = await resolveAdminProfileByEmail(email, c.env)
+  if (!profile?.id) {
+    return fail('NOT_FOUND', 'Email address not found.', 404)
+  }
+
+  const sent = await requestPasswordRecovery(email, redirectTo, c.env)
+  if (!sent) {
+    return fail('DELIVERY_FAILED', 'Unable to send password reset email.', 502)
+  }
+
+  return ok({ sent: true })
 })
 
 export default adminAuthRoutes
