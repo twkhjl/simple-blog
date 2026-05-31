@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { loginAdminWithUsername } from '../../services/adminAuth'
 
 const router = useRouter()
@@ -91,6 +91,10 @@ async function handleSubmit() {
 
         <p v-if="errorMessage" class="admin-status error">{{ errorMessage }}</p>
         <p v-else class="admin-status">{{ defaultMessage }}</p>
+
+        <RouterLink class="admin-inline-link" to="/admin/forgot-password">
+          Forgot password
+        </RouterLink>
 
         <button class="admin-button" type="submit" :disabled="loading || !canSubmit">
           {{ loading ? submittingLabel : submitLabel }}

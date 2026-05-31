@@ -4,7 +4,9 @@ import PublicLayout from '../layouts/PublicLayout.vue'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.vue'
 import AdminPostEditPage from '../pages/admin/AdminPostEditPage.vue'
 import AdminPostListPage from '../pages/admin/AdminPostListPage.vue'
+import AdminForgotPasswordPage from '../pages/auth/AdminForgotPasswordPage.vue'
 import AdminLoginPage from '../pages/auth/AdminLoginPage.vue'
+import AdminResetPasswordPage from '../pages/auth/AdminResetPasswordPage.vue'
 import LoginPage from '../pages/auth/LoginPage.vue'
 import AboutPage from '../pages/public/AboutPage.vue'
 import ArticleListPage from '../pages/public/ArticleListPage.vue'
@@ -20,6 +22,14 @@ export function createAppRouter() {
       {
         path: '/admin/login',
         component: AdminLoginPage,
+      },
+      {
+        path: '/admin/forgot-password',
+        component: AdminForgotPasswordPage,
+      },
+      {
+        path: '/admin/reset-password',
+        component: AdminResetPasswordPage,
       },
       {
         path: '/admin',

@@ -2772,6 +2772,33 @@ img {
   color: #ff9d9d;
 }
 
+.admin-status.success {
+  color: #a9f2bf;
+}
+
+.admin-inline-link,
+.admin-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #ffb89a;
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 0.9rem;
+}
+
+.admin-inline-link:hover,
+.admin-link-button:hover {
+  color: #ffd5c1;
+}
+
+.admin-link-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .admin-theme .status-message,
 .admin-theme .save-toast {
   background: rgba(255, 255, 255, 0.04);

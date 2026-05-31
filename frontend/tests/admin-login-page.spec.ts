@@ -17,7 +17,10 @@ describe('AdminLoginPage', () => {
   it('renders username input for admin login', async () => {
     const router = createRouter({
       history: createWebHashHistory(),
-      routes: [{ path: '/admin/login', component: AdminLoginPage }],
+      routes: [
+        { path: '/admin/login', component: AdminLoginPage },
+        { path: '/admin/forgot-password', component: { template: '<div>forgot</div>' } },
+      ],
     })
 
     await router.push('/admin/login')
@@ -41,6 +44,7 @@ describe('AdminLoginPage', () => {
       history: createWebHashHistory(),
       routes: [
         { path: '/admin/login', component: AdminLoginPage },
+        { path: '/admin/forgot-password', component: { template: '<div>forgot</div>' } },
         { path: '/admin', component: { template: '<div>admin</div>' } },
       ],
     })
@@ -64,5 +68,29 @@ describe('AdminLoginPage', () => {
 
     expect(loginAdminWithUsername).toHaveBeenCalledWith('admin', 'secret')
     expect(router.currentRoute.value.fullPath).toBe('/admin')
+  })
+
+  it('links to forgot-password page', async () => {
+    const router = createRouter({
+      history: createWebHashHistory(),
+      routes: [
+        { path: '/admin/login', component: AdminLoginPage },
+        { path: '/admin/forgot-password', component: { template: '<div>forgot</div>' } },
+      ],
+    })
+
+    await router.push('/admin/login')
+    await router.isReady()
+
+    const wrapper = mount(AdminLoginPage, {
+      global: {
+        plugins: [
+          router,
+          createI18n({ legacy: false, locale: 'en', messages: { en } }),
+        ],
+      },
+    })
+
+    expect(wrapper.get('a[href="#/admin/forgot-password"]').text()).toContain('Forgot password')
   })
 })

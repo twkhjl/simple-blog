@@ -121,4 +121,103 @@ describe('admin username auth api', () => {
       },
     })
   })
+
+  it('returns 400 when forgot-password email is invalid', async () => {
+    const fetchMock = vi.fn(async () => createJsonResponse({ message: 'unexpected' }, 500))
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await app.request('/api/admin/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'bad-email' }),
+    }, env)
+
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 404 when forgot-password email is not an active admin profile', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input)
+
+      if (url.includes('/rest/v1/profiles')) {
+        return createJsonResponse([])
+      }
+
+      return createJsonResponse({ message: 'unexpected' }, 500)
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await app.request('/api/admin/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin@demo.invalid' }),
+    }, env)
+
+    expect(res.status).toBe(404)
+  })
+
+  it('dispatches forgot-password recovery email for active admin profile', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input)
+
+      if (url.includes('/rest/v1/profiles')) {
+        return createJsonResponse([{ id: 'admin-1', email: 'admin@demo.invalid', role: 'admin', status: 'active' }])
+      }
+
+      if (url.includes('/auth/v1/recover')) {
+        expect(init?.method).toBe('POST')
+        expect(init?.body).toBe(JSON.stringify({
+          email: 'admin@demo.invalid',
+          redirect_to: 'http://localhost:5173/?admin_reset=1',
+        }))
+        return createJsonResponse({})
+      }
+
+      return createJsonResponse({ message: 'unexpected' }, 500)
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await app.request('/api/admin/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin@demo.invalid' }),
+    }, env)
+
+    expect(res.status).toBe(200)
+    expect(await res.json()).toMatchObject({
+      success: true,
+      data: {
+        sent: true,
+      },
+    })
+  })
+
+  it('returns 502 when recovery dispatch fails upstream', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input)
+
+      if (url.includes('/rest/v1/profiles')) {
+        return createJsonResponse([{ id: 'admin-1', email: 'admin@demo.invalid', role: 'admin', status: 'active' }])
+      }
+
+      if (url.includes('/auth/v1/recover')) {
+        return createJsonResponse({ message: 'boom' }, 500)
+      }
+
+      return createJsonResponse({ message: 'unexpected' }, 500)
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await app.request('/api/admin/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin@demo.invalid' }),
+    }, env)
+
+    expect(res.status).toBe(502)
+  })
 })
