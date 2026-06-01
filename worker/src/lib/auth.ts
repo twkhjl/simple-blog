@@ -5,6 +5,7 @@ const mockUsers: Record<string, AuthUser> = {
   'user-token': {
     id: 'user-1',
     email: 'reader@demo.invalid',
+    username: null,
     displayName: 'Reader Account',
     role: 'user',
     status: 'active',
@@ -12,6 +13,7 @@ const mockUsers: Record<string, AuthUser> = {
   'editor-token': {
     id: 'editor-1',
     email: 'editor@demo.invalid',
+    username: 'editor',
     displayName: 'Editorial Account',
     role: 'editor',
     status: 'active',
@@ -19,6 +21,7 @@ const mockUsers: Record<string, AuthUser> = {
   'admin-token': {
     id: 'admin-1',
     email: 'admin@demo.invalid',
+    username: 'admin',
     displayName: 'Admin Account',
     role: 'admin',
     status: 'active',
@@ -26,6 +29,7 @@ const mockUsers: Record<string, AuthUser> = {
   'super-admin-token': {
     id: 'super-admin-1',
     email: 'platform-admin@demo.invalid',
+    username: 'platform-admin',
     displayName: 'Platform Admin',
     role: 'super_admin',
     status: 'active',
@@ -33,6 +37,7 @@ const mockUsers: Record<string, AuthUser> = {
   'disabled-token': {
     id: 'disabled-1',
     email: 'inactive-editor@demo.invalid',
+    username: 'inactive-editor',
     displayName: 'Inactive Editor',
     role: 'editor',
     status: 'disabled',
@@ -67,6 +72,7 @@ interface ResolveUserOptions {
     error: unknown
   }>
   fetchProfileById?: (id: string) => Promise<ProfileRow | null>
+  fetchAdminUsernameById?: (id: string) => Promise<string | null>
   upsertProfile?: (profile: ProfileRow) => Promise<ProfileRow | null>
 }
 
@@ -102,9 +108,38 @@ function mapProfileToAuthUser(profile: ProfileRow): AuthUser {
   return {
     id: profile.id,
     email: profile.email,
+    username: null,
     displayName: profile.display_name,
     role: profile.role,
     status: profile.status,
+  }
+}
+
+export function createAdminUsernameLookup(adminClient: {
+  from: (table: string) => {
+    select: (query: string) => {
+      eq: (column: string, value: string) => {
+        maybeSingle: () => PromiseLike<{ data: { username: string } | null, error: unknown }>
+      }
+    }
+  }
+} | null) {
+  return async (id: string): Promise<string | null> => {
+    if (!adminClient) {
+      return null
+    }
+
+    const { data, error } = await adminClient
+      .from('admin_accounts')
+      .select('username')
+      .eq('user_id', id)
+      .maybeSingle()
+
+    if (error || !data?.username) {
+      return null
+    }
+
+    return data.username
   }
 }
 
@@ -155,10 +190,16 @@ export async function resolveUserFromAuthorization(
   }
 
   const fetchProfileById = options.fetchProfileById
+  const fetchAdminUsernameById = options.fetchAdminUsernameById
   if (fetchProfileById) {
     const profile = await fetchProfileById(authUser.id)
     if (profile) {
-      return mapProfileToAuthUser(profile)
+      const user = mapProfileToAuthUser(profile)
+      if (fetchAdminUsernameById) {
+        user.username = await fetchAdminUsernameById(authUser.id)
+      }
+
+      return user
     }
 
     if (options.upsertProfile) {
@@ -179,6 +220,7 @@ export async function resolveUserFromAuthorization(
   return {
     id: authUser.id,
     email: authUser.email ?? '',
+    username: null,
     displayName: null,
     role: 'user',
     status: 'active',

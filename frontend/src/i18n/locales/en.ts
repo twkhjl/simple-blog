@@ -69,6 +69,7 @@ const en = {
       loadingPost: 'Loading post...',
       loginSuccess: 'Login successful. Redirecting...',
       loginFailed: 'Login failed',
+      logoutFailed: 'Logout failed',
       registerSuccess: 'Account created. You can log in now.',
       registerFailed: 'Register failed',
       profileUpdated: 'Profile updated.',

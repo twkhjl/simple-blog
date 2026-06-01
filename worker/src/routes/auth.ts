@@ -14,6 +14,7 @@ authRoutes.get('/me', c => {
   return ok({
     id: user.id,
     email: user.email,
+    username: user.username,
     displayName: user.displayName,
     role: user.role,
     status: user.status,
@@ -36,6 +37,7 @@ authRoutes.patch('/me', async c => {
   return ok({
     id: user.id,
     email: user.email,
+    username: user.username,
     displayName,
     role: user.role,
     status: user.status,

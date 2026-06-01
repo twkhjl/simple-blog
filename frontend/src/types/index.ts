@@ -14,6 +14,7 @@ export interface ApiErrorEnvelope {
 export interface CurrentUser {
   id: string
   email: string
+  username: string | null
   displayName: string | null
   role: 'user' | 'editor' | 'admin' | 'super_admin'
   status: 'active' | 'disabled'

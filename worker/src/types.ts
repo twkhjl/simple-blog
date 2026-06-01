@@ -5,6 +5,7 @@ export type PostStatus = 'draft' | 'published' | 'archived'
 export interface AuthUser {
   id: string
   email: string
+  username: string | null
   displayName: string | null
   role: UserRole
   status: UserStatus

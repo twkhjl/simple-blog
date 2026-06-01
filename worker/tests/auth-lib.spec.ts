@@ -33,6 +33,7 @@ describe('resolveUserFromAuthorization', () => {
       role: 'admin',
       status: 'active',
     })
+    const fetchAdminUsernameById = vi.fn().mockResolvedValue('ops-admin')
 
     const env: WorkerBindings = {
       SUPABASE_URL: 'https://example.supabase.co',
@@ -43,13 +44,16 @@ describe('resolveUserFromAuthorization', () => {
       env,
       getAuthUserByToken: getUser,
       fetchProfileById,
+      fetchAdminUsernameById,
     })
 
     expect(getUser).toHaveBeenCalledWith('real-token')
     expect(fetchProfileById).toHaveBeenCalledWith('user-9')
+    expect(fetchAdminUsernameById).toHaveBeenCalledWith('user-9')
     expect(user).toEqual({
       id: 'user-9',
       email: 'member@demo.invalid',
+      username: 'ops-admin',
       displayName: 'Operations Account',
       role: 'admin',
       status: 'active',

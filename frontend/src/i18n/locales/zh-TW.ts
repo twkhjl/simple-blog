@@ -69,6 +69,7 @@ const zhTW = {
       loadingPost: '載入文章中...',
       loginSuccess: '登入成功，正在導向...',
       loginFailed: '登入失敗',
+      logoutFailed: '登出失敗',
       registerSuccess: '帳號建立成功，現在可以登入。',
       registerFailed: '註冊失敗',
       profileUpdated: '個人資料已更新。',
