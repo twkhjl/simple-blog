@@ -2,6 +2,18 @@ import type { ApiEnvelope } from '../types'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.example.com'
 
+export class ApiRequestError extends Error {
+  status: number
+  code: string | null
+
+  constructor(message: string, options: { status: number, code?: string | null }) {
+    super(message)
+    this.name = 'ApiRequestError'
+    this.status = options.status
+    this.code = options.code ?? null
+  }
+}
+
 export function buildApiUrl(path: string) {
   return `${API_BASE_URL}${path}`
 }
@@ -35,7 +47,10 @@ export function createApiClient(
     }
 
     if (!response.ok || !payload.success) {
-      throw new Error(payload.error?.message ?? 'API request failed')
+      throw new ApiRequestError(
+        payload.error?.message ?? 'API request failed',
+        { status: response.status, code: payload.error?.code ?? null },
+      )
     }
 
     return payload.data
