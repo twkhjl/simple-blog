@@ -32,7 +32,6 @@ const emit = defineEmits<{
       <RouterLink to="/articles" class="front-nav-link">Articles</RouterLink>
       <RouterLink to="/about" class="front-nav-link">About</RouterLink>
       <RouterLink to="/contact" class="front-nav-link">Contact</RouterLink>
-      <RouterLink to="/admin/login" class="front-nav-link">Admin</RouterLink>
     </nav>
     <div class="inline-actions">
       <RouterLink v-if="isLoggedIn" to="/login-records" class="front-login-link">
