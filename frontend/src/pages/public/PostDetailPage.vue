@@ -1,45 +1,105 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { getMockPostBySlug, publicMockContent } from '../../content/publicMockContent'
+import PublicRichContent from '../../components/public/PublicRichContent.vue'
+import { publicPostsService } from '../../services/publicPosts'
+import type { PublicPostDetail } from '../../types'
 
 const route = useRoute()
+const post = ref<PublicPostDetail | null>(null)
+const isLoading = ref(true)
+const errorMessage = ref('')
+const isNotFound = ref(false)
 
-const post = computed(() => getMockPostBySlug(String(route.params.slug)) ?? publicMockContent.posts[0])
-const relatedPosts = computed(() => publicMockContent.posts.filter(item => item.slug !== post.value.slug).slice(0, 2))
+function formatPublishedAt(value: string | null) {
+  if (!value) {
+    return 'Unscheduled'
+  }
+
+  return new Intl.DateTimeFormat('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(value))
+}
+
+const authorName = computed(() => post.value?.author.displayName ?? 'Unknown author')
+
+async function loadPost(slug: string) {
+  isLoading.value = true
+  errorMessage.value = ''
+  isNotFound.value = false
+
+  try {
+    const payload = await publicPostsService.getPostBySlug(slug)
+    if (!payload) {
+      post.value = null
+      isNotFound.value = true
+      return
+    }
+
+    post.value = payload
+  }
+  catch {
+    post.value = null
+    errorMessage.value = '文章載入失敗，請稍後再試。'
+  }
+  finally {
+    isLoading.value = false
+  }
+}
+
+watch(
+  () => String(route.params.slug ?? ''),
+  slug => {
+    void loadPost(slug)
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
   <main data-testid="front-post-detail-page" class="front-main front-post-page">
-    <section class="front-page-head front-panel">
-      <p class="front-card-category">{{ post.category }}</p>
-      <h1 class="front-title">{{ post.title }}</h1>
-      <div class="front-meta-row">
-        <span class="front-muted">{{ post.author }}</span>
-        <span class="front-muted">{{ post.publishedAt }}</span>
-        <span class="front-muted">{{ post.readTime }}</span>
-      </div>
+    <section v-if="isLoading" data-testid="post-detail-loading" class="front-panel front-side-card">
+      <p class="front-card-copy">文章載入中...</p>
     </section>
 
-    <section class="front-post-grid">
-      <article class="front-panel front-side-card">
-        <div class="front-post-cover">
-          <img :src="post.coverImageUrl" :alt="post.title" />
-        </div>
-        <div class="front-rich-copy">
-          <p v-for="paragraph in post.content" :key="paragraph">{{ paragraph }}</p>
-        </div>
-      </article>
+    <section v-else-if="errorMessage" data-testid="post-detail-error" class="front-panel front-side-card">
+      <p class="front-card-copy">{{ errorMessage }}</p>
+      <button type="button" class="front-subtle-button" @click="loadPost(String(route.params.slug ?? ''))">重新載入</button>
+    </section>
 
-      <aside class="front-panel front-side-card">
-        <p class="front-eyebrow">Related</p>
-        <article v-for="related in relatedPosts" :key="related.slug" class="front-side-note">
-          <p class="front-card-category">{{ related.category }}</p>
-          <h2 class="front-card-title">{{ related.title }}</h2>
-          <p class="front-card-copy">{{ related.excerpt }}</p>
-          <RouterLink :to="`/post/${related.slug}`" class="front-subtle-button">繼續閱讀</RouterLink>
+    <section v-else-if="isNotFound" data-testid="post-detail-not-found" class="front-panel front-side-card">
+      <h1 class="front-title">找不到文章</h1>
+      <p class="front-card-copy">這篇文章可能尚未發布，或連結已失效。</p>
+      <RouterLink to="/articles" class="front-subtle-button">返回文章列表</RouterLink>
+    </section>
+
+    <template v-else-if="post">
+      <section class="front-page-head front-panel">
+        <h1 class="front-title">{{ post.title }}</h1>
+        <p v-if="post.excerpt" class="front-copy">{{ post.excerpt }}</p>
+        <div class="front-meta-row">
+          <span class="front-muted">{{ authorName }}</span>
+          <span class="front-muted">{{ formatPublishedAt(post.publishedAt) }}</span>
+        </div>
+      </section>
+
+      <section class="front-post-grid">
+        <article class="front-panel front-side-card">
+          <div v-if="post.coverImageUrl" class="front-post-cover">
+            <img :src="post.coverImageUrl" :alt="post.title" />
+          </div>
+          <PublicRichContent :content="post.content" />
         </article>
-      </aside>
-    </section>
+
+        <aside class="front-panel front-side-card">
+          <p class="front-eyebrow">Navigation</p>
+          <h2 class="front-card-title">閱讀更多文章</h2>
+          <p class="front-card-copy">目前詳情頁先聚焦單篇閱讀，不在此版加入 related posts。</p>
+          <RouterLink to="/articles" class="front-subtle-button">返回文章列表</RouterLink>
+        </aside>
+      </section>
+    </template>
   </main>
 </template>

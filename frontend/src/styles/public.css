@@ -428,8 +428,22 @@
   gap: 1rem;
 }
 
+.front-rich-copy > :first-child {
+  margin-top: 0;
+}
+
 .front-rich-copy p {
   margin: 0;
+}
+
+.front-rich-copy img {
+  width: 100%;
+  border-radius: 1.25rem;
+  display: block;
+}
+
+.front-rich-copy pre {
+  overflow-x: auto;
 }
 
 .front-side-note {
