@@ -41,8 +41,8 @@
               <th scope="col">{{ t('admin.loginRecords.createdAt') }}</th>
               <th scope="col">{{ t('admin.loginRecords.surface') }}</th>
               <th scope="col">{{ t('admin.loginRecords.result') }}</th>
-              <th scope="col">{{ t('admin.loginRecords.identifier') }}</th>
-              <th scope="col">{{ t('admin.loginRecords.user') }}</th>
+              <th scope="col">{{ t('admin.loginRecords.name') }}</th>
+              <th scope="col">{{ t('admin.loginRecords.loginAccount') }}</th>
               <th scope="col">{{ t('admin.loginRecords.ipAddress') }}</th>
               <th scope="col">{{ t('admin.loginRecords.userAgent') }}</th>
               <th scope="col">{{ t('admin.loginRecords.failureReason') }}</th>
@@ -57,8 +57,8 @@
                   {{ formatResult(item.result) }}
                 </span>
               </td>
-              <td>{{ item.identifier }}</td>
-              <td>{{ formatUser(item.user) }}</td>
+              <td>{{ formatName(item) }}</td>
+              <td>{{ formatLoginAccount(item) }}</td>
               <td>{{ item.ipAddress ?? t('admin.loginRecords.noIp') }}</td>
               <td class="wrapping-cell">{{ item.userAgent ?? t('admin.loginRecords.noUserAgent') }}</td>
               <td class="wrapping-cell">{{ item.failureReason ?? t('admin.loginRecords.noFailureReason') }}</td>
@@ -89,7 +89,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { listAdminLoginRecords, listAdminUserLoginRecords, listMyLoginRecords } from '../../services/loginRecords'
 import { authState } from '../../stores/auth'
-import type { LoginRecordUser, LoginRecordsResponse } from '../../types'
+import type { LoginRecordItem, LoginRecordUser, LoginRecordsResponse } from '../../types'
 
 const { t } = useI18n()
 const loading = ref(false)
@@ -119,11 +119,19 @@ function formatSurface(surface: 'front' | 'admin') {
 }
 
 function formatResult(result: 'success' | 'failure') {
-  return result === 'success' ? t('admin.loginRecords.successOnly') : t('admin.loginRecords.failureOnly')
+  return result === 'success' ? t('admin.loginRecords.successResult') : t('admin.loginRecords.failureResult')
 }
 
 function formatUser(user: LoginRecordUser) {
   return user.displayName ?? user.email ?? user.username ?? t('admin.loginRecords.identifier')
+}
+
+function formatName(item: LoginRecordItem) {
+  return item.user.displayName ?? item.user.username ?? item.user.email ?? item.identifier
+}
+
+function formatLoginAccount(item: LoginRecordItem) {
+  return item.user.username ?? item.identifier ?? item.user.email ?? formatUser(item.user)
 }
 
 async function reload(page = 1) {

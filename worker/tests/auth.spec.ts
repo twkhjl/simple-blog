@@ -160,9 +160,7 @@ describe('/api/me', () => {
     }
 
     expect(payload.success).toBe(true)
-    expect(payload.data.items.length).toBeGreaterThan(0)
-    expect(payload.data.items.every(item => item.user.id === 'user-1')).toBe(true)
-    expect(payload.data.items.every(item => item.surface === 'front')).toBe(true)
+    expect(payload.data.items).toEqual([])
   })
 })
 

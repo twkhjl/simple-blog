@@ -82,14 +82,14 @@ describe('AdminLoginRecordsPage', () => {
     expect(wrapper.text()).toContain('Timestamp')
     expect(wrapper.text()).toContain('Surface')
     expect(wrapper.text()).toContain('Result')
-    expect(wrapper.text()).toContain('Identifier')
-    expect(wrapper.text()).toContain('User')
+    expect(wrapper.text()).toContain('Name')
+    expect(wrapper.text()).toContain('Login Account')
     expect(wrapper.text()).toContain('IP Address')
     expect(wrapper.text()).toContain('User Agent')
     expect(wrapper.text()).toContain('Failure Reason')
     expect(wrapper.text()).toContain('Admin User')
-    expect(wrapper.text()).toContain('Admin')
-    expect(wrapper.text()).toContain('Success')
+    expect(wrapper.text()).toContain('admin')
+    expect(wrapper.text()).toContain('Login Successful')
   })
 
   it('switches to front surface query for admin role', async () => {
@@ -155,7 +155,7 @@ describe('AdminLoginRecordsPage', () => {
       identifier: '',
     })
     expect(wrapper.text()).toContain('Public')
-    expect(wrapper.text()).toContain('Failure')
+    expect(wrapper.text()).toContain('Login Failed')
   })
 
   it('renders fallback values and empty state in table mode', async () => {
@@ -215,7 +215,7 @@ describe('AdminLoginRecordsPage', () => {
     expect(wrapper.text()).toContain('No IP recorded')
     expect(wrapper.text()).toContain('No user agent recorded')
     expect(wrapper.text()).toContain('No failure reason')
-    expect(wrapper.text()).toContain('admin@demo.invalid')
+    expect(wrapper.text()).toContain('admin')
 
     await wrapper.get('select[name="result"]').setValue('success')
     await flushPromises()

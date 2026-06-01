@@ -224,9 +224,21 @@ function paginate<T>(items: T[], page = 1, limit = 20) {
   }
 }
 
+function createEmptyPage(page = 1, limit = 20) {
+  const safePage = Number.isFinite(page) && page > 0 ? page : 1
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? limit : 20
+  return {
+    items: [] as LoginRecordItem[],
+    page: safePage,
+    limit: safeLimit,
+    total: 0,
+  }
+}
+
 async function hydrateUsers(
   env: WorkerBindings,
   rows: RawLoginRecordRow[],
+  surface: LoginRecordSurface,
 ) {
   const adminClient = createSupabaseAdminClient(env)
   if (!adminClient || rows.length === 0) {
@@ -258,7 +270,7 @@ async function hydrateUsers(
       .in('id', userIds),
     adminClient
       .from('admin_accounts')
-      .select('user_id, username')
+      .select('user_id, username, display_name')
       .in('user_id', userIds),
   ])
 
@@ -268,12 +280,16 @@ async function hydrateUsers(
       display_name: (row.display_name as string | null) ?? null,
     }]),
   )
-  const usernameMap = new Map<string, string | null>(
-    (adminAccountsResult.data ?? []).map(row => [row.user_id as string, (row.username as string | null) ?? null]),
+  const adminAccountMap = new Map<string, { username: string | null, displayName: string | null }>(
+    (adminAccountsResult.data ?? []).map(row => [row.user_id as string, {
+      username: (row.username as string | null) ?? null,
+      displayName: (row.display_name as string | null) ?? null,
+    }]),
   )
 
   return rows.map(row => {
     const profile = row.user_id ? profileMap.get(row.user_id) : null
+    const adminAccount = row.user_id ? adminAccountMap.get(row.user_id) : null
     return {
       id: row.id,
       userId: row.user_id,
@@ -286,8 +302,10 @@ async function hydrateUsers(
       user: {
         id: row.user_id ?? 'unknown-user',
         email: profile?.email ?? row.login_identifier,
-        username: row.user_id ? (usernameMap.get(row.user_id) ?? null) : null,
-        displayName: profile?.display_name ?? null,
+        username: adminAccount?.username ?? null,
+        displayName: surface === 'admin'
+          ? (adminAccount?.displayName ?? profile?.display_name ?? null)
+          : (profile?.display_name ?? null),
       },
     }
   })
@@ -303,8 +321,7 @@ export async function listLoginRecords(
   const adminClient = env ? createSupabaseAdminClient(env) : null
 
   if (!adminClient) {
-    const source = surface === 'front' ? mockFrontLoginRecords : mockAdminLoginRecords
-    return paginate(filterMockRecords(source, options), page, limit)
+    return createEmptyPage(page, limit)
   }
 
   let query = adminClient
@@ -329,11 +346,10 @@ export async function listLoginRecords(
   const { data, error, count } = await query.range(from, to)
 
   if (error || !data) {
-    const source = surface === 'front' ? mockFrontLoginRecords : mockAdminLoginRecords
-    return paginate(filterMockRecords(source, options), page, limit)
+    return createEmptyPage(page, limit)
   }
 
-  const hydrated = await hydrateUsers(env!, data as unknown as RawLoginRecordRow[])
+  const hydrated = await hydrateUsers(env!, data as unknown as RawLoginRecordRow[], surface)
   return {
     items: hydrated.map(record => ({
       id: record.id,
