@@ -381,6 +381,13 @@
   height: 200px;
 }
 
+.front-list-cover-placeholder {
+  min-height: 15rem;
+  background:
+    linear-gradient(135deg, rgba(176, 196, 222, 0.28), rgba(255, 255, 255, 0.6)),
+    radial-gradient(circle at top right, rgba(53, 94, 165, 0.12), transparent 52%);
+}
+
 .front-card-category {
   color: var(--front-accent);
   font-size: 0.84rem;
