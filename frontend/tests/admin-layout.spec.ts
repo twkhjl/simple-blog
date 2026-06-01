@@ -40,6 +40,10 @@ describe('AdminLayout', () => {
           component: { template: '<div>change password</div>' },
         },
         {
+          path: '/admin/login-records',
+          component: { template: '<div>login records</div>' },
+        },
+        {
           path: '/',
           component: { template: '<div>home</div>' },
         },

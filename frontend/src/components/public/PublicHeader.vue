@@ -2,10 +2,14 @@
 defineProps<{
   brand: string
   signInLabel: string
+  loginRecordsLabel: string
+  logoutLabel: string
+  isLoggedIn: boolean
 }>()
 
 const emit = defineEmits<{
   toggleMenu: []
+  logout: []
 }>()
 </script>
 
@@ -30,8 +34,16 @@ const emit = defineEmits<{
       <RouterLink to="/contact" class="front-nav-link">Contact</RouterLink>
       <RouterLink to="/admin/login" class="front-nav-link">Admin</RouterLink>
     </nav>
-    <RouterLink to="/login" class="front-login-link">
-      {{ signInLabel }}
-    </RouterLink>
+    <div class="inline-actions">
+      <RouterLink v-if="isLoggedIn" to="/login-records" class="front-login-link">
+        {{ loginRecordsLabel }}
+      </RouterLink>
+      <button v-if="isLoggedIn" type="button" class="front-login-link" @click="emit('logout')">
+        {{ logoutLabel }}
+      </button>
+      <RouterLink v-else to="/login" class="front-login-link">
+        {{ signInLabel }}
+      </RouterLink>
+    </div>
   </div>
 </template>

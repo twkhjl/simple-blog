@@ -59,3 +59,31 @@ create table public.files (
 create index idx_files_owner_id on public.files(owner_id);
 create index idx_files_created_at on public.files(created_at desc);
 
+create table public.front_login_records (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  login_identifier text not null,
+  result text not null check (result in ('success', 'failure')),
+  failure_reason text,
+  ip_address text,
+  user_agent text,
+  created_at timestamptz not null default now()
+);
+
+create index idx_front_login_records_user_created_at on public.front_login_records(user_id, created_at desc);
+create index idx_front_login_records_created_at on public.front_login_records(created_at desc);
+
+create table public.admin_login_records (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  login_identifier text not null,
+  result text not null check (result in ('success', 'failure')),
+  failure_reason text,
+  ip_address text,
+  user_agent text,
+  created_at timestamptz not null default now()
+);
+
+create index idx_admin_login_records_user_created_at on public.admin_login_records(user_id, created_at desc);
+create index idx_admin_login_records_created_at on public.admin_login_records(created_at desc);
+

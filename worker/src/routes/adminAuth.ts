@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { buildLoginRecordContext, recordLoginEvent } from '../lib/loginRecords'
 import { fail, ok } from '../lib/response'
 import type { AppEnv, UserRole, UserStatus, WorkerBindings } from '../types'
 
@@ -180,30 +181,77 @@ adminAuthRoutes.post('/admin/auth/login', async c => {
   const body = await readJson(c.req.raw)
   const username = typeof body?.username === 'string' ? body.username.trim() : ''
   const password = typeof body?.password === 'string' ? body.password : ''
+  const context = buildLoginRecordContext(c.req.raw)
 
   if (!username || !password) {
+    await recordLoginEvent(c.env, {
+      surface: 'admin',
+      identifier: username,
+      result: 'failure',
+      failureReason: 'invalid_credentials',
+      ...context,
+    })
     return fail('UNAUTHORIZED', GENERIC_LOGIN_ERROR, 401)
   }
 
   const account = await resolveAdminAccount(username, c.env)
   if (!account?.user_id) {
+    await recordLoginEvent(c.env, {
+      surface: 'admin',
+      identifier: username,
+      result: 'failure',
+      failureReason: 'invalid_credentials',
+      ...context,
+    })
     return fail('UNAUTHORIZED', GENERIC_LOGIN_ERROR, 401)
   }
 
   const profile = await resolveAdminProfile(account.user_id, c.env)
   if (!profile || !['editor', 'admin', 'super_admin'].includes(profile.role) || profile.status !== 'active') {
+    await recordLoginEvent(c.env, {
+      surface: 'admin',
+      userId: account.user_id,
+      identifier: username,
+      result: 'failure',
+      failureReason: 'invalid_credentials',
+      ...context,
+    })
     return fail('UNAUTHORIZED', GENERIC_LOGIN_ERROR, 401)
   }
 
   const email = await resolveAuthEmail(account.user_id, c.env)
   if (!email) {
+    await recordLoginEvent(c.env, {
+      surface: 'admin',
+      userId: account.user_id,
+      identifier: username,
+      result: 'failure',
+      failureReason: 'invalid_credentials',
+      ...context,
+    })
     return fail('UNAUTHORIZED', GENERIC_LOGIN_ERROR, 401)
   }
 
   const session = await signInWithEmail(email, password, c.env)
   if (!session) {
+    await recordLoginEvent(c.env, {
+      surface: 'admin',
+      userId: account.user_id,
+      identifier: username,
+      result: 'failure',
+      failureReason: 'invalid_credentials',
+      ...context,
+    })
     return fail('UNAUTHORIZED', GENERIC_LOGIN_ERROR, 401)
   }
+
+  await recordLoginEvent(c.env, {
+    surface: 'admin',
+    userId: account.user_id,
+    identifier: username,
+    result: 'success',
+    ...context,
+  })
 
   return ok({ session })
 })

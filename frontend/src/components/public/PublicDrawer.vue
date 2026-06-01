@@ -2,12 +2,16 @@
 defineProps<{
   brand: string
   signInLabel: string
+  loginRecordsLabel: string
+  logoutLabel: string
+  isLoggedIn: boolean
   open: boolean
   nav: ReadonlyArray<{ label: string; to: string }>
 }>()
 
 const emit = defineEmits<{
   close: []
+  logout: []
 }>()
 </script>
 
@@ -30,7 +34,13 @@ const emit = defineEmits<{
         {{ item.label }}
       </RouterLink>
     </nav>
-    <RouterLink to="/login" class="front-login-link" @click="emit('close')">
+    <RouterLink v-if="isLoggedIn" to="/login-records" class="front-login-link" @click="emit('close')">
+      {{ loginRecordsLabel }}
+    </RouterLink>
+    <button v-if="isLoggedIn" type="button" class="front-login-link" @click="emit('close'); emit('logout')">
+      {{ logoutLabel }}
+    </button>
+    <RouterLink v-else to="/login" class="front-login-link" @click="emit('close')">
       {{ signInLabel }}
     </RouterLink>
   </aside>

@@ -83,3 +83,29 @@ export interface UploadedFilePayload {
   mimeType: string
   size: number
 }
+
+export interface LoginRecordUser {
+  id: string
+  email: string
+  username: string | null
+  displayName: string | null
+}
+
+export interface LoginRecordItem {
+  id: string
+  surface: 'front' | 'admin'
+  result: 'success' | 'failure'
+  identifier: string
+  ipAddress: string | null
+  userAgent: string | null
+  failureReason: string | null
+  createdAt: string
+  user: LoginRecordUser
+}
+
+export interface LoginRecordsResponse {
+  items: LoginRecordItem[]
+  page: number
+  limit: number
+  total: number
+}

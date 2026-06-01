@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { isMeaningfulRichText, sanitizeRichTextHtml } from '../lib/content'
+import { listLoginRecords } from '../lib/loginRecords'
 import { buildFileUrl } from '../lib/r2'
 import { fail, ok } from '../lib/response'
 import { requireAuth } from '../middleware/requireAuth'
@@ -53,6 +54,31 @@ function serializeAdminPost(post: Awaited<ReturnType<typeof getAdminPostById>>, 
 }
 
 adminRoutes.use('*', requireAuth, requireRole(['editor', 'admin', 'super_admin']))
+
+adminRoutes.get('/login-records', requireRole(['admin', 'super_admin']), async c => {
+  const page = Number(c.req.query('page') ?? 1)
+  const result = c.req.query('result')
+  const identifier = c.req.query('identifier') ?? ''
+
+  return ok(await listLoginRecords(c.env, 'admin', {
+    page,
+    identifier,
+    result: result === 'success' || result === 'failure' ? result : 'all',
+  }))
+})
+
+adminRoutes.get('/user-login-records', requireRole(['admin', 'super_admin']), async c => {
+  const page = Number(c.req.query('page') ?? 1)
+  const result = c.req.query('result')
+  const identifier = c.req.query('identifier') ?? ''
+  const surface = c.req.query('surface') === 'front' ? 'front' : 'admin'
+
+  return ok(await listLoginRecords(c.env, surface, {
+    page,
+    identifier,
+    result: result === 'success' || result === 'failure' ? result : 'all',
+  }))
+})
 
 adminRoutes.post('/change-password', async c => {
   if (!c.env.SUPABASE_URL || !c.env.SUPABASE_ANON_KEY || !c.env.SUPABASE_SERVICE_ROLE_KEY) {

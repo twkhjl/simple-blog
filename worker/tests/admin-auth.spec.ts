@@ -100,6 +100,13 @@ describe('admin username auth api', () => {
         })
       }
 
+      if (url.includes('/rest/v1/admin_login_records')) {
+        expect(init?.method).toBe('POST')
+        expect(String(init?.body)).toContain('"login_identifier":"admin"')
+        expect(String(init?.body)).toContain('"result":"success"')
+        return createJsonResponse([{ id: 'admin-record-1' }], 201)
+      }
+
       return createJsonResponse({ message: 'unexpected' }, 500)
     })
 
@@ -353,6 +360,51 @@ describe('admin username auth api', () => {
         success: true,
       },
     })
+  })
+
+  it('writes failed admin login record when credentials are invalid', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input)
+
+      if (url.includes('/rest/v1/admin_accounts')) {
+        return createJsonResponse([{ user_id: 'admin-1', is_active: true }])
+      }
+
+      if (url.includes('/rest/v1/profiles')) {
+        return createJsonResponse([{ id: 'admin-1', role: 'admin', status: 'active' }])
+      }
+
+      if (url.endsWith('/auth/v1/admin/users/admin-1')) {
+        return createJsonResponse({ user: { email: 'admin@demo.invalid' } })
+      }
+
+      if (url.includes('/auth/v1/token?grant_type=password')) {
+        return createJsonResponse({ message: 'invalid login' }, 400)
+      }
+
+      if (url.includes('/rest/v1/admin_login_records')) {
+        expect(String(init?.body)).toContain('"login_identifier":"admin"')
+        expect(String(init?.body)).toContain('"result":"failure"')
+        expect(String(init?.body)).toContain('"failure_reason":"invalid_credentials"')
+        return createJsonResponse([{ id: 'admin-record-2' }], 201)
+      }
+
+      return createJsonResponse({ message: 'unexpected' }, 500)
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await app.request('/api/admin/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-forwarded-for': '203.0.113.20',
+        'user-agent': 'VitestAdmin/1.0',
+      },
+      body: JSON.stringify({ username: 'admin', password: 'bad-secret' }),
+    }, env)
+
+    expect(res.status).toBe(401)
   })
 
   it('returns 502 when password update fails upstream', async () => {

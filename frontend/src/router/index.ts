@@ -3,11 +3,13 @@ import AdminLayout from '../layouts/AdminLayout.vue'
 import PublicLayout from '../layouts/PublicLayout.vue'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.vue'
 import AdminChangePasswordPage from '../pages/admin/AdminChangePasswordPage.vue'
+import AdminLoginRecordsPage from '../pages/admin/AdminLoginRecordsPage.vue'
 import AdminPostEditPage from '../pages/admin/AdminPostEditPage.vue'
 import AdminPostListPage from '../pages/admin/AdminPostListPage.vue'
 import AdminForgotPasswordPage from '../pages/auth/AdminForgotPasswordPage.vue'
 import AdminLoginPage from '../pages/auth/AdminLoginPage.vue'
 import AdminResetPasswordPage from '../pages/auth/AdminResetPasswordPage.vue'
+import LoginRecordsPage from '../pages/auth/LoginRecordsPage.vue'
 import LoginPage from '../pages/auth/LoginPage.vue'
 import AboutPage from '../pages/public/AboutPage.vue'
 import ArticleListPage from '../pages/public/ArticleListPage.vue'
@@ -15,6 +17,7 @@ import ContactPage from '../pages/public/ContactPage.vue'
 import HomePage from '../pages/public/HomePage.vue'
 import PostDetailPage from '../pages/public/PostDetailPage.vue'
 import { canAccessAdmin, ensureAuthInitialized } from '../stores/auth'
+import { authState } from '../stores/auth'
 
 export function createAppRouter() {
   return createRouter({
@@ -46,6 +49,7 @@ export function createAppRouter() {
         children: [
           { path: '', component: AdminDashboardPage },
           { path: 'change-password', component: AdminChangePasswordPage },
+          { path: 'login-records', component: AdminLoginRecordsPage },
           { path: 'posts', component: AdminPostListPage },
           { path: 'posts/new', component: AdminPostEditPage },
           { path: 'posts/:id/edit', component: AdminPostEditPage },
@@ -60,6 +64,18 @@ export function createAppRouter() {
           { path: 'contact', component: ContactPage },
           { path: 'articles', component: ArticleListPage },
           { path: 'login', component: LoginPage },
+          {
+            path: 'login-records',
+            component: LoginRecordsPage,
+            beforeEnter: async () => {
+              await ensureAuthInitialized()
+              if (!authState.session) {
+                return '/login'
+              }
+
+              return true
+            },
+          },
           { path: 'post/:slug', component: PostDetailPage },
         ],
       },

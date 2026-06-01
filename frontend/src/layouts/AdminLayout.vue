@@ -65,6 +65,9 @@
             <RouterLink class="nav-link" :class="{ active: route.path === '/admin' }" to="/admin">
               {{ t('admin.layout.dashboard') }}
             </RouterLink>
+            <RouterLink class="nav-link" :class="{ active: route.path.startsWith('/admin/login-records') }" to="/admin/login-records">
+              {{ t('admin.layout.loginRecords') }}
+            </RouterLink>
             <RouterLink class="nav-link" :class="{ active: route.path.startsWith('/admin/posts') }" to="/admin/posts">
               {{ t('admin.layout.posts') }}
             </RouterLink>

@@ -12,6 +12,8 @@ describe('admin router guards', () => {
     expect(router.resolve('/admin').matched.length).toBeGreaterThan(0)
     expect(router.resolve('/admin/posts').matched.length).toBeGreaterThan(0)
     expect(router.resolve('/admin/change-password').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/login-records').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/admin/login-records').matched.length).toBeGreaterThan(0)
   })
 
   it('redirects unauthenticated admin route access to /admin/login', async () => {
@@ -22,5 +24,15 @@ describe('admin router guards', () => {
     await router.push('/admin')
 
     expect(router.currentRoute.value.fullPath).toBe('/admin/login')
+  })
+
+  it('redirects unauthenticated login-records access to /login', async () => {
+    vi.spyOn(authStore, 'ensureAuthInitialized').mockResolvedValue()
+    authStore.authState.session = null
+
+    const router = createAppRouter()
+    await router.push('/login-records')
+
+    expect(router.currentRoute.value.fullPath).toBe('/login')
   })
 })

@@ -30,6 +30,10 @@ const en = {
       currentPassword: 'Current Password',
       newPassword: 'New Password',
       confirmPassword: 'Confirm Password',
+      identifier: 'Identifier',
+      ipAddress: 'IP Address',
+      userAgent: 'User Agent',
+      failureReason: 'Failure Reason',
       title: 'Title',
       slug: 'Slug',
       excerpt: 'Excerpt',
@@ -169,6 +173,22 @@ const en = {
       copy: 'Enter the editorial workspace with the same dark tactile language as the rest of the app.',
       emailPlaceholder: "editor{'@'}demo.invalid",
       passwordPlaceholder: 'Enter your password',
+      submitting: 'Signing in...',
+    },
+    loginRecords: {
+      eyebrow: 'Access Activity',
+      title: 'Login Records',
+      copy: 'Review your recent sign-in attempts and successful access history.',
+      resultFilter: 'Result',
+      allResults: 'All Results',
+      successOnly: 'Success Only',
+      failureOnly: 'Failure Only',
+      noIp: 'No IP recorded',
+      noUserAgent: 'No user agent recorded',
+      noFailureReason: 'No failure reason',
+      loading: 'Loading login records...',
+      previous: 'Previous',
+      next: 'Next',
     },
     register: {
       eyebrow: 'New Identity',
@@ -202,6 +222,7 @@ const en = {
       workspace: 'Workspace',
       panel: 'Admin Panel',
       dashboard: 'Dashboard',
+      loginRecords: 'Login Records',
       posts: 'Posts',
       profile: 'Profile',
     },
@@ -268,6 +289,25 @@ const en = {
       success: 'Password updated successfully',
       submitting: 'Updating...',
     },
+    loginRecords: {
+      eyebrow: 'Audit Trail',
+      title: 'Login Records',
+      copy: 'Inspect successful and failed sign-ins across admin and public accounts.',
+      surfaceFilter: 'Surface',
+      adminSurface: 'Admin',
+      frontSurface: 'Public',
+      resultFilter: 'Result',
+      allResults: 'All Results',
+      successOnly: 'Success Only',
+      failureOnly: 'Failure Only',
+      identifierFilter: 'Email or Username',
+      noIp: 'No IP recorded',
+      noUserAgent: 'No user agent recorded',
+      noFailureReason: 'No failure reason',
+      loading: 'Loading login records...',
+      previous: 'Previous',
+      next: 'Next',
+    },
   },
   editor: {
     toolbar: {
@@ -330,6 +370,9 @@ const en = {
     profile: {
       title: 'Profile',
     },
+    loginRecords: {
+      title: 'Login Records',
+    },
     adminDashboard: {
       title: 'Admin Dashboard',
     },
@@ -341,6 +384,9 @@ const en = {
     },
     adminChangePassword: {
       title: 'Change Password',
+    },
+    adminLoginRecords: {
+      title: 'Login Records',
     },
     adminPostNew: {
       title: 'Create Post',

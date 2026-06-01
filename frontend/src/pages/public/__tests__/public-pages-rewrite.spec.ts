@@ -4,10 +4,12 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import { mount } from '@vue/test-utils'
+import { createI18n } from 'vue-i18n'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { nextTick } from 'vue'
 import App from '../../../App.vue'
 import { publicMockContent } from '../../../content/publicMockContent'
+import en from '../../../i18n/locales/en'
 import { createAppRouter } from '../../../router'
 
 const sourceFiles = [
@@ -25,7 +27,10 @@ async function mountAt(path: string) {
 
   const wrapper = mount(App, {
     global: {
-      plugins: [router],
+      plugins: [
+        router,
+        createI18n({ legacy: false, locale: 'en', messages: { en } }),
+      ],
     },
   })
 
