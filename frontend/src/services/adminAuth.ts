@@ -65,8 +65,9 @@ export async function requestAdminPasswordReset(email: string) {
 }
 
 export function persistAdminRecoverySessionFromUrl() {
-  const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash
-  const params = new URLSearchParams(hash)
+  const rawHash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash
+  const normalizedHash = rawHash.startsWith('/') ? rawHash.slice(1) : rawHash
+  const params = new URLSearchParams(normalizedHash)
   const accessToken = params.get('access_token')
   const refreshToken = params.get('refresh_token')
 
@@ -80,6 +81,10 @@ export function persistAdminRecoverySessionFromUrl() {
   }))
 
   return true
+}
+
+export function hasAdminRecoveryTokensInUrl() {
+  return window.location.hash.includes('access_token=') && window.location.hash.includes('refresh_token=')
 }
 
 export async function hydrateAdminRecoverySession() {
