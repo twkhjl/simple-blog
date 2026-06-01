@@ -5,9 +5,41 @@ import { fail, ok } from '../lib/response'
 import { requireAuth } from '../middleware/requireAuth'
 import { requireRole } from '../middleware/requireRole'
 import { createAdminPost, deleteAdminPost, getAdminPostById, listAdminPosts, updateAdminPost } from './posts'
-import type { AppEnv } from '../types'
+import type { AppEnv, WorkerBindings } from '../types'
 
 const adminRoutes = new Hono<AppEnv>()
+const MIN_PASSWORD_LENGTH = 8
+
+function getServiceHeaders(env: WorkerBindings) {
+  return {
+    apikey: env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+    authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY ?? ''}`,
+    'content-type': 'application/json',
+  }
+}
+
+async function verifyCurrentPassword(email: string, password: string, env: WorkerBindings) {
+  const response = await fetch(new URL('/auth/v1/token?grant_type=password', env.SUPABASE_URL), {
+    method: 'POST',
+    headers: {
+      apikey: env.SUPABASE_ANON_KEY ?? '',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  })
+
+  return response.ok
+}
+
+async function updateAdminPassword(userId: string, newPassword: string, env: WorkerBindings) {
+  const response = await fetch(new URL(`/auth/v1/admin/users/${userId}`, env.SUPABASE_URL), {
+    method: 'PUT',
+    headers: getServiceHeaders(env),
+    body: JSON.stringify({ password: newPassword }),
+  })
+
+  return response.ok
+}
 
 function serializeAdminPost(post: Awaited<ReturnType<typeof getAdminPostById>>, env: AppEnv['Bindings']) {
   if (!post) {
@@ -21,6 +53,45 @@ function serializeAdminPost(post: Awaited<ReturnType<typeof getAdminPostById>>, 
 }
 
 adminRoutes.use('*', requireAuth, requireRole(['editor', 'admin', 'super_admin']))
+
+adminRoutes.post('/change-password', async c => {
+  if (!c.env.SUPABASE_URL || !c.env.SUPABASE_ANON_KEY || !c.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return fail('CONFIG_ERROR', 'Password update is unavailable.', 500)
+  }
+
+  const user = c.get('user')
+  const body = await c.req.json().catch(() => null) as {
+    currentPassword?: string
+    newPassword?: string
+  } | null
+
+  const currentPassword = typeof body?.currentPassword === 'string' ? body.currentPassword : ''
+  const newPassword = typeof body?.newPassword === 'string' ? body.newPassword : ''
+
+  if (!currentPassword || !newPassword) {
+    return fail('VALIDATION_ERROR', 'Current password and new password are required.', 400)
+  }
+
+  if (newPassword.length < MIN_PASSWORD_LENGTH) {
+    return fail('INVALID_NEW_PASSWORD', `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`, 400)
+  }
+
+  if (currentPassword === newPassword) {
+    return fail('INVALID_NEW_PASSWORD', 'New password must be different from current password.', 400)
+  }
+
+  const currentPasswordValid = await verifyCurrentPassword(user.email, currentPassword, c.env)
+  if (!currentPasswordValid) {
+    return fail('INVALID_CURRENT_PASSWORD', 'Current password is incorrect.', 400)
+  }
+
+  const updated = await updateAdminPassword(user.id, newPassword, c.env)
+  if (!updated) {
+    return fail('PASSWORD_UPDATE_FAILED', 'Failed to update password.', 502)
+  }
+
+  return ok({ success: true })
+})
 
 adminRoutes.get('/posts', c => {
   const user = c.get('user')

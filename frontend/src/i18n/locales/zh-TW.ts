@@ -324,4 +324,51 @@ const zhTW = {
   },
 } as const
 
-export default zhTW
+export default {
+  ...zhTW,
+  common: {
+    ...zhTW.common,
+    actions: {
+      ...zhTW.common.actions,
+      changePassword: '修改密碼',
+    },
+    labels: {
+      ...zhTW.common.labels,
+      currentPassword: '舊密碼',
+      newPassword: '新密碼',
+      confirmPassword: '確認密碼',
+    },
+    messages: {
+      ...zhTW.common.messages,
+      passwordUpdated: '密碼已更新。',
+    },
+  },
+  admin: {
+    ...zhTW.admin,
+    changePassword: {
+      eyebrow: '安全設定',
+      title: '修改密碼',
+      copy: '直接在後台更新目前管理帳號密碼，不需離開控制介面。',
+      help: '請先輸入舊密碼，再設定新密碼。',
+      currentPasswordPlaceholder: '請輸入舊密碼',
+      newPasswordPlaceholder: '請輸入新密碼',
+      confirmPasswordPlaceholder: '請再次輸入新密碼',
+      required: '三個密碼欄位皆為必填',
+      tooShort: '密碼長度至少要 {count} 個字元',
+      mismatch: '兩次輸入的新密碼不一致',
+      sameAsCurrent: '新密碼不可與舊密碼相同',
+      invalidCurrentPassword: '舊密碼錯誤',
+      invalidNewPassword: '新密碼不符合規則',
+      unauthorized: '登入狀態已失效，請重新登入',
+      failed: '密碼更新失敗',
+      success: '密碼已更新成功',
+      submitting: '更新中...',
+    },
+  },
+  seo: {
+    ...zhTW.seo,
+    adminChangePassword: {
+      title: '修改密碼',
+    },
+  },
+} as const

@@ -258,4 +258,138 @@ describe('admin username auth api', () => {
       },
     })
   })
+
+  it('returns 401 when change-password request has no authorization', async () => {
+    const res = await app.request('/api/admin/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword: 'secret123', newPassword: 'secret456' }),
+    }, env)
+
+    expect(res.status).toBe(401)
+  })
+
+  it('returns 403 when non-admin user tries to change password', async () => {
+    const res = await app.request('/api/admin/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer user-token',
+      },
+      body: JSON.stringify({ currentPassword: 'secret123', newPassword: 'secret456' }),
+    }, env)
+
+    expect(res.status).toBe(403)
+  })
+
+  it('returns 400 when current password is invalid', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input)
+
+      if (url.includes('/auth/v1/token?grant_type=password')) {
+        expect(init?.body).toBe(JSON.stringify({ email: 'admin@demo.invalid', password: 'wrong-secret' }))
+        return createJsonResponse({ message: 'invalid login' }, 400)
+      }
+
+      return createJsonResponse({ message: 'unexpected' }, 500)
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await app.request('/api/admin/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer admin-token',
+      },
+      body: JSON.stringify({ currentPassword: 'wrong-secret', newPassword: 'secret456' }),
+    }, env)
+
+    expect(res.status).toBe(400)
+    expect(await res.json()).toMatchObject({
+      success: false,
+      error: {
+        code: 'INVALID_CURRENT_PASSWORD',
+      },
+    })
+  })
+
+  it('updates password when current password is valid', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input)
+
+      if (url.includes('/auth/v1/token?grant_type=password')) {
+        expect(init?.body).toBe(JSON.stringify({ email: 'admin@demo.invalid', password: 'secret123' }))
+        return createJsonResponse({
+          access_token: 'access-token',
+          refresh_token: 'refresh-token',
+        })
+      }
+
+      if (url.endsWith('/auth/v1/admin/users/admin-1')) {
+        expect(init?.method).toBe('PUT')
+        expect(init?.body).toBe(JSON.stringify({ password: 'secret456' }))
+        return createJsonResponse({ user: { id: 'admin-1' } })
+      }
+
+      return createJsonResponse({ message: 'unexpected' }, 500)
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await app.request('/api/admin/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer admin-token',
+      },
+      body: JSON.stringify({ currentPassword: 'secret123', newPassword: 'secret456' }),
+    }, env)
+
+    expect(res.status).toBe(200)
+    expect(await res.json()).toMatchObject({
+      success: true,
+      data: {
+        success: true,
+      },
+    })
+  })
+
+  it('returns 502 when password update fails upstream', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input)
+
+      if (url.includes('/auth/v1/token?grant_type=password')) {
+        return createJsonResponse({
+          access_token: 'access-token',
+          refresh_token: 'refresh-token',
+        })
+      }
+
+      if (url.endsWith('/auth/v1/admin/users/admin-1')) {
+        return createJsonResponse({ message: 'boom' }, 500)
+      }
+
+      return createJsonResponse({ message: 'unexpected' }, 500)
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await app.request('/api/admin/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer admin-token',
+      },
+      body: JSON.stringify({ currentPassword: 'secret123', newPassword: 'secret456' }),
+    }, env)
+
+    expect(res.status).toBe(502)
+    expect(await res.json()).toMatchObject({
+      success: false,
+      error: {
+        code: 'PASSWORD_UPDATE_FAILED',
+      },
+    })
+  })
 })

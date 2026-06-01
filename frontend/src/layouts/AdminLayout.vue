@@ -29,6 +29,14 @@
                 data-testid="admin-user-menu"
               >
                 <p v-if="logoutError" class="admin-user-menu-error">{{ logoutError }}</p>
+                <RouterLink
+                  class="admin-user-menu-action"
+                  to="/admin/change-password"
+                  data-testid="admin-change-password-link"
+                  @click="isUserMenuOpen = false"
+                >
+                  {{ t('common.actions.changePassword') }}
+                </RouterLink>
                 <button
                   class="admin-user-menu-action"
                   type="button"

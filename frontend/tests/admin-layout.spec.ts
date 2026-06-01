@@ -36,6 +36,10 @@ describe('AdminLayout', () => {
           component: { template: '<div>new</div>' },
         },
         {
+          path: '/admin/change-password',
+          component: { template: '<div>change password</div>' },
+        },
+        {
           path: '/',
           component: { template: '<div>home</div>' },
         },
@@ -92,5 +96,26 @@ describe('AdminLayout', () => {
 
     expect(logoutSpy).toHaveBeenCalledTimes(1)
     expect(router.currentRoute.value.fullPath).toBe('/admin/login')
+  })
+
+  it('opens user menu and links to change-password page', async () => {
+    authState.profile = {
+      id: 'admin-1',
+      email: 'admin@demo.invalid',
+      username: 'admin',
+      displayName: 'Admin Person',
+      role: 'admin',
+      status: 'active',
+    } as any
+
+    const { router, wrapper } = await mountLayout()
+
+    await wrapper.get('[data-testid="admin-user-trigger"]').trigger('click')
+    expect(wrapper.get('[data-testid="admin-change-password-link"]').text()).toContain('Change Password')
+
+    await wrapper.get('[data-testid="admin-change-password-link"]').trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.fullPath).toBe('/admin/change-password')
   })
 })

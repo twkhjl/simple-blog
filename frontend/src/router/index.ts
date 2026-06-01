@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import AdminLayout from '../layouts/AdminLayout.vue'
 import PublicLayout from '../layouts/PublicLayout.vue'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.vue'
+import AdminChangePasswordPage from '../pages/admin/AdminChangePasswordPage.vue'
 import AdminPostEditPage from '../pages/admin/AdminPostEditPage.vue'
 import AdminPostListPage from '../pages/admin/AdminPostListPage.vue'
 import AdminForgotPasswordPage from '../pages/auth/AdminForgotPasswordPage.vue'
@@ -44,6 +45,7 @@ export function createAppRouter() {
         },
         children: [
           { path: '', component: AdminDashboardPage },
+          { path: 'change-password', component: AdminChangePasswordPage },
           { path: 'posts', component: AdminPostListPage },
           { path: 'posts/new', component: AdminPostEditPage },
           { path: 'posts/:id/edit', component: AdminPostEditPage },

@@ -1,4 +1,5 @@
 import { authState, refreshProfile } from '../stores/auth'
+import { createApiClient } from './api'
 import { buildApiUrl } from './api'
 import { getSupabaseClient } from './supabase'
 
@@ -128,4 +129,9 @@ export async function updateAdminPassword(password: string) {
   }
 
   window.sessionStorage.removeItem(RECOVERY_STORAGE_KEY)
+}
+
+export async function changeAdminPassword(payload: { currentPassword: string, newPassword: string }) {
+  const client = createApiClient(fetch, () => authState.session?.access_token ?? null)
+  return client.post<{ success: true }>('/api/admin/change-password', payload)
 }

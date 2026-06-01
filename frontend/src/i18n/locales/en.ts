@@ -22,10 +22,14 @@ const en = {
       managePosts: 'Manage Posts',
       newDraft: 'New Draft',
       backToExplore: 'Back to Explore',
+      changePassword: 'Change Password',
     },
     labels: {
       email: 'Email',
       password: 'Password',
+      currentPassword: 'Current Password',
+      newPassword: 'New Password',
+      confirmPassword: 'Confirm Password',
       title: 'Title',
       slug: 'Slug',
       excerpt: 'Excerpt',
@@ -93,6 +97,7 @@ const en = {
       uploadingCover: 'Uploading cover image...',
       toggleNavigationMenu: 'Toggle navigation menu',
       postNotFound: 'Post not found: {slug}',
+      passwordUpdated: 'Password updated successfully.',
     },
   },
   public: {
@@ -244,6 +249,25 @@ const en = {
       actions: 'Actions',
       clearCover: 'Clear Cover',
     },
+    changePassword: {
+      eyebrow: 'Security',
+      title: 'Change Password',
+      copy: 'Update your current admin password without leaving the control surface.',
+      help: 'Enter your current password, then choose a new one.',
+      currentPasswordPlaceholder: 'Enter your current password',
+      newPasswordPlaceholder: 'Enter a new password',
+      confirmPasswordPlaceholder: 'Repeat the new password',
+      required: 'All password fields are required',
+      tooShort: 'Password must be at least {count} characters',
+      mismatch: 'Passwords do not match',
+      sameAsCurrent: 'New password must be different from current password',
+      invalidCurrentPassword: 'Current password is incorrect',
+      invalidNewPassword: 'New password is invalid',
+      unauthorized: 'Your session has expired. Please log in again.',
+      failed: 'Password update failed',
+      success: 'Password updated successfully',
+      submitting: 'Updating...',
+    },
   },
   editor: {
     toolbar: {
@@ -314,6 +338,9 @@ const en = {
     },
     adminPosts: {
       title: 'Manage Posts',
+    },
+    adminChangePassword: {
+      title: 'Change Password',
     },
     adminPostNew: {
       title: 'Create Post',
