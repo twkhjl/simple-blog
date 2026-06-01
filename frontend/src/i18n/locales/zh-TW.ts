@@ -1,4 +1,4 @@
-const zhTW = {
+﻿const zhTW = {
   common: {
     locale: {
       zhTW: '繁體中文',
@@ -398,6 +398,14 @@ export default {
       eyebrow: '稽核軌跡',
       title: '登入紀錄',
       copy: '查看前台與後台帳號的成功與失敗登入紀錄。',
+      createdAt: '時間',
+      surface: '入口',
+      result: '結果',
+      identifier: '帳號',
+      user: '使用者',
+      ipAddress: 'IP',
+      userAgent: '裝置資訊',
+      failureReason: '失敗原因',
       surfaceFilter: '入口',
       adminSurface: '後台',
       frontSurface: '前台',
@@ -410,6 +418,7 @@ export default {
       noUserAgent: '未記錄裝置資訊',
       noFailureReason: '無失敗原因',
       loading: '載入登入紀錄中...',
+      empty: '目前沒有登入紀錄',
       previous: '上一頁',
       next: '下一頁',
     },
