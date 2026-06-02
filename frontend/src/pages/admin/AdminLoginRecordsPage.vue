@@ -52,7 +52,7 @@
             <tr v-for="item in records.items" :key="item.id">
               <td>{{ formatTimestamp(item.createdAt) }}</td>
               <td>{{ formatSurface(item.surface) }}</td>
-              <td>
+              <td class="result-column">
                 <span class="login-result-chip" :class="item.result">
                   {{ formatResult(item.result) }}
                 </span>
@@ -225,5 +225,10 @@ onMounted(() => {
 .login-result-chip.failure {
   background: rgba(248, 113, 113, 0.14);
   color: rgb(252, 165, 165);
+}
+
+.result-column {
+  width: 7rem;
+  min-width: 7rem;
 }
 </style>
