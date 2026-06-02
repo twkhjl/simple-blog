@@ -3,9 +3,23 @@
     <header class="admin-header">
       <div class="container">
         <div class="admin-header-inner admin-surface">
-          <div class="brand-block">
-            <p class="brand-mark">{{ t('admin.layout.brandTitle') }}</p>
-            <p class="brand-copy">{{ t('admin.layout.brandCopy') }}</p>
+          <div class="admin-topbar-main">
+            <button
+              type="button"
+              class="admin-mobile-menu-button"
+              data-testid="admin-mobile-menu-button"
+              :aria-expanded="isMobileNavOpen"
+              :aria-label="t('admin.layout.openMenu')"
+              @click="toggleMobileNav"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <div class="brand-block">
+              <p class="brand-mark">{{ t('admin.layout.brandTitle') }}</p>
+              <p class="brand-copy">{{ t('admin.layout.brandCopy') }}</p>
+            </div>
           </div>
 
           <div class="admin-topbar-actions">
@@ -53,6 +67,13 @@
       </div>
     </header>
 
+    <div
+      class="admin-mobile-overlay"
+      :class="{ open: isMobileNavOpen }"
+      data-testid="admin-mobile-overlay"
+      @click="closeMobileNav"
+    ></div>
+
     <main class="admin-shell">
       <aside class="admin-sidebar">
         <div class="admin-surface admin-sidebar-panel">
@@ -61,18 +82,51 @@
             <p class="section-title admin-panel-title">{{ t('admin.layout.panel') }}</p>
           </div>
 
-          <nav class="sidebar-nav">
-            <RouterLink class="nav-link" :class="{ active: route.path === '/admin' }" to="/admin">
-              {{ t('admin.layout.dashboard') }}
-            </RouterLink>
-            <RouterLink class="nav-link" :class="{ active: route.path.startsWith('/admin/login-records') }" to="/admin/login-records">
-              {{ t('admin.layout.loginRecords') }}
-            </RouterLink>
-            <RouterLink class="nav-link" :class="{ active: route.path.startsWith('/admin/posts') }" to="/admin/posts">
-              {{ t('admin.layout.posts') }}
+          <nav class="sidebar-nav" :aria-label="t('admin.layout.primaryNav')">
+            <RouterLink
+              v-for="item in navItems"
+              :key="item.key"
+              class="nav-link"
+              :class="{ active: item.active }"
+              :to="item.to"
+              :data-testid="item.testId"
+            >
+              {{ item.label }}
             </RouterLink>
           </nav>
         </div>
+      </aside>
+
+      <aside
+        class="admin-mobile-drawer admin-surface"
+        :class="{ open: isMobileNavOpen }"
+        data-testid="admin-mobile-drawer"
+      >
+        <div class="admin-mobile-drawer-head">
+          <p class="section-title admin-panel-title">{{ t('admin.layout.panel') }}</p>
+          <button
+            type="button"
+            class="admin-drawer-close"
+            :aria-label="t('admin.layout.closeMenu')"
+            @click="closeMobileNav"
+          >
+            x
+          </button>
+        </div>
+
+        <nav class="sidebar-nav" :aria-label="t('admin.layout.primaryNav')">
+          <RouterLink
+            v-for="item in navItems"
+            :key="`${item.key}-mobile`"
+            class="nav-link"
+            :class="{ active: item.active }"
+            :to="item.to"
+            :data-testid="item.mobileTestId"
+            @click="closeMobileNav"
+          >
+            {{ item.label }}
+          </RouterLink>
+        </nav>
       </aside>
 
       <section class="admin-main">
@@ -84,7 +138,7 @@
 
 <script setup lang="ts">
 import '../style.css'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import AdminLocaleSwitcher from '../components/admin/AdminLocaleSwitcher.vue'
@@ -94,15 +148,51 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const isUserMenuOpen = ref(false)
+const isMobileNavOpen = ref(false)
 const logoutPending = ref(false)
 const logoutError = ref('')
 const userMenuRef = ref<HTMLElement | null>(null)
+
+const navItems = computed(() => [
+  {
+    key: 'dashboard',
+    label: t('admin.layout.dashboard'),
+    to: '/admin',
+    active: route.path === '/admin',
+    testId: 'admin-nav-dashboard',
+    mobileTestId: 'admin-mobile-nav-dashboard',
+  },
+  {
+    key: 'login-records',
+    label: t('admin.layout.loginRecords'),
+    to: '/admin/login-records',
+    active: route.path.startsWith('/admin/login-records'),
+    testId: 'admin-nav-login-records',
+    mobileTestId: 'admin-mobile-nav-login-records',
+  },
+  {
+    key: 'posts',
+    label: t('admin.layout.posts'),
+    to: '/admin/posts',
+    active: route.path.startsWith('/admin/posts'),
+    testId: 'admin-nav-posts',
+    mobileTestId: 'admin-mobile-nav-posts',
+  },
+])
 
 const adminIdentityLabel = computed(() => (
   authState.profile?.displayName
   ?? authState.profile?.username
   ?? t('common.statusValues.admin')
 ))
+
+function closeMobileNav() {
+  isMobileNavOpen.value = false
+}
+
+function toggleMobileNav() {
+  isMobileNavOpen.value = !isMobileNavOpen.value
+}
 
 function toggleUserMenu() {
   isUserMenuOpen.value = !isUserMenuOpen.value
@@ -126,6 +216,15 @@ function handleDocumentClick(event: MouseEvent) {
   }
 }
 
+function handleDocumentKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Escape') {
+    return
+  }
+
+  isUserMenuOpen.value = false
+  closeMobileNav()
+}
+
 async function handleLogout() {
   if (logoutPending.value) {
     return
@@ -145,11 +244,18 @@ async function handleLogout() {
   }
 }
 
+watch(() => route.fullPath, () => {
+  isUserMenuOpen.value = false
+  closeMobileNav()
+})
+
 onMounted(() => {
   document.addEventListener('click', handleDocumentClick)
+  document.addEventListener('keydown', handleDocumentKeydown)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleDocumentClick)
+  document.removeEventListener('keydown', handleDocumentKeydown)
 })
 </script>

@@ -12,10 +12,11 @@ describe('AdminLayout', () => {
     authState.session = null
     authState.profile = null
     authState.error = null
+    document.body.innerHTML = ''
     vi.restoreAllMocks()
   })
 
-  async function mountLayout() {
+  async function mountLayout(startAt = '/admin') {
     const router = createRouter({
       history: createWebHashHistory(),
       routes: [
@@ -50,10 +51,11 @@ describe('AdminLayout', () => {
       ],
     })
 
-    await router.push('/admin')
+    await router.push(startAt)
     await router.isReady()
 
     const wrapper = mount(AdminLayout, {
+      attachTo: document.body,
       global: {
         plugins: [
           router,
@@ -121,5 +123,80 @@ describe('AdminLayout', () => {
     await flushPromises()
 
     expect(router.currentRoute.value.fullPath).toBe('/admin/change-password')
+  })
+
+  it('marks login-records nav link active on nested admin route', async () => {
+    authState.profile = {
+      id: 'admin-1',
+      email: 'admin@demo.invalid',
+      username: 'admin',
+      displayName: 'Admin Person',
+      role: 'admin',
+      status: 'active',
+    } as any
+
+    const { wrapper } = await mountLayout('/admin/login-records')
+
+    expect(wrapper.get('[data-testid="admin-nav-login-records"]').classes()).toContain('active')
+  })
+
+  it('opens mobile drawer from hamburger and closes from overlay', async () => {
+    authState.profile = {
+      id: 'admin-1',
+      email: 'admin@demo.invalid',
+      username: 'admin',
+      displayName: 'Admin Person',
+      role: 'admin',
+      status: 'active',
+    } as any
+
+    const { wrapper } = await mountLayout()
+
+    expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).not.toContain('open')
+
+    await wrapper.get('[data-testid="admin-mobile-menu-button"]').trigger('click')
+    expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).toContain('open')
+
+    await wrapper.get('[data-testid="admin-mobile-overlay"]').trigger('click')
+    expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).not.toContain('open')
+  })
+
+  it('closes mobile drawer after tapping nav item', async () => {
+    authState.profile = {
+      id: 'admin-1',
+      email: 'admin@demo.invalid',
+      username: 'admin',
+      displayName: 'Admin Person',
+      role: 'admin',
+      status: 'active',
+    } as any
+
+    const { router, wrapper } = await mountLayout()
+
+    await wrapper.get('[data-testid="admin-mobile-menu-button"]').trigger('click')
+    await wrapper.get('[data-testid="admin-mobile-nav-posts"]').trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.fullPath).toBe('/admin/posts')
+    expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).not.toContain('open')
+  })
+
+  it('closes mobile drawer on Escape', async () => {
+    authState.profile = {
+      id: 'admin-1',
+      email: 'admin@demo.invalid',
+      username: 'admin',
+      displayName: 'Admin Person',
+      role: 'admin',
+      status: 'active',
+    } as any
+
+    const { wrapper } = await mountLayout()
+
+    await wrapper.get('[data-testid="admin-mobile-menu-button"]').trigger('click')
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await flushPromises()
+
+    expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).not.toContain('open')
   })
 })

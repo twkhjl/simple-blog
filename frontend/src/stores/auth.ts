@@ -51,19 +51,18 @@ async function runAuthInitialization() {
     const { data } = await getCurrentSession()
     authState.session = data.session
     await refreshProfile()
+    if (!authSubscriptionBound) {
+      onAuthStateChange(async (_event, session) => {
+        authState.session = session
+        await refreshProfile()
+      })
+      authSubscriptionBound = true
+    }
   } catch (error) {
     authState.error = error instanceof Error ? error.message : 'Failed to initialize auth'
   } finally {
     authState.initializing = false
     authState.ready = true
-  }
-
-  if (!authSubscriptionBound) {
-    onAuthStateChange(async (_event, session) => {
-      authState.session = session
-      await refreshProfile()
-    })
-    authSubscriptionBound = true
   }
 }
 

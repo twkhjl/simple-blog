@@ -2578,13 +2578,17 @@ img {
 }
 
 .admin-theme .admin-shell {
+  position: relative;
   width: min(1380px, calc(100vw - 2rem));
   grid-template-columns: 248px minmax(0, 1fr);
   gap: 1.25rem;
+  align-items: start;
   padding: 1rem 0 2rem;
 }
 
 .admin-theme .admin-sidebar {
+  position: sticky;
+  top: 1rem;
   padding: 0;
   background: transparent;
   box-shadow: none;
@@ -2616,6 +2620,20 @@ img {
 .admin-theme .admin-header-inner,
 .admin-theme .admin-sidebar-panel {
   padding: 1.2rem 1.25rem;
+}
+
+.admin-theme .admin-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-topbar-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
 }
 
 .admin-sidebar-panel {
@@ -2679,6 +2697,81 @@ img {
   color: #fff7f2;
   background: linear-gradient(135deg, #ff6a2d, #b83f14);
   box-shadow: 0 0 0 1px rgba(255, 131, 75, 0.14), 0 0 24px rgba(255, 106, 45, 0.22);
+}
+
+.admin-mobile-menu-button,
+.admin-drawer-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 181, 158, 0.16);
+  background: #1b1e22;
+  color: #f4e6df;
+}
+
+.admin-mobile-menu-button {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 16px;
+  flex-direction: column;
+  gap: 0.28rem;
+  cursor: pointer;
+}
+
+.admin-mobile-menu-button span {
+  width: 1rem;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.admin-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 8, 10, 0.58);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 35;
+}
+
+.admin-mobile-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.admin-mobile-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(320px, calc(100vw - 2rem));
+  height: 100vh;
+  padding: 1.25rem;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+  transform: translateX(-105%);
+  transition: transform 0.22s ease;
+  z-index: 40;
+}
+
+.admin-mobile-drawer.open {
+  transform: translateX(0);
+}
+
+.admin-mobile-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.admin-drawer-close {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  cursor: pointer;
 }
 
 .admin-topbar-actions {
@@ -2878,6 +2971,36 @@ img {
   }
 
   .admin-theme .admin-sidebar {
-    position: static;
+    display: none;
+  }
+
+  .admin-theme .admin-shell {
+    width: calc(100vw - 1rem);
+  }
+
+  .admin-theme .admin-header-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .admin-mobile-menu-button,
+  .admin-drawer-close {
+    display: inline-flex;
+  }
+
+  .admin-topbar-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .admin-topbar-actions > * {
+    flex: 1 1 10rem;
+  }
+
+  .admin-shell-button,
+  .admin-theme .neo-button,
+  .admin-button {
+    width: 100%;
   }
 }

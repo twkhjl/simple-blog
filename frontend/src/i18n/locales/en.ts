@@ -225,6 +225,9 @@ const en = {
       loginRecords: 'Login Records',
       posts: 'Posts',
       profile: 'Profile',
+      primaryNav: 'Primary navigation',
+      openMenu: 'Open menu',
+      closeMenu: 'Close menu',
     },
     dashboard: {
       eyebrow: 'Operations',

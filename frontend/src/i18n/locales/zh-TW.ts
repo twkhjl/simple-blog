@@ -374,6 +374,9 @@ export default {
     layout: {
       ...zhTW.admin.layout,
       loginRecords: '登入紀錄',
+      primaryNav: '主要導覽',
+      openMenu: '開啟選單',
+      closeMenu: '關閉選單',
     },
     changePassword: {
       eyebrow: '安全設定',
