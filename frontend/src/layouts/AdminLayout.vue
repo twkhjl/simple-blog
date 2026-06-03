@@ -127,6 +127,36 @@
             {{ item.label }}
           </RouterLink>
         </nav>
+
+        <section class="admin-mobile-actions" data-testid="admin-mobile-actions">
+          <p class="eyebrow">{{ t('admin.layout.globalActions') }}</p>
+          <div class="admin-mobile-action-list">
+            <AdminLocaleSwitcher />
+            <RouterLink class="admin-shell-button secondary" to="/" @click="closeMobileNav">
+              {{ t('common.actions.backToSite') }}
+            </RouterLink>
+            <RouterLink class="admin-shell-button primary" to="/admin/posts/new" @click="closeMobileNav">
+              {{ t('common.actions.newPost') }}
+            </RouterLink>
+            <RouterLink
+              class="admin-user-menu-action"
+              to="/admin/change-password"
+              data-testid="admin-mobile-action-change-password"
+              @click="closeMobileNav"
+            >
+              {{ t('common.actions.changePassword') }}
+            </RouterLink>
+            <button
+              class="admin-user-menu-action"
+              type="button"
+              data-testid="admin-mobile-action-logout"
+              :disabled="logoutPending"
+              @click="handleMobileLogout"
+            >
+              {{ t('common.actions.logout') }}
+            </button>
+          </div>
+        </section>
       </aside>
 
       <section class="admin-main">
@@ -242,6 +272,11 @@ async function handleLogout() {
   } finally {
     logoutPending.value = false
   }
+}
+
+async function handleMobileLogout() {
+  closeMobileNav()
+  await handleLogout()
 }
 
 watch(() => route.fullPath, () => {

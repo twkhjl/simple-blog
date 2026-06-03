@@ -156,6 +156,7 @@ describe('AdminLayout', () => {
 
     await wrapper.get('[data-testid="admin-mobile-menu-button"]').trigger('click')
     expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).toContain('open')
+    expect(wrapper.get('[data-testid="admin-mobile-actions"]').exists()).toBe(true)
 
     await wrapper.get('[data-testid="admin-mobile-overlay"]').trigger('click')
     expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).not.toContain('open')
@@ -178,6 +179,49 @@ describe('AdminLayout', () => {
     await flushPromises()
 
     expect(router.currentRoute.value.fullPath).toBe('/admin/posts')
+    expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).not.toContain('open')
+  })
+
+  it('closes mobile drawer after tapping change-password action', async () => {
+    authState.profile = {
+      id: 'admin-1',
+      email: 'admin@demo.invalid',
+      username: 'admin',
+      displayName: 'Admin Person',
+      role: 'admin',
+      status: 'active',
+    } as any
+
+    const { router, wrapper } = await mountLayout()
+
+    await wrapper.get('[data-testid="admin-mobile-menu-button"]').trigger('click')
+    await wrapper.get('[data-testid="admin-mobile-action-change-password"]').trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.fullPath).toBe('/admin/change-password')
+    expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).not.toContain('open')
+  })
+
+  it('logs out from mobile drawer and redirects to /admin/login', async () => {
+    authState.profile = {
+      id: 'admin-1',
+      email: 'admin@demo.invalid',
+      username: 'admin',
+      displayName: 'Admin Person',
+      role: 'admin',
+      status: 'active',
+    } as any
+
+    const logoutSpy = vi.spyOn(authStore, 'logout').mockResolvedValue(undefined)
+
+    const { router, wrapper } = await mountLayout()
+
+    await wrapper.get('[data-testid="admin-mobile-menu-button"]').trigger('click')
+    await wrapper.get('[data-testid="admin-mobile-action-logout"]').trigger('click')
+    await flushPromises()
+
+    expect(logoutSpy).toHaveBeenCalledTimes(1)
+    expect(router.currentRoute.value.fullPath).toBe('/admin/login')
     expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).not.toContain('open')
   })
 

@@ -226,6 +226,7 @@ const en = {
       posts: 'Posts',
       profile: 'Profile',
       primaryNav: 'Primary navigation',
+      globalActions: 'Global actions',
       openMenu: 'Open menu',
       closeMenu: 'Close menu',
     },

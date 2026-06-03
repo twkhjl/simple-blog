@@ -2748,8 +2748,9 @@ img {
   height: 100vh;
   padding: 1.25rem;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 1rem;
+  overflow-y: auto;
   transform: translateX(-105%);
   transition: transform 0.22s ease;
   z-index: 40;
@@ -2779,6 +2780,24 @@ img {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.admin-mobile-actions,
+.admin-mobile-action-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-mobile-actions {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 181, 158, 0.12);
+}
+
+.admin-mobile-action-list .locale-switcher,
+.admin-mobile-action-list .locale-switcher-option,
+.admin-mobile-action-list .admin-shell-button,
+.admin-mobile-action-list .admin-user-menu-action {
+  width: 100%;
 }
 
 .admin-user-menu-shell {
@@ -2990,12 +3009,7 @@ img {
   }
 
   .admin-topbar-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .admin-topbar-actions > * {
-    flex: 1 1 10rem;
+    display: none;
   }
 
   .admin-shell-button,
