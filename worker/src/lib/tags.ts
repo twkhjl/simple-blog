@@ -6,8 +6,9 @@ export function normalizeTagName(value: string) {
 
 export function slugifyTagName(value: string) {
   return normalizeTagName(value)
+    .normalize('NFKC')
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
     .trim()
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')

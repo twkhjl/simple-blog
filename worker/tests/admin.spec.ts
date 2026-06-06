@@ -190,6 +190,29 @@ describe('admin posts api', () => {
 
     expect(res.status).toBe(400)
   })
+
+  it('creates a chinese tag slug during post create', async () => {
+    const res = await app.request('/api/admin/posts', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer editor-token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: 'Chinese tag post',
+        slug: 'chinese-tag-post',
+        excerpt: 'excerpt',
+        content: '# content',
+        tags: ['西子灣'],
+        status: 'draft',
+        publishedAt: null,
+      }),
+    })
+
+    expect(res.status).toBe(201)
+    const payload = await res.json() as { data: { tags: Array<{ slug: string }> } }
+    expect(payload.data.tags.map(tag => tag.slug)).toEqual(['西子灣'])
+  })
 })
 
 describe('admin tags api', () => {

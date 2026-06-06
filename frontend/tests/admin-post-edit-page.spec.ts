@@ -117,4 +117,19 @@ describe('AdminPostEditPage', () => {
     expect(post).not.toHaveBeenCalled()
     expect(wrapper.text().toLowerCase()).toContain('disabled')
   })
+
+  it('creates chinese tag chip on Enter', async () => {
+    get.mockResolvedValue({
+      items: [],
+    })
+
+    const { wrapper } = await mountPage()
+    const input = wrapper.get('[data-testid="post-tags-input"]')
+
+    await input.setValue('西子灣')
+    await input.trigger('keydown.enter')
+
+    expect(wrapper.findAll('[data-testid="post-tag-chip"]')).toHaveLength(1)
+    expect(wrapper.text()).toContain('西子灣')
+  })
 })
