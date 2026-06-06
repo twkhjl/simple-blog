@@ -827,3 +827,46 @@ export async function updateAdminTagStatus(env: WorkerBindings | undefined, id: 
 
   return { error: null, tag: { ...mapDbTag(data as DbTagRow), postCount: 0 } }
 }
+
+export async function deleteAdminTag(env: WorkerBindings | undefined, id: string) {
+  const adminClient = env ? createSupabaseAdminClient(env) : null
+  if (!adminClient) {
+    const index = mockTags.findIndex(tag => tag.id === id)
+    if (index === -1) {
+      return { error: 'Tag not found.', deleted: false }
+    }
+
+    mockTags.splice(index, 1)
+    for (const post of mockPosts) {
+      post.tags = post.tags.filter(tag => tag.id !== id)
+    }
+
+    return { error: null, deleted: true }
+  }
+
+  const unlinkResult = await adminClient
+    .from('post_tags')
+    .delete()
+    .eq('tag_id', id)
+
+  if (unlinkResult.error) {
+    return { error: 'Failed to delete tag links.', deleted: false }
+  }
+
+  const deleteResult = await adminClient
+    .from('tags')
+    .delete()
+    .eq('id', id)
+    .select('id')
+    .maybeSingle()
+
+  if (deleteResult.error) {
+    return { error: 'Failed to delete tag.', deleted: false }
+  }
+
+  if (!deleteResult.data) {
+    return { error: 'Tag not found.', deleted: false }
+  }
+
+  return { error: null, deleted: true }
+}

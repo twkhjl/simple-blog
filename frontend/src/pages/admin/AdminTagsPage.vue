@@ -74,6 +74,19 @@ async function renameTag(tag: AdminTag) {
   }
 }
 
+async function handleDeleteTag(tag: AdminTag) {
+  if (!window.confirm(t('admin.tags.deleteConfirm', { name: tag.name }))) {
+    return
+  }
+
+  try {
+    await adminTagsService.deleteTag(tag.id)
+    tags.value = tags.value.filter(item => item.id !== tag.id)
+  } catch (deleteError) {
+    error.value = deleteError instanceof Error ? deleteError.message : t('admin.tags.deleteError')
+  }
+}
+
 onMounted(() => {
   void loadTags()
 })
@@ -119,6 +132,9 @@ onMounted(() => {
           <button type="button" class="neo-button secondary" @click="renameTag(tag)">{{ t('common.actions.edit') }}</button>
           <button type="button" class="neo-button" @click="toggleStatus(tag)">
             {{ tag.status === 'active' ? t('admin.tags.disable') : t('admin.tags.enable') }}
+          </button>
+          <button type="button" class="neo-button danger" data-testid="admin-tag-delete" @click="handleDeleteTag(tag)">
+            {{ t('common.actions.delete') }}
           </button>
         </div>
       </article>

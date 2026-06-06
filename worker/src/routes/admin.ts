@@ -5,7 +5,7 @@ import { buildFileUrl } from '../lib/r2'
 import { fail, ok } from '../lib/response'
 import { requireAuth } from '../middleware/requireAuth'
 import { requireRole } from '../middleware/requireRole'
-import { createAdminPost, createAdminTag, deleteAdminPost, getAdminPostById, listAdminPosts, listAdminTags, updateAdminPost, updateAdminTag, updateAdminTagStatus } from './posts'
+import { createAdminPost, createAdminTag, deleteAdminPost, deleteAdminTag, getAdminPostById, listAdminPosts, listAdminTags, updateAdminPost, updateAdminTag, updateAdminTagStatus } from './posts'
 import type { AppEnv, TagStatus, WorkerBindings } from '../types'
 
 const adminRoutes = new Hono<AppEnv>()
@@ -196,6 +196,19 @@ adminRoutes.patch('/tags/:id/status', async c => {
   }
 
   return ok(result.tag)
+})
+
+adminRoutes.delete('/tags/:id', async c => {
+  const result = await deleteAdminTag(c.env, c.req.param('id'))
+  if (result.error) {
+    const code = result.error === 'Tag not found.' ? 404 : 400
+    return fail('VALIDATION_ERROR', result.error, code)
+  }
+
+  return ok({
+    id: c.req.param('id'),
+    deleted: true,
+  })
 })
 
 adminRoutes.post('/posts', async c => {

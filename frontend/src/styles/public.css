@@ -372,6 +372,10 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
+.front-article-feed-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .front-list-card {
   display: grid;
   gap: 0.9rem;
@@ -386,6 +390,10 @@
   background:
     linear-gradient(135deg, rgba(176, 196, 222, 0.28), rgba(255, 255, 255, 0.6)),
     radial-gradient(circle at top right, rgba(53, 94, 165, 0.12), transparent 52%);
+}
+
+.front-back-button {
+  justify-self: start;
 }
 
 .front-card-category {

@@ -1,5 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import { describe, expect, it, vi } from 'vitest'
 import TagPostsPage from '../src/pages/public/TagPostsPage.vue'
 
@@ -13,8 +13,11 @@ vi.mock('../src/services/publicTags', () => ({
 
 function createTestRouter() {
   return createRouter({
-    history: createWebHashHistory(),
-    routes: [{ path: '/tag/:slug', component: TagPostsPage }],
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/articles', component: { template: '<div>articles</div>' } },
+      { path: '/tag/:slug', component: TagPostsPage },
+    ],
   })
 }
 
@@ -52,5 +55,30 @@ describe('TagPostsPage', () => {
     expect(getTagPosts).toHaveBeenCalledWith('vue')
     expect(wrapper.text()).toContain('Vue')
     expect(wrapper.text()).toContain('DB Post')
+  })
+
+  it('falls back to /articles when back button has no history', async () => {
+    getTagPosts.mockResolvedValue({
+      tag: { id: 'tag-1', name: 'Vue', slug: 'vue' },
+      items: [],
+      total: 0,
+    })
+
+    const router = createTestRouter()
+    await router.push('/tag/vue')
+    await router.isReady()
+
+    const wrapper = mount(TagPostsPage, {
+      global: {
+        plugins: [router],
+        stubs: { RouterLink: { template: '<a><slot /></a>' } },
+      },
+    })
+
+    await flushPromises()
+    await wrapper.get('[data-testid="tag-posts-back"]').trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.fullPath).toBe('/articles')
   })
 })

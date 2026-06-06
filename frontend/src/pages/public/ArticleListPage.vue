@@ -83,10 +83,9 @@ onMounted(loadPosts)
       <p class="front-card-copy">目前沒有已發佈文章。</p>
     </section>
 
-    <section v-else class="front-article-feed">
+    <section v-else class="front-article-feed front-article-feed-single">
       <article v-for="post in posts" :key="post.slug" class="front-panel front-list-card">
         <img v-if="post.coverImageUrl" :src="post.coverImageUrl" :alt="post.title" class="front-list-cover" />
-        <div v-else class="front-list-cover front-list-cover-placeholder"></div>
         <h2 class="front-card-title">{{ post.title }}</h2>
         <p class="front-card-copy">{{ post.excerpt }}</p>
         <div v-if="post.tags.length" class="front-tag-row">

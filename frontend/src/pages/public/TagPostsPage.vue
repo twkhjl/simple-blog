@@ -1,15 +1,25 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { ApiRequestError } from '../../services/api'
 import { publicTagsService } from '../../services/publicTags'
-import { useRoute } from 'vue-router'
 import type { PublicTagPostsResponse } from '../../types'
 
 const route = useRoute()
+const router = useRouter()
 const payload = ref<PublicTagPostsResponse | null>(null)
 const isLoading = ref(true)
 const isNotFound = ref(false)
 const errorMessage = ref('')
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.back()
+    return
+  }
+
+  void router.push('/articles')
+}
 
 async function loadTagPosts(slug: string) {
   isLoading.value = true
@@ -41,6 +51,12 @@ watch(
 
 <template>
   <main class="front-main front-article-list-page" data-testid="tag-posts-page">
+    <section class="front-panel front-side-card">
+      <button type="button" class="front-subtle-button front-back-button" data-testid="tag-posts-back" @click="goBack">
+        返回上一頁
+      </button>
+    </section>
+
     <section v-if="isLoading" class="front-panel front-side-card">
       <p class="front-card-copy">載入標籤文章中...</p>
     </section>
@@ -65,7 +81,7 @@ watch(
         <p class="front-card-copy">此標籤目前沒有公開文章。</p>
       </section>
 
-      <section v-else class="front-article-feed">
+      <section v-else class="front-article-feed front-article-feed-single">
         <article v-for="post in payload.items" :key="post.slug" class="front-panel front-list-card">
           <h2 class="front-card-title">{{ post.title }}</h2>
           <p class="front-card-copy">{{ post.excerpt }}</p>

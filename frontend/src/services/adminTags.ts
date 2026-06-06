@@ -26,4 +26,7 @@ export const adminTagsService = {
   async updateTagStatus(id: string, status: 'active' | 'disabled') {
     return getClient().patch<AdminTag>(`/api/admin/tags/${id}/status`, { status })
   },
+  async deleteTag(id: string) {
+    return getClient().delete<{ id: string, deleted: boolean }>(`/api/admin/tags/${id}`)
+  },
 }

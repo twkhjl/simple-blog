@@ -267,6 +267,8 @@
       createError: '建立標籤失敗',
       renameError: '重新命名標籤失敗',
       statusError: '更新標籤狀態失敗',
+      deleteError: '刪除標籤失敗',
+      deleteConfirm: '要刪除「{name}」並移除所有文章關聯嗎？文章不會被刪除。',
     },
   },
   editor: {

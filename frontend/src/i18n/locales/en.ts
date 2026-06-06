@@ -297,6 +297,8 @@ const en = {
       createError: 'Failed to create tag',
       renameError: 'Failed to rename tag',
       statusError: 'Failed to update tag status',
+      deleteError: 'Failed to delete tag',
+      deleteConfirm: 'Delete "{name}" and remove it from all posts? Posts will not be deleted.',
     },
     changePassword: {
       eyebrow: 'Security',

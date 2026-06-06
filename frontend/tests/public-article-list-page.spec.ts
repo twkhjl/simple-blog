@@ -62,4 +62,29 @@ describe('ArticleListPage', () => {
 
     expect(wrapper.find('[data-testid="article-list-empty"]').exists()).toBe(true)
   })
+
+  it('does not render image block when post has no cover image', async () => {
+    listPosts.mockResolvedValue([
+      {
+        id: 'post-1',
+        title: 'No Cover',
+        slug: 'no-cover',
+        excerpt: 'No image',
+        coverImageUrl: null,
+        publishedAt: '2026-06-01T08:00:00Z',
+        tags: [],
+      },
+    ])
+    listTags.mockResolvedValue([])
+
+    const wrapper = mount(ArticleListPage, {
+      global: {
+        stubs: { RouterLink: { template: '<a><slot /></a>' } },
+      },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.find('.front-list-cover').exists()).toBe(false)
+  })
 })

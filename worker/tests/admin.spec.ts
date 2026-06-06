@@ -259,4 +259,41 @@ describe('admin tags api', () => {
     const payload = await res.json() as { data: { status: string } }
     expect(payload.data.status).toBe('disabled')
   })
+
+  it('deletes tag and preserves posts', async () => {
+    const createTagRes = await app.request('/api/admin/tags', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer editor-token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: 'Disposable',
+      }),
+    })
+
+    const createdTag = await createTagRes.json() as { data: { id: string } }
+    const deleteRes = await app.request(`/api/admin/tags/${createdTag.data.id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Bearer editor-token',
+      },
+    })
+
+    expect(deleteRes.status).toBe(200)
+
+    const postsRes = await app.request('/api/posts')
+    expect(postsRes.status).toBe(200)
+  })
+
+  it('returns 404 when deleting missing tag', async () => {
+    const res = await app.request('/api/admin/tags/missing-tag', {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Bearer editor-token',
+      },
+    })
+
+    expect(res.status).toBe(404)
+  })
 })
