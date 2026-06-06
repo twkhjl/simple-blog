@@ -13,7 +13,7 @@ const errorMessage = ref('')
 
 function formatPublishedAt(value: string | null) {
   if (!value) {
-    return 'Unscheduled'
+    return '未排程'
   }
 
   return new Intl.DateTimeFormat('zh-TW', {
@@ -51,14 +51,14 @@ onMounted(loadPosts)
 <template>
   <main data-testid="front-article-list-page" class="front-main front-article-list-page">
     <section class="front-page-head front-panel">
-      <p class="front-eyebrow">Articles</p>
+      <p class="front-eyebrow">首頁</p>
       <h1 class="front-title">{{ publicMockContent.articleList.title }}</h1>
       <p class="front-copy">{{ publicMockContent.articleList.intro }}</p>
     </section>
 
     <section class="front-panel front-side-card">
       <div class="front-filter-row">
-        <span class="front-filter-chip active">Published</span>
+        <span class="front-filter-chip active">最新文章</span>
         <RouterLink
           v-for="tag in tags"
           :key="tag.slug"
@@ -80,7 +80,7 @@ onMounted(loadPosts)
     </section>
 
     <section v-else-if="posts.length === 0" data-testid="article-list-empty" class="front-panel front-side-card">
-      <p class="front-card-copy">目前沒有已發佈文章。</p>
+      <p class="front-card-copy">目前還沒有已發佈文章。</p>
     </section>
 
     <section v-else class="front-article-feed front-article-feed-single">

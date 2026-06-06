@@ -15,7 +15,7 @@ function createTestRouter() {
   return createRouter({
     history: createMemoryHistory(),
     routes: [
-      { path: '/articles', component: { template: '<div>articles</div>' } },
+      { path: '/', component: { template: '<div>home</div>' } },
       { path: '/tag/:slug', component: TagPostsPage },
     ],
   })
@@ -57,7 +57,7 @@ describe('TagPostsPage', () => {
     expect(wrapper.text()).toContain('DB Post')
   })
 
-  it('falls back to /articles when back button has no history', async () => {
+  it('falls back to / when back button has no history', async () => {
     getTagPosts.mockResolvedValue({
       tag: { id: 'tag-1', name: 'Vue', slug: 'vue' },
       items: [],
@@ -79,6 +79,6 @@ describe('TagPostsPage', () => {
     await wrapper.get('[data-testid="tag-posts-back"]').trigger('click')
     await flushPromises()
 
-    expect(router.currentRoute.value.fullPath).toBe('/articles')
+    expect(router.currentRoute.value.fullPath).toBe('/')
   })
 })

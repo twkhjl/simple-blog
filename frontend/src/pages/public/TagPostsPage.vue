@@ -18,7 +18,7 @@ function goBack() {
     return
   }
 
-  void router.push('/articles')
+  void router.push('/')
 }
 
 async function loadTagPosts(slug: string) {
@@ -28,14 +28,17 @@ async function loadTagPosts(slug: string) {
 
   try {
     payload.value = await publicTagsService.getTagPosts(slug)
-  } catch (error) {
+  }
+  catch (error) {
     payload.value = null
     if (error instanceof ApiRequestError && error.status === 404) {
       isNotFound.value = true
-    } else {
+    }
+    else {
       errorMessage.value = '載入標籤文章失敗，請稍後再試。'
     }
-  } finally {
+  }
+  finally {
     isLoading.value = false
   }
 }
@@ -67,18 +70,18 @@ watch(
 
     <section v-else-if="isNotFound" class="front-panel front-side-card">
       <h1 class="front-title">找不到標籤</h1>
-      <p class="front-card-copy">此標籤不存在，或目前未開放瀏覽。</p>
+      <p class="front-card-copy">這個標籤不存在，或目前沒有對外開放。</p>
     </section>
 
     <template v-else-if="payload">
       <section class="front-page-head front-panel">
-        <p class="front-eyebrow">Tag</p>
+        <p class="front-eyebrow">標籤</p>
         <h1 class="front-title">{{ payload.tag.name }}</h1>
-        <p class="front-copy">共 {{ payload.total }} 篇文章</p>
+        <p class="front-copy">共有 {{ payload.total }} 篇文章</p>
       </section>
 
       <section v-if="payload.items.length === 0" class="front-panel front-side-card">
-        <p class="front-card-copy">此標籤目前沒有公開文章。</p>
+        <p class="front-card-copy">這個標籤目前還沒有文章。</p>
       </section>
 
       <section v-else class="front-article-feed front-article-feed-single">

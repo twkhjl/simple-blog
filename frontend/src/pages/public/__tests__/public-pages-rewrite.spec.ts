@@ -13,7 +13,6 @@ import en from '../../../i18n/locales/en'
 import { createAppRouter } from '../../../router'
 
 const sourceFiles = [
-  resolve(process.cwd(), 'src/pages/public/HomePage.vue'),
   resolve(process.cwd(), 'src/pages/public/AboutPage.vue'),
   resolve(process.cwd(), 'src/pages/public/ContactPage.vue'),
   resolve(process.cwd(), 'src/pages/public/ArticleListPage.vue'),
@@ -64,7 +63,7 @@ describe('Public pages static HTML rewrite', () => {
 
   it('Given each public route, when rendered, then shared shell and page-specific landmarks exist', async () => {
     const routes = [
-      ['/', 'front-home-page'],
+      ['/', 'front-article-list-page'],
       ['/about', 'front-about-page'],
       ['/contact', 'front-contact-page'],
       ['/articles', 'front-article-list-page'],
@@ -79,6 +78,10 @@ describe('Public pages static HTML rewrite', () => {
       expect(wrapper.find('[data-testid="public-drawer"]').exists()).toBe(true)
       expect(wrapper.find('[data-testid="public-footer"]').exists()).toBe(true)
       expect(wrapper.find(`[data-testid="${testId}"]`).exists()).toBe(true)
+      expect(wrapper.find('[data-testid="public-header"]').text()).toContain('首頁')
+      expect(wrapper.find('[data-testid="public-header"]').text()).toContain('關於')
+      expect(wrapper.find('[data-testid="public-header"]').text()).toContain('聯絡')
+      expect(wrapper.find('[data-testid="public-header"]').text()).not.toContain('Articles')
 
       wrapper.unmount()
     }
@@ -88,11 +91,20 @@ describe('Public pages static HTML rewrite', () => {
     expect(publicMockContent.site.brand.length).toBeGreaterThan(0)
     expect(publicMockContent.site.nav.length).toBeGreaterThan(0)
     expect(publicMockContent.site.footerLinks.length).toBeGreaterThan(0)
-    expect(publicMockContent.home.title.length).toBeGreaterThan(0)
+    expect(publicMockContent.articleList.title.length).toBeGreaterThan(0)
     expect(publicMockContent.about.sections.length).toBeGreaterThan(0)
     expect(publicMockContent.contact.cards.length).toBeGreaterThan(0)
     expect(publicMockContent.contact.form.fields.length).toBeGreaterThan(0)
     expect(publicMockContent.posts.length).toBeGreaterThan(0)
     expect(publicMockContent.posts[0].content.join(' ')).not.toMatch(/<html[\s>]/i)
+  })
+
+  it('Given the compatibility articles route, when rendered, then it redirects to the homepage list', async () => {
+    const wrapper = await mountAt('/articles')
+
+    expect(wrapper.find('[data-testid="front-article-list-page"]').exists()).toBe(true)
+    expect(wrapper.vm.$router.currentRoute.value.fullPath).toBe('/')
+
+    wrapper.unmount()
   })
 })

@@ -13,7 +13,7 @@ const isNotFound = ref(false)
 
 function formatPublishedAt(value: string | null) {
   if (!value) {
-    return 'Unscheduled'
+    return '未排程'
   }
 
   return new Intl.DateTimeFormat('zh-TW', {
@@ -23,7 +23,7 @@ function formatPublishedAt(value: string | null) {
   }).format(new Date(value))
 }
 
-const authorName = computed(() => post.value?.author.displayName ?? 'Unknown author')
+const authorName = computed(() => post.value?.author.displayName ?? '未知作者')
 
 async function loadPost(slug: string) {
   isLoading.value = true
@@ -71,8 +71,8 @@ watch(
 
     <section v-else-if="isNotFound" data-testid="post-detail-not-found" class="front-panel front-side-card">
       <h1 class="front-title">找不到文章</h1>
-      <p class="front-card-copy">這篇文章可能已下架，或連結已失效。</p>
-      <RouterLink to="/articles" class="front-subtle-button">返回文章列表</RouterLink>
+      <p class="front-card-copy">這篇文章不存在，或目前無法公開瀏覽。</p>
+      <RouterLink to="/" class="front-subtle-button">回到首頁</RouterLink>
     </section>
 
     <template v-else-if="post">
@@ -104,10 +104,10 @@ watch(
         </article>
 
         <aside class="front-panel front-side-card">
-          <p class="front-eyebrow">Navigation</p>
-          <h2 class="front-card-title">閱讀更多文章</h2>
-          <p class="front-card-copy">目前詳情頁先聚焦單篇閱讀，不在此版加入 related posts。</p>
-          <RouterLink to="/articles" class="front-subtle-button">返回文章列表</RouterLink>
+          <p class="front-eyebrow">導覽</p>
+          <h2 class="front-card-title">繼續閱讀其他文章</h2>
+          <p class="front-card-copy">回到首頁文章列表，繼續瀏覽最新內容與相關主題。</p>
+          <RouterLink to="/" class="front-subtle-button">回到首頁</RouterLink>
         </aside>
       </section>
     </template>

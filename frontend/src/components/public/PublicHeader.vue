@@ -28,10 +28,9 @@ const emit = defineEmits<{
       <p class="front-brand-copy">Readable systems, durable decisions.</p>
     </div>
     <nav class="front-nav" aria-label="Main">
-      <RouterLink to="/" class="front-nav-link">Home</RouterLink>
-      <RouterLink to="/articles" class="front-nav-link">Articles</RouterLink>
-      <RouterLink to="/about" class="front-nav-link">About</RouterLink>
-      <RouterLink to="/contact" class="front-nav-link">Contact</RouterLink>
+      <RouterLink to="/" class="front-nav-link">首頁</RouterLink>
+      <RouterLink to="/about" class="front-nav-link">關於</RouterLink>
+      <RouterLink to="/contact" class="front-nav-link">聯絡</RouterLink>
     </nav>
     <div class="inline-actions">
       <RouterLink v-if="isLoggedIn" to="/login-records" class="front-login-link">

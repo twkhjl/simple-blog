@@ -15,7 +15,6 @@ import LoginPage from '../pages/auth/LoginPage.vue'
 import AboutPage from '../pages/public/AboutPage.vue'
 import ArticleListPage from '../pages/public/ArticleListPage.vue'
 import ContactPage from '../pages/public/ContactPage.vue'
-import HomePage from '../pages/public/HomePage.vue'
 import PostDetailPage from '../pages/public/PostDetailPage.vue'
 import TagPostsPage from '../pages/public/TagPostsPage.vue'
 import { canAccessAdmin, ensureAuthInitialized } from '../stores/auth'
@@ -62,10 +61,10 @@ export function createAppRouter() {
         path: '/',
         component: PublicLayout,
         children: [
-          { path: '', component: HomePage },
+          { path: '', component: ArticleListPage },
           { path: 'about', component: AboutPage },
           { path: 'contact', component: ContactPage },
-          { path: 'articles', component: ArticleListPage },
+          { path: 'articles', redirect: '/' },
           { path: 'tag/:slug', component: TagPostsPage },
           { path: 'login', component: LoginPage },
           {

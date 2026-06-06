@@ -8,11 +8,6 @@ export interface PublicFooterLink {
   to: string
 }
 
-export interface PublicMetric {
-  label: string
-  value: string
-}
-
 export interface PublicSection {
   title: string
   body: string

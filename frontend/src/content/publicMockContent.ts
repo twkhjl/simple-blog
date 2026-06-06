@@ -2,7 +2,6 @@ import type {
   PublicContactCard,
   PublicContactField,
   PublicFooterLink,
-  PublicMetric,
   PublicMockPost,
   PublicNavItem,
   PublicSection,
@@ -10,22 +9,14 @@ import type {
 
 const nav: PublicNavItem[] = [
   { label: '首頁', to: '/' },
-  { label: '文章列表', to: '/articles' },
-  { label: '關於我們', to: '/about' },
-  { label: '聯絡我們', to: '/contact' },
+  { label: '關於', to: '/about' },
+  { label: '聯絡', to: '/contact' },
 ]
 
 const footerLinks: PublicFooterLink[] = [
   { label: '首頁', to: '/' },
-  { label: '文章列表', to: '/articles' },
-  { label: '關於我們', to: '/about' },
-  { label: '聯絡我們', to: '/contact' },
-]
-
-const metrics: PublicMetric[] = [
-  { label: '已發布主題', value: '48+' },
-  { label: '深度教學', value: '12' },
-  { label: '每週更新', value: '2 次' },
+  { label: '關於', to: '/about' },
+  { label: '聯絡', to: '/contact' },
 ]
 
 const aboutSections: PublicSection[] = [
@@ -112,15 +103,6 @@ export const publicMockContent = {
     footerLinks,
     footerCopy: '© 2026 TechHumana. All rights reserved.',
   },
-  home: {
-    eyebrow: 'Tech Notes',
-    title: '把技術決策寫清楚，讓團隊少走回頭路',
-    copy: '我們記錄前端重構、內容建模、產品協作與工程細節，讓每一次改版都建立在可追溯的設計與實作基礎上。',
-    metrics,
-    featuredPostSlug: 'first-post',
-    secondaryTitle: '本週關注',
-    secondaryCopy: '從畫面、內容到互動，挑出值得優先處理的品質議題。',
-  },
   about: {
     title: '關於 TechHumana',
     intro: '我們是一個以技術內容與產品實作為核心的團隊，專注在把抽象需求轉成清楚、可靠、可維護的系統。',
@@ -144,8 +126,8 @@ export const publicMockContent = {
     copy: '後台登入保留給內容維運與編輯作業使用。',
   },
   articleList: {
-    title: '文章列表',
-    intro: '整理我們近期發布的教學、重構筆記與設計決策，讓你可以快速找到最相關的內容。',
+    title: '最新文章',
+    intro: '整理近期發布的教學、重構筆記與設計決策，讓首頁直接成為主要閱讀入口。',
     filters: ['全部', '前端架構', '設計系統', '內容建模'],
   },
   posts,
