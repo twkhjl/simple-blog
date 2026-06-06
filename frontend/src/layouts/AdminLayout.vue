@@ -200,6 +200,18 @@ const navItems = computed(() => [
     testId: 'admin-nav-login-records',
     mobileTestId: 'admin-mobile-nav-login-records',
   },
+  ...(
+    authState.profile?.role === 'admin' || authState.profile?.role === 'super_admin'
+      ? [{
+          key: 'contact-messages',
+          label: t('admin.layout.contactMessages'),
+          to: '/admin/contact-messages',
+          active: route.path.startsWith('/admin/contact-messages'),
+          testId: 'admin-nav-contact-messages',
+          mobileTestId: 'admin-mobile-nav-contact-messages',
+        }]
+      : []
+  ),
   {
     key: 'posts',
     label: t('admin.layout.posts'),

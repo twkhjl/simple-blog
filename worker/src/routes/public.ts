@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { fail, ok } from '../lib/response'
+import { submitContactMessage } from './contact'
 import { getPublicTagPostsBySlug, getPublishedPostBySlug, listPublicTags, listPublishedPosts } from './posts'
 import type { AppEnv } from '../types'
 
@@ -43,6 +44,28 @@ publicRoutes.get('/tags/:slug', c => {
 
     return ok(payload)
   })
+})
+
+publicRoutes.post('/contact', async c => {
+  const body = await c.req.json().catch(() => null) as {
+    name?: string
+    email?: string
+    subject?: string
+    message?: string
+  } | null
+
+  const requestIp = c.req.header('CF-Connecting-IP')
+    ?? c.req.header('X-Forwarded-For')?.split(',')[0]?.trim()
+    ?? null
+  const userAgent = c.req.header('User-Agent') ?? null
+  const result = await submitContactMessage(c.env, body, { requestIp, userAgent })
+
+  if (result.error) {
+    const status = result.code === 'RATE_LIMITED' ? 429 : result.code === 'VALIDATION_ERROR' ? 400 : 500
+    return fail(result.code ?? 'INTERNAL_ERROR', result.error, status)
+  }
+
+  return ok({ success: true }, 201)
 })
 
 export default publicRoutes

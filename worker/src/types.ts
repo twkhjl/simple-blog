@@ -2,6 +2,7 @@ export type UserRole = 'user' | 'editor' | 'admin' | 'super_admin'
 export type UserStatus = 'active' | 'disabled'
 export type PostStatus = 'draft' | 'published' | 'archived'
 export type TagStatus = 'active' | 'disabled'
+export type ContactMessageStatus = 'pending' | 'processed'
 
 export interface AuthUser {
   id: string
@@ -53,5 +54,19 @@ export interface TagRecord {
   slug: string
   status: TagStatus
   postCount?: number
+}
+
+export interface ContactMessageRecord {
+  id: string
+  name: string
+  email: string
+  subject: string
+  message: string
+  status: ContactMessageStatus
+  requestIp: string | null
+  userAgent: string | null
+  createdAt: string
+  updatedAt: string
+  processedAt: string | null
 }
 

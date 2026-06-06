@@ -86,6 +86,15 @@ export interface TagSummary {
   slug: string
 }
 
+export type ContactMessageStatus = 'pending' | 'processed'
+
+export interface PublicContactSubmission {
+  name: string
+  email: string
+  subject: string
+  message: string
+}
+
 export interface AdminTag extends TagSummary {
   status: 'active' | 'disabled'
   postCount: number
@@ -133,4 +142,21 @@ export interface LoginRecordsResponse {
   page: number
   limit: number
   total: number
+}
+
+export interface AdminContactMessageListItem {
+  id: string
+  name: string
+  email: string
+  subject: string
+  status: ContactMessageStatus
+  createdAt: string
+  processedAt: string | null
+}
+
+export interface AdminContactMessageDetail extends AdminContactMessageListItem {
+  message: string
+  requestIp: string | null
+  userAgent: string | null
+  updatedAt: string
 }

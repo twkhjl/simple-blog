@@ -5,8 +5,9 @@ import { buildFileUrl } from '../lib/r2'
 import { fail, ok } from '../lib/response'
 import { requireAuth } from '../middleware/requireAuth'
 import { requireRole } from '../middleware/requireRole'
+import { getAdminContactMessageById, listAdminContactMessages, updateAdminContactMessageStatus } from './contact'
 import { createAdminPost, createAdminTag, deleteAdminPost, deleteAdminTag, getAdminPostById, listAdminPosts, listAdminTags, updateAdminPost, updateAdminTag, updateAdminTagStatus } from './posts'
-import type { AppEnv, TagStatus, WorkerBindings } from '../types'
+import type { AppEnv, ContactMessageStatus, TagStatus, WorkerBindings } from '../types'
 
 const adminRoutes = new Hono<AppEnv>()
 const MIN_PASSWORD_LENGTH = 8
@@ -209,6 +210,43 @@ adminRoutes.delete('/tags/:id', async c => {
     id: c.req.param('id'),
     deleted: true,
   })
+})
+
+adminRoutes.get('/contact-messages', requireRole(['admin', 'super_admin']), async c => {
+  const status = c.req.query('status')
+  const search = c.req.query('search') ?? ''
+  const items = await listAdminContactMessages(c.env, {
+    status: status === 'pending' || status === 'processed' ? status : 'all',
+    search,
+  })
+
+  return ok({
+    items,
+    total: items.length,
+  })
+})
+
+adminRoutes.get('/contact-messages/:id', requireRole(['admin', 'super_admin']), async c => {
+  const message = await getAdminContactMessageById(c.req.param('id'), c.env)
+  if (!message) {
+    return fail('NOT_FOUND', 'Contact message not found', 404)
+  }
+
+  return ok(message)
+})
+
+adminRoutes.patch('/contact-messages/:id/status', requireRole(['admin', 'super_admin']), async c => {
+  const body = await c.req.json().catch(() => null) as { status?: ContactMessageStatus } | null
+  if (body?.status !== 'pending' && body?.status !== 'processed') {
+    return fail('VALIDATION_ERROR', 'Contact message status is invalid', 400)
+  }
+
+  const result = await updateAdminContactMessageStatus(c.env, c.req.param('id'), body.status)
+  if (result.error || !result.message) {
+    return fail('NOT_FOUND', result.error ?? 'Contact message not found', 404)
+  }
+
+  return ok(result.message)
 })
 
 adminRoutes.post('/posts', async c => {

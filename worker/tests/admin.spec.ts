@@ -297,3 +297,69 @@ describe('admin tags api', () => {
     expect(res.status).toBe(404)
   })
 })
+
+describe('admin contact messages api', () => {
+  it('rejects editor access to contact messages', async () => {
+    const res = await app.request('/api/admin/contact-messages', {
+      headers: {
+        Authorization: 'Bearer editor-token',
+      },
+    })
+
+    expect(res.status).toBe(403)
+  })
+
+  it('lists contact messages for admin role', async () => {
+    const res = await app.request('/api/admin/contact-messages', {
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+
+    expect(res.status).toBe(200)
+    const payload = await res.json() as { data: { items: Array<{ id: string }> } }
+    expect(payload.data.items.length).toBeGreaterThan(0)
+  })
+
+  it('returns contact message detail for admin role', async () => {
+    const listRes = await app.request('/api/admin/contact-messages', {
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+    const listPayload = await listRes.json() as { data: { items: Array<{ id: string }> } }
+
+    const detailRes = await app.request(`/api/admin/contact-messages/${listPayload.data.items[0].id}`, {
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+
+    expect(detailRes.status).toBe(200)
+  })
+
+  it('updates contact message status for admin role', async () => {
+    const listRes = await app.request('/api/admin/contact-messages', {
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+    const listPayload = await listRes.json() as { data: { items: Array<{ id: string }> } }
+
+    const updateRes = await app.request(`/api/admin/contact-messages/${listPayload.data.items[0].id}/status`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: 'Bearer admin-token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: 'processed',
+      }),
+    })
+
+    expect(updateRes.status).toBe(200)
+    const payload = await updateRes.json() as { data: { status: string, processedAt: string | null } }
+    expect(payload.data.status).toBe('processed')
+    expect(payload.data.processedAt).not.toBeNull()
+  })
+})

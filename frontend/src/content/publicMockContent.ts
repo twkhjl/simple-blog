@@ -110,11 +110,11 @@ export const publicMockContent = {
   },
   contact: {
     title: '聯絡我們',
-    intro: '如果你想聊內容合作、工程顧問、前端重構或編輯流程設計，可以透過下面方式找到我們。',
+    intro: '如果你想聊內容合作、工程顧問、前端重構或編輯流程設計，可以透過下面表單留下訊息，我們會再與你聯繫。',
     cards: contactCards,
     form: {
       fields: contactFields,
-      submitLabel: '送出訊息',
+      submitLabel: '送出留言',
     },
   },
   login: {

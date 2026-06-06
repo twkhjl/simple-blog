@@ -58,3 +58,79 @@ describe('public tags api', () => {
   })
 })
 
+describe('public contact api', () => {
+  it('creates a contact message', async () => {
+    const res = await app.request('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': '198.51.100.10',
+      },
+      body: JSON.stringify({
+        name: 'Reader',
+        email: 'reader@example.com',
+        subject: 'Need help',
+        message: 'Please contact me about consulting.',
+      }),
+    })
+
+    expect(res.status).toBe(201)
+  })
+
+  it('rejects invalid contact payload', async () => {
+    const res = await app.request('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': '198.51.100.11',
+      },
+      body: JSON.stringify({
+        name: 'Reader',
+        email: 'bad-email',
+        subject: '',
+        message: 'hello',
+      }),
+    })
+
+    expect(res.status).toBe(400)
+  })
+
+  it('rate limits repeated contact submissions from same ip', async () => {
+    const ip = '198.51.100.12'
+
+    for (let index = 0; index < 3; index += 1) {
+      const res = await app.request('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'CF-Connecting-IP': ip,
+        },
+        body: JSON.stringify({
+          name: `Reader ${index}`,
+          email: `reader${index}@example.com`,
+          subject: 'Need help',
+          message: 'Please contact me about consulting.',
+        }),
+      })
+
+      expect(res.status).toBe(201)
+    }
+
+    const blockedRes = await app.request('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': ip,
+      },
+      body: JSON.stringify({
+        name: 'Reader 4',
+        email: 'reader4@example.com',
+        subject: 'Need help',
+        message: 'Please contact me about consulting.',
+      }),
+    })
+
+    expect(blockedRes.status).toBe(429)
+  })
+})
+
