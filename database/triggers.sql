@@ -51,3 +51,8 @@ create trigger set_posts_updated_at
 before update on public.posts
 for each row execute procedure private.set_updated_at();
 
+drop trigger if exists set_tags_updated_at on public.tags;
+create trigger set_tags_updated_at
+before update on public.tags
+for each row execute procedure private.set_updated_at();
+

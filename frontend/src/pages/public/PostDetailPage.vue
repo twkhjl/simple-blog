@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import PublicRichContent from '../../components/public/PublicRichContent.vue'
 import { publicPostsService } from '../../services/publicPosts'
 import type { PublicPostDetail } from '../../types'
@@ -42,7 +42,7 @@ async function loadPost(slug: string) {
   }
   catch {
     post.value = null
-    errorMessage.value = '文章載入失敗，請稍後再試。'
+    errorMessage.value = '載入文章失敗，請稍後再試。'
   }
   finally {
     isLoading.value = false
@@ -61,7 +61,7 @@ watch(
 <template>
   <main data-testid="front-post-detail-page" class="front-main front-post-page">
     <section v-if="isLoading" data-testid="post-detail-loading" class="front-panel front-side-card">
-      <p class="front-card-copy">文章載入中...</p>
+      <p class="front-card-copy">載入文章中...</p>
     </section>
 
     <section v-else-if="errorMessage" data-testid="post-detail-error" class="front-panel front-side-card">
@@ -71,7 +71,7 @@ watch(
 
     <section v-else-if="isNotFound" data-testid="post-detail-not-found" class="front-panel front-side-card">
       <h1 class="front-title">找不到文章</h1>
-      <p class="front-card-copy">這篇文章可能尚未發布，或連結已失效。</p>
+      <p class="front-card-copy">這篇文章可能已下架，或連結已失效。</p>
       <RouterLink to="/articles" class="front-subtle-button">返回文章列表</RouterLink>
     </section>
 
@@ -79,6 +79,16 @@ watch(
       <section class="front-page-head front-panel">
         <h1 class="front-title">{{ post.title }}</h1>
         <p v-if="post.excerpt" class="front-copy">{{ post.excerpt }}</p>
+        <div v-if="post.tags.length" class="front-tag-row">
+          <RouterLink
+            v-for="tag in post.tags"
+            :key="tag.slug"
+            :to="`/tag/${tag.slug}`"
+            class="front-tag-chip"
+          >
+            {{ tag.name }}
+          </RouterLink>
+        </div>
         <div class="front-meta-row">
           <span class="front-muted">{{ authorName }}</span>
           <span class="front-muted">{{ formatPublishedAt(post.publishedAt) }}</span>

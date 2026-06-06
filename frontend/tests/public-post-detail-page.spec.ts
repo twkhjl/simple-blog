@@ -30,6 +30,7 @@ describe('PostDetailPage', () => {
       status: 'published',
       author: { id: 'author-1', displayName: 'Editor One' },
       publishedAt: '2026-06-01T08:00:00Z',
+      tags: [{ id: 'tag-1', name: 'Vue', slug: 'vue' }],
     })
 
     const router = createTestRouter()
@@ -48,6 +49,7 @@ describe('PostDetailPage', () => {
     expect(getPostBySlug).toHaveBeenCalledWith('db-post')
     expect(wrapper.text()).toContain('DB Post')
     expect(wrapper.text()).toContain('Editor One')
+    expect(wrapper.text()).toContain('Vue')
     expect(wrapper.find('[data-testid="post-detail-rich-content"]').exists()).toBe(true)
   })
 

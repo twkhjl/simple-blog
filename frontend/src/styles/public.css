@@ -514,6 +514,25 @@
   color: var(--front-text-soft);
 }
 
+.front-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.75rem 0 0;
+}
+
+.front-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  color: var(--front-accent);
+  background: rgba(255, 182, 135, 0.16);
+  border: 1px solid rgba(137, 80, 39, 0.12);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
 @media (max-width: 960px) {
   .front-nav,
   .front-brand-copy {

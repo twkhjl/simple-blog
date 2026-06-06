@@ -2982,6 +2982,53 @@ img {
   border: 1px solid rgba(255, 181, 158, 0.12);
 }
 
+.admin-theme .tag-editor {
+  padding: 0.75rem;
+  border-radius: 18px;
+  background: #1a1d21;
+}
+
+.admin-theme .tag-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.admin-theme .tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 181, 158, 0.18);
+  background: rgba(255, 184, 154, 0.08);
+  color: #fff0e9;
+}
+
+.admin-theme .tag-chip.compact {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.88rem;
+}
+
+.admin-theme .tag-chip-remove {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.admin-theme .tag-input {
+  flex: 1 1 220px;
+  min-width: 160px;
+  border: 0;
+  background: transparent;
+  color: #f4e6df;
+  font: inherit;
+  outline: none;
+}
+
 @media (max-width: 960px) {
   .admin-login-layout,
   .admin-theme .admin-shell,

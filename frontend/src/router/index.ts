@@ -6,6 +6,7 @@ import AdminChangePasswordPage from '../pages/admin/AdminChangePasswordPage.vue'
 import AdminLoginRecordsPage from '../pages/admin/AdminLoginRecordsPage.vue'
 import AdminPostEditPage from '../pages/admin/AdminPostEditPage.vue'
 import AdminPostListPage from '../pages/admin/AdminPostListPage.vue'
+import AdminTagsPage from '../pages/admin/AdminTagsPage.vue'
 import AdminForgotPasswordPage from '../pages/auth/AdminForgotPasswordPage.vue'
 import AdminLoginPage from '../pages/auth/AdminLoginPage.vue'
 import AdminResetPasswordPage from '../pages/auth/AdminResetPasswordPage.vue'
@@ -16,6 +17,7 @@ import ArticleListPage from '../pages/public/ArticleListPage.vue'
 import ContactPage from '../pages/public/ContactPage.vue'
 import HomePage from '../pages/public/HomePage.vue'
 import PostDetailPage from '../pages/public/PostDetailPage.vue'
+import TagPostsPage from '../pages/public/TagPostsPage.vue'
 import { canAccessAdmin, ensureAuthInitialized } from '../stores/auth'
 import { authState } from '../stores/auth'
 
@@ -53,6 +55,7 @@ export function createAppRouter() {
           { path: 'posts', component: AdminPostListPage },
           { path: 'posts/new', component: AdminPostEditPage },
           { path: 'posts/:id/edit', component: AdminPostEditPage },
+          { path: 'tags', component: AdminTagsPage },
         ],
       },
       {
@@ -63,6 +66,7 @@ export function createAppRouter() {
           { path: 'about', component: AboutPage },
           { path: 'contact', component: ContactPage },
           { path: 'articles', component: ArticleListPage },
+          { path: 'tag/:slug', component: TagPostsPage },
           { path: 'login', component: LoginPage },
           {
             path: 'login-records',

@@ -76,7 +76,27 @@ create index idx_posts_author_id on public.posts(author_id);
 create index idx_posts_updated_at on public.posts(updated_at desc);
 ```
 
-3.3 files
+3.3 tags / post_tags
+
+```sql
+create table public.tags (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  slug citext not null unique,
+  status text not null default 'active' check (status in ('active', 'disabled')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.post_tags (
+  post_id uuid not null references public.posts(id) on delete cascade,
+  tag_id uuid not null references public.tags(id),
+  created_at timestamptz not null default now(),
+  primary key (post_id, tag_id)
+);
+```
+
+3.4 files
 
 用途：
 

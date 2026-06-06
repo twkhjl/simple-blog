@@ -48,6 +48,34 @@
             <RichTextEditor ref="richTextEditor" v-model="form.content" />
           </div>
         </div>
+
+        <div class="neo-shell" style="padding: 1.4rem;">
+          <div class="field">
+            <span class="field-label">{{ t('common.labels.tags') }}</span>
+            <div class="tag-editor neo-inset">
+              <div class="tag-chip-row">
+                <span v-for="tag in selectedTags" :key="tag.slug" class="tag-chip" data-testid="post-tag-chip">
+                  {{ tag.name }}
+                  <button type="button" class="tag-chip-remove" @click="removeTag(tag.slug)">x</button>
+                </span>
+                <input
+                  v-model="tagInput"
+                  data-testid="post-tags-input"
+                  class="tag-input"
+                  type="text"
+                  :list="tagOptionsId"
+                  :placeholder="t('admin.edit.tagsPlaceholder')"
+                  @keydown.enter.prevent="commitTagInput"
+                  @keydown.backspace="handleTagInputBackspace"
+                >
+              </div>
+            </div>
+            <datalist :id="tagOptionsId">
+              <option v-for="tag in activeTagOptions" :key="tag.id" :value="tag.name"></option>
+            </datalist>
+            <p class="status-message">{{ t('admin.edit.tagsHint') }}</p>
+          </div>
+        </div>
       </div>
 
       <aside class="stack-card">
@@ -157,7 +185,7 @@ import { createApiClient } from '../../services/api'
 import { extractAccessToken } from '../../services/auth'
 import { ACCEPTED_IMAGE_TYPES, createImageUploader, isSupportedImageType } from '../../services/uploads'
 import { authState } from '../../stores/auth'
-import type { AdminPostDetail } from '../../types'
+import type { AdminPostDetail, AdminTag, TagSummary } from '../../types'
 import { isHtmlLike, isMeaningfulEditorHtml, plainTextToHtml } from '../../utils/richText'
 import { formatDisplayDate } from '../../utils/ui'
 
@@ -177,8 +205,11 @@ const previewImageUrl = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const richTextEditor = ref<RichTextEditorExpose | null>(null)
 const saveToastMessage = ref('')
+const tagInput = ref('')
+const availableTags = ref<AdminTag[]>([])
 let localPreviewUrl: string | null = null
 let saveToastTimer: ReturnType<typeof setTimeout> | null = null
+const tagOptionsId = 'admin-post-tag-options'
 
 const form = reactive({
   title: '',
@@ -195,6 +226,10 @@ const rawMetadata = reactive({
   createdAt: null as string | null,
   updatedAt: null as string | null,
 })
+
+const selectedTags = ref<TagSummary[]>([])
+const activeTagOptions = computed(() => availableTags.value.filter(tag => tag.status === 'active'))
+const disabledTagSlugSet = computed(() => new Set(availableTags.value.filter(tag => tag.status === 'disabled').map(tag => tag.slug)))
 
 const metadata = computed(() => ({
   author: rawMetadata.author ?? t('common.status.editorialDesk'),
@@ -273,10 +308,60 @@ async function loadPost() {
   form.status = data.status
   form.coverImageKey = data.coverImageKey
   form.publishedAt = data.publishedAt
+  selectedTags.value = data.tags
   setPreviewImage(data.coverImageUrl)
   rawMetadata.author = data.authorDisplayName
   rawMetadata.createdAt = data.createdAt
   rawMetadata.updatedAt = data.updatedAt
+}
+
+async function loadTagOptions() {
+  const payload = await getClient().get<{ items: AdminTag[] }>('/api/admin/tags')
+  availableTags.value = payload.items
+}
+
+function addTagByName(rawValue: string) {
+  const name = rawValue.trim().replace(/\s+/g, ' ')
+  if (!name) {
+    return
+  }
+
+  const matchedOption = availableTags.value.find(tag => tag.slug === slugify(name))
+  const nextTag = matchedOption
+    ? { id: matchedOption.id, name: matchedOption.name, slug: matchedOption.slug }
+    : { id: `draft-${slugify(name)}`, name, slug: slugify(name) }
+
+  if (selectedTags.value.some(tag => tag.slug === nextTag.slug)) {
+    tagInput.value = ''
+    return
+  }
+
+  selectedTags.value = [...selectedTags.value, nextTag]
+  tagInput.value = ''
+}
+
+function commitTagInput() {
+  addTagByName(tagInput.value)
+}
+
+function removeTag(slug: string) {
+  selectedTags.value = selectedTags.value.filter(tag => tag.slug !== slug)
+}
+
+function handleTagInputBackspace() {
+  if (tagInput.value.length === 0) {
+    selectedTags.value = selectedTags.value.slice(0, -1)
+  }
+}
+
+function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
 }
 
 async function handleCoverImageChange(event: Event) {
@@ -339,9 +424,17 @@ async function handleSave() {
     slug: form.slug,
     excerpt: form.excerpt,
     content: form.content,
+    tags: selectedTags.value.map(tag => tag.name),
     status: form.status,
     coverImageKey: form.coverImageKey,
     publishedAt: form.publishedAt,
+  }
+
+  const disabledTag = selectedTags.value.find(tag => disabledTagSlugSet.value.has(tag.slug))
+  if (disabledTag) {
+    message.value = t('admin.edit.disabledTagError', { name: disabledTag.name })
+    saving.value = false
+    return
   }
 
   try {
@@ -384,6 +477,7 @@ async function handleDelete() {
 
 onMounted(async () => {
   try {
+    await loadTagOptions()
     await loadPost()
   } catch (error) {
     message.value = error instanceof Error ? error.message : t('common.messages.failedToLoadPost')

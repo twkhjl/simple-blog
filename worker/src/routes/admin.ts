@@ -5,8 +5,8 @@ import { buildFileUrl } from '../lib/r2'
 import { fail, ok } from '../lib/response'
 import { requireAuth } from '../middleware/requireAuth'
 import { requireRole } from '../middleware/requireRole'
-import { createAdminPost, deleteAdminPost, getAdminPostById, listAdminPosts, updateAdminPost } from './posts'
-import type { AppEnv, WorkerBindings } from '../types'
+import { createAdminPost, createAdminTag, deleteAdminPost, getAdminPostById, listAdminPosts, listAdminTags, updateAdminPost, updateAdminTag, updateAdminTagStatus } from './posts'
+import type { AppEnv, TagStatus, WorkerBindings } from '../types'
 
 const adminRoutes = new Hono<AppEnv>()
 const MIN_PASSWORD_LENGTH = 8
@@ -146,6 +146,58 @@ adminRoutes.get('/posts/:id', c => {
   })
 })
 
+adminRoutes.get('/tags', async c => {
+  const items = await listAdminTags(c.env)
+  return ok({
+    items,
+    total: items.length,
+  })
+})
+
+adminRoutes.post('/tags', async c => {
+  const body = await c.req.json().catch(() => null) as { name?: string } | null
+  if (!body?.name?.trim()) {
+    return fail('VALIDATION_ERROR', 'Tag name is required', 400)
+  }
+
+  const result = await createAdminTag(c.env, body.name)
+  if (result.error || !result.tag) {
+    return fail('VALIDATION_ERROR', result.error ?? 'Failed to create tag', 400)
+  }
+
+  return ok(result.tag, 201)
+})
+
+adminRoutes.put('/tags/:id', async c => {
+  const body = await c.req.json().catch(() => null) as { name?: string } | null
+  if (!body?.name?.trim()) {
+    return fail('VALIDATION_ERROR', 'Tag name is required', 400)
+  }
+
+  const result = await updateAdminTag(c.env, c.req.param('id'), body.name)
+  if (result.error || !result.tag) {
+    const code = result.error === 'Tag not found.' ? 404 : 400
+    return fail('VALIDATION_ERROR', result.error ?? 'Failed to update tag', code)
+  }
+
+  return ok(result.tag)
+})
+
+adminRoutes.patch('/tags/:id/status', async c => {
+  const body = await c.req.json().catch(() => null) as { status?: TagStatus } | null
+  if (body?.status !== 'active' && body?.status !== 'disabled') {
+    return fail('VALIDATION_ERROR', 'Tag status is invalid', 400)
+  }
+
+  const result = await updateAdminTagStatus(c.env, c.req.param('id'), body.status)
+  if (result.error || !result.tag) {
+    const code = result.error === 'Tag not found.' ? 404 : 400
+    return fail('VALIDATION_ERROR', result.error ?? 'Failed to update tag status', code)
+  }
+
+  return ok(result.tag)
+})
+
 adminRoutes.post('/posts', async c => {
   const user = c.get('user')
   const body = await c.req.json().catch(() => null) as {
@@ -154,6 +206,7 @@ adminRoutes.post('/posts', async c => {
     excerpt?: string
     content?: string
     coverImageKey?: string | null
+    tags?: string[]
     status?: 'draft' | 'published' | 'archived'
     publishedAt?: string | null
   } | null
@@ -173,15 +226,16 @@ adminRoutes.post('/posts', async c => {
     excerpt: body.excerpt ?? '',
     content,
     coverImageKey: body.coverImageKey ?? null,
+    tags: Array.isArray(body.tags) ? body.tags : [],
     status: body.status,
     publishedAt: body.publishedAt ?? null,
   })
 
-  if (!post) {
-    return fail('INTERNAL_ERROR', 'Failed to create post', 500)
+  if (post.error || !post.post) {
+    return fail('VALIDATION_ERROR', post.error ?? 'Failed to create post', 400)
   }
 
-  return ok(serializeAdminPost(post, c.env), 201)
+  return ok(serializeAdminPost(post.post, c.env), 201)
 })
 
 adminRoutes.put('/posts/:id', async c => {
@@ -201,6 +255,7 @@ adminRoutes.put('/posts/:id', async c => {
     excerpt?: string
     content?: string
     coverImageKey?: string | null
+    tags?: string[]
     status?: 'draft' | 'published' | 'archived'
     publishedAt?: string | null
   } | null
@@ -220,15 +275,16 @@ adminRoutes.put('/posts/:id', async c => {
     excerpt: body.excerpt ?? '',
     content,
     coverImageKey: body.coverImageKey ?? null,
+    tags: Array.isArray(body.tags) ? body.tags : [],
     status: body.status,
     publishedAt: body.publishedAt ?? null,
   })
 
-  if (!post) {
-    return fail('INTERNAL_ERROR', 'Failed to update post', 500)
+  if (post.error || !post.post) {
+    return fail('VALIDATION_ERROR', post.error ?? 'Failed to update post', 400)
   }
 
-  return ok(serializeAdminPost(post, c.env))
+  return ok(serializeAdminPost(post.post, c.env))
 })
 
 adminRoutes.delete('/posts/:id', async c => {

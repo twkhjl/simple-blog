@@ -49,6 +49,11 @@
               <span>{{ formatDisplayDate(post.updatedAt, locale, t('common.status.unscheduled')) }}</span>
               <span v-if="post.publishedAt">{{ t('admin.posts.publishedAt', { date: formatDisplayDate(post.publishedAt, locale, t('common.status.unscheduled')) }) }}</span>
             </div>
+            <div v-if="post.tags.length" class="tag-chip-row" style="margin-top: 0.75rem;">
+              <span v-for="tag in post.tags.slice(0, 4)" :key="tag.slug" class="tag-chip compact">
+                {{ tag.name }}
+              </span>
+            </div>
           </div>
           <div class="inline-actions" style="justify-content: flex-end;">
             <span class="status-badge" :class="post.status">{{ t(`common.statusValues.${post.status}`) }}</span>

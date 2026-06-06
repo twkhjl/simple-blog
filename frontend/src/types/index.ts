@@ -32,6 +32,7 @@ export interface PublicPostListItem {
   excerpt: string
   coverImageUrl: string | null
   publishedAt: string | null
+  tags: TagSummary[]
 }
 
 export interface PublicPostDetail {
@@ -47,6 +48,7 @@ export interface PublicPostDetail {
     displayName: string | null
   }
   publishedAt: string | null
+  tags: TagSummary[]
 }
 
 export interface AdminPostListItem {
@@ -58,6 +60,7 @@ export interface AdminPostListItem {
   authorDisplayName: string | null
   publishedAt: string | null
   updatedAt: string
+  tags: TagSummary[]
 }
 
 export interface AdminPostDetail {
@@ -74,6 +77,28 @@ export interface AdminPostDetail {
   publishedAt: string | null
   createdAt: string
   updatedAt: string
+  tags: TagSummary[]
+}
+
+export interface TagSummary {
+  id: string
+  name: string
+  slug: string
+}
+
+export interface AdminTag extends TagSummary {
+  status: 'active' | 'disabled'
+  postCount: number
+}
+
+export interface PublicTagListItem extends TagSummary {
+  postCount: number
+}
+
+export interface PublicTagPostsResponse {
+  tag: TagSummary
+  items: PublicPostListItem[]
+  total: number
 }
 
 export interface UploadedFilePayload {

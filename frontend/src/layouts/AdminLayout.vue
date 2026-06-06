@@ -208,6 +208,14 @@ const navItems = computed(() => [
     testId: 'admin-nav-posts',
     mobileTestId: 'admin-mobile-nav-posts',
   },
+  {
+    key: 'tags',
+    label: t('admin.layout.tags'),
+    to: '/admin/tags',
+    active: route.path.startsWith('/admin/tags'),
+    testId: 'admin-nav-tags',
+    mobileTestId: 'admin-mobile-nav-tags',
+  },
 ])
 
 const adminIdentityLabel = computed(() => (

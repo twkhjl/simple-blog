@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { publicMockContent } from '../../content/publicMockContent'
 import { publicPostsService } from '../../services/publicPosts'
-import type { PublicPostListItem } from '../../types'
+import { publicTagsService } from '../../services/publicTags'
+import type { PublicPostListItem, PublicTagListItem } from '../../types'
 
 const posts = ref<PublicPostListItem[]>([])
+const tags = ref<PublicTagListItem[]>([])
 const isLoading = ref(true)
 const errorMessage = ref('')
 
@@ -25,11 +28,17 @@ async function loadPosts() {
   errorMessage.value = ''
 
   try {
-    posts.value = await publicPostsService.listPosts()
+    const [postItems, tagItems] = await Promise.all([
+      publicPostsService.listPosts(),
+      publicTagsService.listTags().catch(() => []),
+    ])
+    posts.value = postItems
+    tags.value = tagItems
   }
   catch {
-    errorMessage.value = '文章載入失敗，請稍後再試。'
+    errorMessage.value = '載入文章失敗，請稍後再試。'
     posts.value = []
+    tags.value = []
   }
   finally {
     isLoading.value = false
@@ -50,11 +59,19 @@ onMounted(loadPosts)
     <section class="front-panel front-side-card">
       <div class="front-filter-row">
         <span class="front-filter-chip active">Published</span>
+        <RouterLink
+          v-for="tag in tags"
+          :key="tag.slug"
+          :to="`/tag/${tag.slug}`"
+          class="front-filter-chip"
+        >
+          {{ tag.name }}
+        </RouterLink>
       </div>
     </section>
 
     <section v-if="isLoading" data-testid="article-list-loading" class="front-panel front-side-card">
-      <p class="front-card-copy">文章載入中...</p>
+      <p class="front-card-copy">載入文章中...</p>
     </section>
 
     <section v-else-if="errorMessage" data-testid="article-list-error" class="front-panel front-side-card">
@@ -63,7 +80,7 @@ onMounted(loadPosts)
     </section>
 
     <section v-else-if="posts.length === 0" data-testid="article-list-empty" class="front-panel front-side-card">
-      <p class="front-card-copy">目前還沒有已發布文章。</p>
+      <p class="front-card-copy">目前沒有已發佈文章。</p>
     </section>
 
     <section v-else class="front-article-feed">
@@ -72,6 +89,16 @@ onMounted(loadPosts)
         <div v-else class="front-list-cover front-list-cover-placeholder"></div>
         <h2 class="front-card-title">{{ post.title }}</h2>
         <p class="front-card-copy">{{ post.excerpt }}</p>
+        <div v-if="post.tags.length" class="front-tag-row">
+          <RouterLink
+            v-for="tag in post.tags"
+            :key="tag.slug"
+            :to="`/tag/${tag.slug}`"
+            class="front-tag-chip"
+          >
+            {{ tag.name }}
+          </RouterLink>
+        </div>
         <div class="front-meta-row">
           <span class="front-muted">{{ formatPublishedAt(post.publishedAt) }}</span>
         </div>

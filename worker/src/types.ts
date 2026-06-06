@@ -1,6 +1,7 @@
 export type UserRole = 'user' | 'editor' | 'admin' | 'super_admin'
 export type UserStatus = 'active' | 'disabled'
 export type PostStatus = 'draft' | 'published' | 'archived'
+export type TagStatus = 'active' | 'disabled'
 
 export interface AuthUser {
   id: string
@@ -43,5 +44,14 @@ export interface PostRecord {
   publishedAt: string | null
   createdAt: string
   updatedAt: string
+  tags: TagRecord[]
+}
+
+export interface TagRecord {
+  id: string
+  name: string
+  slug: string
+  status: TagStatus
+  postCount?: number
 }
 

@@ -11,9 +11,11 @@ describe('admin router guards', () => {
     expect(router.resolve('/admin/reset-password').matched.length).toBeGreaterThan(0)
     expect(router.resolve('/admin').matched.length).toBeGreaterThan(0)
     expect(router.resolve('/admin/posts').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/admin/tags').matched.length).toBeGreaterThan(0)
     expect(router.resolve('/admin/change-password').matched.length).toBeGreaterThan(0)
     expect(router.resolve('/login-records').matched.length).toBeGreaterThan(0)
     expect(router.resolve('/admin/login-records').matched.length).toBeGreaterThan(0)
+    expect(router.resolve('/tag/vue').matched.length).toBeGreaterThan(0)
   })
 
   it('redirects unauthenticated admin route access to /admin/login', async () => {

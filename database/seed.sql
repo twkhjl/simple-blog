@@ -11,3 +11,13 @@ set username = excluded.username,
     display_name = excluded.display_name,
     is_active = excluded.is_active;
 
+insert into public.tags (name, slug, status)
+values
+  ('Launch', 'launch', 'active'),
+  ('Vue', 'vue', 'active'),
+  ('Release', 'release', 'active'),
+  ('Legacy', 'legacy', 'disabled')
+on conflict (slug) do update
+set name = excluded.name,
+    status = excluded.status;
+

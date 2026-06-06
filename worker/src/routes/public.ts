@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { fail, ok } from '../lib/response'
-import { getPublishedPostBySlug, listPublishedPosts } from './posts'
+import { getPublicTagPostsBySlug, getPublishedPostBySlug, listPublicTags, listPublishedPosts } from './posts'
 import type { AppEnv } from '../types'
 
 const publicRoutes = new Hono<AppEnv>()
@@ -23,6 +23,25 @@ publicRoutes.get('/posts/:slug', c => {
     }
 
     return ok(post)
+  })
+})
+
+publicRoutes.get('/tags', c => {
+  return listPublicTags(c.env).then(items =>
+    ok({
+      items,
+      total: items.length,
+    }),
+  )
+})
+
+publicRoutes.get('/tags/:slug', c => {
+  return getPublicTagPostsBySlug(c.req.param('slug'), c.env).then(payload => {
+    if (!payload) {
+      return fail('NOT_FOUND', 'Tag not found', 404)
+    }
+
+    return ok(payload)
   })
 })
 

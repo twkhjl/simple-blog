@@ -33,6 +33,10 @@ describe('AdminLayout', () => {
           component: { template: '<div>posts</div>' },
         },
         {
+          path: '/admin/tags',
+          component: { template: '<div>tags</div>' },
+        },
+        {
           path: '/admin/posts/new',
           component: { template: '<div>new</div>' },
         },
@@ -180,6 +184,22 @@ describe('AdminLayout', () => {
 
     expect(router.currentRoute.value.fullPath).toBe('/admin/posts')
     expect(wrapper.get('[data-testid="admin-mobile-drawer"]').classes()).not.toContain('open')
+  })
+
+  it('shows tags nav item and marks it active', async () => {
+    authState.profile = {
+      id: 'admin-1',
+      email: 'admin@demo.invalid',
+      username: 'admin',
+      displayName: 'Admin Person',
+      role: 'admin',
+      status: 'active',
+    } as any
+
+    const { wrapper } = await mountLayout('/admin/tags')
+
+    expect(wrapper.get('[data-testid="admin-nav-tags"]').classes()).toContain('active')
+    expect(wrapper.get('[data-testid="admin-mobile-nav-tags"]').exists()).toBe(true)
   })
 
   it('closes mobile drawer after tapping change-password action', async () => {

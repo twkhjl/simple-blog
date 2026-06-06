@@ -45,6 +45,27 @@ create index idx_posts_published_at on public.posts(published_at desc);
 create index idx_posts_author_id on public.posts(author_id);
 create index idx_posts_updated_at on public.posts(updated_at desc);
 
+create table public.tags (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  slug citext not null unique,
+  status text not null default 'active' check (status in ('active', 'disabled')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index idx_tags_status on public.tags(status);
+create index idx_tags_name on public.tags(name);
+
+create table public.post_tags (
+  post_id uuid not null references public.posts(id) on delete cascade,
+  tag_id uuid not null references public.tags(id),
+  created_at timestamptz not null default now(),
+  primary key (post_id, tag_id)
+);
+
+create index idx_post_tags_tag_id on public.post_tags(tag_id);
+
 create table public.files (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users(id),
