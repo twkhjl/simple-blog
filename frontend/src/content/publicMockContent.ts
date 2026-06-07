@@ -10,13 +10,13 @@ import type {
 const nav: PublicNavItem[] = [
   { label: '首頁', to: '/' },
   { label: '關於', to: '/about' },
-  { label: '聯絡', to: '/contact' },
+  { label: '與我聯絡', to: '/contact' },
 ]
 
 const footerLinks: PublicFooterLink[] = [
   { label: '首頁', to: '/' },
   { label: '關於', to: '/about' },
-  { label: '聯絡', to: '/contact' },
+  { label: '與我聯絡', to: '/contact' },
 ]
 
 const aboutSections: PublicSection[] = [
@@ -105,12 +105,12 @@ export const publicMockContent = {
   },
   about: {
     title: '關於 TechHumana',
-    intro: '我們是一個以技術內容與產品實作為核心的團隊，專注在把抽象需求轉成清楚、可靠、可維護的系統。',
+    intro: '',
     sections: aboutSections,
   },
   contact: {
     title: '聯絡我們',
-    intro: '如果你想聊內容合作、工程顧問、前端重構或編輯流程設計，可以透過下面表單留下訊息，我們會再與你聯繫。',
+    intro: '若對網頁內容有任何疑問或建議，都歡迎與我們聯絡',
     cards: contactCards,
     form: {
       fields: contactFields,
@@ -119,16 +119,16 @@ export const publicMockContent = {
   },
   login: {
     title: '會員登入',
-    copy: '登入後可以收藏文章、查看閱讀清單，並延續你在站上的工作流程。',
+    copy: '',
   },
   adminLogin: {
     title: 'Admin Sign In',
-    copy: '後台登入保留給內容維運與編輯作業使用。',
+    copy: '',
   },
   articleList: {
-    title: '最新文章',
-    intro: '整理近期發布的教學、重構筆記與設計決策，讓首頁直接成為主要閱讀入口。',
-    filters: ['全部', '前端架構', '設計系統', '內容建模'],
+    title: '文章列表',
+    intro: '',
+    filters: [],
   },
   posts,
 } as const
