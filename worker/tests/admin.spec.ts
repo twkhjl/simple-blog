@@ -27,6 +27,94 @@ describe('admin posts api', () => {
     expect(res.status).toBe(200)
   })
 
+  it('returns paginated posts with stats for admin role', async () => {
+    const res = await app.request('/api/admin/posts?page=1&limit=1', {
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+
+    expect(res.status).toBe(200)
+    const payload = await res.json() as {
+      data: {
+        items: Array<{ id: string }>
+        page: number
+        limit: number
+        total: number
+        stats: {
+          total: number
+          draft: number
+          published: number
+          archived: number
+        }
+      }
+    }
+    expect(payload.data.page).toBe(1)
+    expect(payload.data.limit).toBe(1)
+    expect(payload.data.total).toBeGreaterThanOrEqual(2)
+    expect(payload.data.items).toHaveLength(1)
+    expect(payload.data.stats).toEqual({
+      total: payload.data.total,
+      draft: 1,
+      published: 1,
+      archived: 0,
+    })
+  })
+
+  it('returns second page without repeating first page items', async () => {
+    const firstRes = await app.request('/api/admin/posts?page=1&limit=1', {
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+    const secondRes = await app.request('/api/admin/posts?page=2&limit=1', {
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+
+    expect(firstRes.status).toBe(200)
+    expect(secondRes.status).toBe(200)
+
+    const firstPayload = await firstRes.json() as { data: { items: Array<{ id: string }> } }
+    const secondPayload = await secondRes.json() as { data: { items: Array<{ id: string }>, page: number } }
+
+    expect(secondPayload.data.page).toBe(2)
+    expect(firstPayload.data.items[0]?.id).not.toBe(secondPayload.data.items[0]?.id)
+  })
+
+  it('paginates editor-visible posts only and reports editor-only stats', async () => {
+    const res = await app.request('/api/admin/posts?page=1&limit=1', {
+      headers: {
+        Authorization: 'Bearer editor-token',
+      },
+    })
+
+    expect(res.status).toBe(200)
+    const payload = await res.json() as {
+      data: {
+        items: Array<{ authorId: string }>
+        total: number
+        stats: {
+          total: number
+          draft: number
+          published: number
+          archived: number
+        }
+      }
+    }
+
+    expect(payload.data.items).toHaveLength(1)
+    expect(payload.data.items[0]?.authorId).toBe('editor-1')
+    expect(payload.data.total).toBe(2)
+    expect(payload.data.stats).toEqual({
+      total: 2,
+      draft: 1,
+      published: 1,
+      archived: 0,
+    })
+  })
+
   it('creates a draft post for editor role', async () => {
     const res = await app.request('/api/admin/posts', {
       method: 'POST',

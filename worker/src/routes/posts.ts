@@ -40,6 +40,21 @@ interface AdminPostPayload {
   tags: string[]
 }
 
+interface AdminPostListStats {
+  total: number
+  draft: number
+  published: number
+  archived: number
+}
+
+interface AdminPostListResponse {
+  items: ReturnType<typeof toAdminListItem>[]
+  page: number
+  limit: number
+  total: number
+  stats: AdminPostListStats
+}
+
 const mockTags: TagRecord[] = [
   { id: 'tag-launch', name: 'Launch', slug: 'launch', status: 'active' },
   { id: 'tag-vue', name: 'Vue', slug: 'vue', status: 'active' },
@@ -169,6 +184,22 @@ function toAdminListItem(post: PostRecord) {
     updatedAt: post.updatedAt,
     tags: post.tags.map(publicTagShape),
   }
+}
+
+function buildAdminPostStats(posts: PostRecord[]): AdminPostListStats {
+  return posts.reduce(
+    (acc, post) => {
+      acc.total += 1
+      acc[post.status] += 1
+      return acc
+    },
+    {
+      total: 0,
+      draft: 0,
+      published: 0,
+      archived: 0,
+    },
+  )
 }
 
 async function hydrateAuthorDisplayNames(
@@ -464,11 +495,28 @@ export async function getPublicTagPostsBySlug(slug: string, env?: WorkerBindings
   }
 }
 
-export async function listAdminPosts(env: WorkerBindings | undefined, authorId?: string) {
+export async function listAdminPosts(
+  env: WorkerBindings | undefined,
+  options: {
+    authorId?: string
+    page: number
+    limit: number
+  },
+): Promise<AdminPostListResponse> {
+  const safePage = Math.max(1, Math.trunc(options.page) || 1)
+  const safeLimit = Math.max(1, Math.trunc(options.limit) || 20)
   const adminClient = env ? createSupabaseAdminClient(env) : null
   if (!adminClient) {
-    const items = authorId ? mockPosts.filter(post => post.authorId === authorId) : mockPosts
-    return items.map(toAdminListItem)
+    const visiblePosts = options.authorId ? mockPosts.filter(post => post.authorId === options.authorId) : mockPosts
+    const stats = buildAdminPostStats(visiblePosts)
+    const start = (safePage - 1) * safeLimit
+    return {
+      items: visiblePosts.slice(start, start + safeLimit).map(toAdminListItem),
+      page: safePage,
+      limit: safeLimit,
+      total: visiblePosts.length,
+      stats,
+    }
   }
 
   let query = adminClient
@@ -476,14 +524,22 @@ export async function listAdminPosts(env: WorkerBindings | undefined, authorId?:
     .select('id, title, slug, excerpt, content, cover_image_key, status, author_id, published_at, created_at, updated_at')
     .order('updated_at', { ascending: false })
 
-  if (authorId) {
-    query = query.eq('author_id', authorId)
+  if (options.authorId) {
+    query = query.eq('author_id', options.authorId)
   }
 
   const { data, error } = await query
   if (error || !data) {
-    const items = authorId ? mockPosts.filter(post => post.authorId === authorId) : mockPosts
-    return items.map(toAdminListItem)
+    const visiblePosts = options.authorId ? mockPosts.filter(post => post.authorId === options.authorId) : mockPosts
+    const stats = buildAdminPostStats(visiblePosts)
+    const start = (safePage - 1) * safeLimit
+    return {
+      items: visiblePosts.slice(start, start + safeLimit).map(toAdminListItem),
+      page: safePage,
+      limit: safeLimit,
+      total: visiblePosts.length,
+      stats,
+    }
   }
 
   const posts = await hydrateAuthorDisplayNames(
@@ -491,7 +547,15 @@ export async function listAdminPosts(env: WorkerBindings | undefined, authorId?:
     await loadTagsForPosts(adminClient, (data as unknown as DbPostRow[]).map(mapDbPost)),
   )
 
-  return posts.map(toAdminListItem)
+  const stats = buildAdminPostStats(posts)
+  const start = (safePage - 1) * safeLimit
+  return {
+    items: posts.slice(start, start + safeLimit).map(toAdminListItem),
+    page: safePage,
+    limit: safeLimit,
+    total: posts.length,
+    stats,
+  }
 }
 
 export async function getAdminPostById(id: string, env?: WorkerBindings) {
@@ -693,7 +757,8 @@ export async function listAdminTags(env?: WorkerBindings) {
     return []
   }
 
-  const posts = await Promise.all((await listAdminPosts(env)).map(async item => ({
+  const postsResponse = await listAdminPosts(env, { page: 1, limit: Number.MAX_SAFE_INTEGER })
+  const posts = await Promise.all(postsResponse.items.map(async item => ({
     ...item,
     tags: item.tags as any,
   })))

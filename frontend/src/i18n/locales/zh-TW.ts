@@ -248,6 +248,8 @@
       emptyTitle: '目前沒有文章。',
       emptyCopy: '建立第一篇文章後，這裡會顯示內容清單。',
       publishedAt: '發佈於 {date}',
+      previous: '上一頁',
+      next: '下一頁',
     },
     edit: {
       eyebrow: '文章編輯器',

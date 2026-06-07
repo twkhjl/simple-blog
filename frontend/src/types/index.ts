@@ -63,6 +63,21 @@ export interface AdminPostListItem {
   tags: TagSummary[]
 }
 
+export interface AdminPostListStats {
+  total: number
+  draft: number
+  published: number
+  archived: number
+}
+
+export interface AdminPostListResponse {
+  items: AdminPostListItem[]
+  page: number
+  limit: number
+  total: number
+  stats: AdminPostListStats
+}
+
 export interface AdminPostDetail {
   id: string
   title: string

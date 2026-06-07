@@ -122,14 +122,13 @@ adminRoutes.post('/change-password', async c => {
 
 adminRoutes.get('/posts', c => {
   const user = c.get('user')
-  return listAdminPosts(c.env, user.role === 'editor' ? user.id : undefined).then(items =>
-    ok({
-      items,
-      page: Number(c.req.query('page') ?? 1),
-      limit: Number(c.req.query('limit') ?? 20),
-      total: items.length,
-    }),
-  )
+  const page = Number(c.req.query('page') ?? 1)
+  const limit = Number(c.req.query('limit') ?? 20)
+  return listAdminPosts(c.env, {
+    authorId: user.role === 'editor' ? user.id : undefined,
+    page,
+    limit,
+  }).then(ok)
 })
 
 adminRoutes.get('/posts/:id', c => {

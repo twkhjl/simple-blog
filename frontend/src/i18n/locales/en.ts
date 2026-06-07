@@ -278,6 +278,8 @@ const en = {
       emptyTitle: 'No posts yet.',
       emptyCopy: 'Create the first entry to populate this control list.',
       publishedAt: 'Published {date}',
+      previous: 'Previous',
+      next: 'Next',
     },
     edit: {
       eyebrow: 'Editorial Editor',
