@@ -23,7 +23,7 @@ const emit = defineEmits<{
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">close</span>
       </button>
     </div>
-    <nav class="front-drawer-links flex-grow">
+    <nav class="front-drawer-links">
       <RouterLink
         v-for="item in nav"
         :key="item.to"
