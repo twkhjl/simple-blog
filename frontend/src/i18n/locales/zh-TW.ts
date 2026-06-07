@@ -401,6 +401,8 @@ export default {
     actions: {
       ...zhTW.common.actions,
       changePassword: '修改密碼',
+      cancel: '取消',
+      close: '關閉',
     },
     labels: {
       ...zhTW.common.labels,
@@ -448,6 +450,20 @@ export default {
       globalActions: '全域操作',
       openMenu: '開啟選單',
       closeMenu: '關閉選單',
+    },
+    tags: {
+      ...zhTW.admin.tags,
+      createTitle: '建立標籤',
+      editTitle: '編輯標籤',
+      deleteTitle: '刪除標籤',
+      nameLabel: '標籤名稱',
+      postCount: '文章數',
+      actions: '操作',
+    },
+    contactMessages: {
+      ...zhTW.admin.contactMessages,
+      subject: '主旨',
+      processedAt: '處理時間',
     },
     changePassword: {
       eyebrow: '安全設定',
