@@ -21,23 +21,15 @@ const footerLinks: PublicFooterLink[] = [
 
 const aboutSections: PublicSection[] = [
   {
-    title: '我們寫什麼',
-    body: 'TechHumana 聚焦前端、後端、產品設計與協作流程，內容偏向實務總結與可落地的操作建議。',
+    title: '關於我',
+    body: '可透過聯絡我們頁面與我聯絡,感謝您',
   },
-  {
-    title: '我們怎麼寫',
-    body: '每篇文章都盡量保留脈絡、決策理由與實作取捨，讓讀者不只知道怎麼做，也知道為什麼這樣做。',
-  },
-  {
-    title: '我們相信什麼',
-    body: '好的內容應該同時兼顧清楚、準確與可維護。這也是本次從靜態 HTML 回歸 Vue 元件化的核心原因。',
-  },
+  
 ]
 
 const contactCards: PublicContactCard[] = [
-  { label: 'Email', value: 'studio@example.invalid' },
-  { label: 'Office Hours', value: 'Mon - Fri / 10:00 - 18:00' },
-  { label: 'Location', value: 'Taipei / Remote-first' },
+  { label: 'Email', value: 'twkhjl@gmail.com' },
+  { label: 'Location', value: 'Taiwan' },
 ]
 
 const contactFields: PublicContactField[] = [
