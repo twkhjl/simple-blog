@@ -175,3 +175,55 @@ export interface AdminContactMessageDetail extends AdminContactMessageListItem {
   userAgent: string | null
   updatedAt: string
 }
+
+export type CommentStatus = 'pending' | 'approved' | 'hidden'
+
+export interface PublicCommentNode {
+  id: string
+  parentId: string | null
+  authorName: string
+  body: string
+  createdAt: string
+  replies: PublicCommentNode[]
+}
+
+export interface PublicCommentSubmission {
+  authorName: string
+  authorEmail: string
+  body: string
+  parentId?: string | null
+}
+
+export interface AdminCommentListItem {
+  id: string
+  postId: string
+  postTitle: string | null
+  parentId: string | null
+  parentBody: string | null
+  authorName: string
+  authorEmail: string
+  bodyPreview: string
+  status: CommentStatus
+  createdAt: string
+  approvedAt: string | null
+}
+
+export interface AdminCommentDetail {
+  id: string
+  postId: string
+  postTitle: string | null
+  parent: {
+    id: string
+    authorName: string
+    body: string
+  } | null
+  authorName: string
+  authorEmail: string
+  body: string
+  status: CommentStatus
+  requestIp: string | null
+  userAgent: string | null
+  createdAt: string
+  updatedAt: string
+  approvedAt: string | null
+}

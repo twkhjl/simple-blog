@@ -5,9 +5,10 @@ import { buildFileUrl } from '../lib/r2'
 import { fail, ok } from '../lib/response'
 import { requireAuth } from '../middleware/requireAuth'
 import { requireRole } from '../middleware/requireRole'
+import { deleteAdminComment, getAdminCommentById, listAdminComments, updateAdminCommentStatus } from './comments'
 import { getAdminContactMessageById, listAdminContactMessages, updateAdminContactMessageStatus } from './contact'
 import { createAdminPost, createAdminTag, deleteAdminPost, deleteAdminTag, getAdminPostById, listAdminPosts, listAdminTags, updateAdminPost, updateAdminTag, updateAdminTagStatus } from './posts'
-import type { AppEnv, ContactMessageStatus, TagStatus, WorkerBindings } from '../types'
+import type { AppEnv, CommentStatus, ContactMessageStatus, TagStatus, WorkerBindings } from '../types'
 
 const adminRoutes = new Hono<AppEnv>()
 const MIN_PASSWORD_LENGTH = 8
@@ -246,6 +247,57 @@ adminRoutes.patch('/contact-messages/:id/status', requireRole(['admin', 'super_a
   }
 
   return ok(result.message)
+})
+
+adminRoutes.get('/comments', requireRole(['admin', 'super_admin']), async c => {
+  const status = c.req.query('status')
+  const postId = c.req.query('postId') ?? undefined
+  const search = c.req.query('search') ?? ''
+  const items = await listAdminComments(c.env, {
+    status: status === 'pending' || status === 'approved' || status === 'hidden' ? status : 'all',
+    postId,
+    search,
+  })
+
+  return ok({
+    items,
+    total: items.length,
+  })
+})
+
+adminRoutes.get('/comments/:id', requireRole(['admin', 'super_admin']), async c => {
+  const comment = await getAdminCommentById(c.req.param('id'), c.env)
+  if (!comment) {
+    return fail('NOT_FOUND', 'Comment not found', 404)
+  }
+
+  return ok(comment)
+})
+
+adminRoutes.patch('/comments/:id/status', requireRole(['admin', 'super_admin']), async c => {
+  const body = await c.req.json().catch(() => null) as { status?: CommentStatus } | null
+  if (body?.status !== 'pending' && body?.status !== 'approved' && body?.status !== 'hidden') {
+    return fail('VALIDATION_ERROR', 'Comment status is invalid', 400)
+  }
+
+  const result = await updateAdminCommentStatus(c.env, c.req.param('id'), body.status)
+  if (result.error || !result.comment) {
+    return fail('NOT_FOUND', result.error ?? 'Comment not found', 404)
+  }
+
+  return ok(result.comment)
+})
+
+adminRoutes.delete('/comments/:id', requireRole(['admin', 'super_admin']), async c => {
+  const deleted = await deleteAdminComment(c.env, c.req.param('id'))
+  if (!deleted) {
+    return fail('NOT_FOUND', 'Comment not found', 404)
+  }
+
+  return ok({
+    id: c.req.param('id'),
+    deleted: true,
+  })
 })
 
 adminRoutes.post('/posts', async c => {

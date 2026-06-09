@@ -93,6 +93,21 @@ const mockPosts: PostRecord[] = [
     updatedAt: '2026-05-17T00:00:00Z',
     tags: [mockTags[1]],
   },
+  {
+    id: 'post-3',
+    title: 'Second Published Post',
+    slug: 'second-published-post',
+    excerpt: 'Published sibling entry for cross-post comment checks.',
+    content: '# Second Published Post\n\nUse this sample entry for cross-post comment validation.',
+    coverImageKey: null,
+    status: 'published',
+    authorId: 'editor-1',
+    authorDisplayName: 'Editorial Account',
+    publishedAt: '2026-05-18T00:00:00Z',
+    createdAt: '2026-05-18T00:00:00Z',
+    updatedAt: '2026-05-18T00:00:00Z',
+    tags: [mockTags[2]],
+  },
 ]
 
 function nowIso() {

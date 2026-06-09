@@ -66,6 +66,25 @@ create table public.post_tags (
 
 create index idx_post_tags_tag_id on public.post_tags(tag_id);
 
+create table public.comments (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references public.posts(id) on delete cascade,
+  parent_id uuid references public.comments(id) on delete cascade,
+  author_name text not null,
+  author_email text not null,
+  body text not null,
+  status text not null default 'pending' check (status in ('pending', 'approved', 'hidden')),
+  request_ip text,
+  user_agent text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  approved_at timestamptz
+);
+
+create index idx_comments_post_status_created_at on public.comments(post_id, status, created_at desc);
+create index idx_comments_parent_id on public.comments(parent_id);
+create index idx_comments_request_ip_created_at on public.comments(request_ip, created_at desc);
+
 create table public.files (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users(id),

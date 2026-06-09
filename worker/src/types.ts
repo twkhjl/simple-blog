@@ -3,6 +3,7 @@ export type UserStatus = 'active' | 'disabled'
 export type PostStatus = 'draft' | 'published' | 'archived'
 export type TagStatus = 'active' | 'disabled'
 export type ContactMessageStatus = 'pending' | 'processed'
+export type CommentStatus = 'pending' | 'approved' | 'hidden'
 
 export interface AuthUser {
   id: string
@@ -68,5 +69,20 @@ export interface ContactMessageRecord {
   createdAt: string
   updatedAt: string
   processedAt: string | null
+}
+
+export interface CommentRecord {
+  id: string
+  postId: string
+  parentId: string | null
+  authorName: string
+  authorEmail: string
+  body: string
+  status: CommentStatus
+  requestIp: string | null
+  userAgent: string | null
+  createdAt: string
+  updatedAt: string
+  approvedAt: string | null
 }
 

@@ -4,6 +4,7 @@ import PublicLayout from '../layouts/PublicLayout.vue'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.vue'
 import AdminChangePasswordPage from '../pages/admin/AdminChangePasswordPage.vue'
 import AdminContactMessagesPage from '../pages/admin/AdminContactMessagesPage.vue'
+import AdminCommentsPage from '../pages/admin/AdminCommentsPage.vue'
 import AdminLoginRecordsPage from '../pages/admin/AdminLoginRecordsPage.vue'
 import AdminPostEditPage from '../pages/admin/AdminPostEditPage.vue'
 import AdminPostListPage from '../pages/admin/AdminPostListPage.vue'
@@ -54,6 +55,18 @@ export function createAppRouter() {
           {
             path: 'contact-messages',
             component: AdminContactMessagesPage,
+            beforeEnter: async () => {
+              await ensureAuthInitialized()
+              if (authState.profile?.role !== 'admin' && authState.profile?.role !== 'super_admin') {
+                return '/admin'
+              }
+
+              return true
+            },
+          },
+          {
+            path: 'comments',
+            component: AdminCommentsPage,
             beforeEnter: async () => {
               await ensureAuthInitialized()
               if (authState.profile?.role !== 'admin' && authState.profile?.role !== 'super_admin') {

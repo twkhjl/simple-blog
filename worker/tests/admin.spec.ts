@@ -56,7 +56,7 @@ describe('admin posts api', () => {
     expect(payload.data.stats).toEqual({
       total: payload.data.total,
       draft: 1,
-      published: 1,
+      published: 2,
       archived: 0,
     })
   })
@@ -106,11 +106,11 @@ describe('admin posts api', () => {
 
     expect(payload.data.items).toHaveLength(1)
     expect(payload.data.items[0]?.authorId).toBe('editor-1')
-    expect(payload.data.total).toBe(2)
+    expect(payload.data.total).toBe(3)
     expect(payload.data.stats).toEqual({
-      total: 2,
+      total: 3,
       draft: 1,
-      published: 1,
+      published: 2,
       archived: 0,
     })
   })
@@ -449,5 +449,124 @@ describe('admin contact messages api', () => {
     const payload = await updateRes.json() as { data: { status: string, processedAt: string | null } }
     expect(payload.data.status).toBe('processed')
     expect(payload.data.processedAt).not.toBeNull()
+  })
+})
+
+describe('admin comments api', () => {
+  it('rejects editor access to comment management', async () => {
+    const res = await app.request('/api/admin/comments', {
+      headers: {
+        Authorization: 'Bearer editor-token',
+      },
+    })
+
+    expect(res.status).toBe(403)
+  })
+
+  it('lists comments for admin role with filters', async () => {
+    const createRes = await app.request('/api/posts/launch-checklist/comments', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer admin-token',
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': '198.51.100.40',
+      },
+      body: JSON.stringify({
+        authorName: 'Admin Reader',
+        authorEmail: 'admin-reader@example.com',
+        body: 'Need review here',
+      }),
+    })
+    const created = await createRes.json() as { data: { id: string } }
+
+    const listRes = await app.request('/api/admin/comments?status=pending&search=Need', {
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+
+    expect(listRes.status).toBe(200)
+    const payload = await listRes.json() as { data: { items: Array<{ id: string, postTitle: string }> } }
+    expect(payload.data.items.some(item => item.id === created.data.id)).toBe(true)
+    expect(payload.data.items[0]?.postTitle).toBeTruthy()
+  })
+
+  it('returns comment detail, updates status, and deletes subtree', async () => {
+    const parentRes = await app.request('/api/posts/launch-checklist/comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': '198.51.100.41',
+      },
+      body: JSON.stringify({
+        authorName: 'Parent',
+        authorEmail: 'parent@example.com',
+        body: 'Delete me',
+      }),
+    })
+    const parent = await parentRes.json() as { data: { id: string } }
+
+    const replyRes = await app.request('/api/posts/launch-checklist/comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CF-Connecting-IP': '198.51.100.41',
+      },
+      body: JSON.stringify({
+        authorName: 'Child',
+        authorEmail: 'child@example.com',
+        body: 'Child node',
+        parentId: parent.data.id,
+      }),
+    })
+    const reply = await replyRes.json() as { data: { id: string } }
+
+    const detailRes = await app.request(`/api/admin/comments/${reply.data.id}`, {
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+
+    expect(detailRes.status).toBe(200)
+    const detailPayload = await detailRes.json() as {
+      data: {
+        id: string
+        parent: { id: string, body: string } | null
+      }
+    }
+    expect(detailPayload.data.parent?.id).toBe(parent.data.id)
+
+    const approveRes = await app.request(`/api/admin/comments/${parent.data.id}/status`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: 'Bearer admin-token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: 'approved',
+      }),
+    })
+
+    expect(approveRes.status).toBe(200)
+    const approvePayload = await approveRes.json() as { data: { status: string, approvedAt: string | null } }
+    expect(approvePayload.data.status).toBe('approved')
+    expect(approvePayload.data.approvedAt).not.toBeNull()
+
+    const deleteRes = await app.request(`/api/admin/comments/${parent.data.id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+
+    expect(deleteRes.status).toBe(200)
+
+    const missingChildRes = await app.request(`/api/admin/comments/${reply.data.id}`, {
+      headers: {
+        Authorization: 'Bearer admin-token',
+      },
+    })
+
+    expect(missingChildRes.status).toBe(404)
   })
 })

@@ -209,6 +209,13 @@ const navItems = computed(() => [
           active: route.path.startsWith('/admin/contact-messages'),
           testId: 'admin-nav-contact-messages',
           mobileTestId: 'admin-mobile-nav-contact-messages',
+        }, {
+          key: 'comments',
+          label: t('admin.layout.comments'),
+          to: '/admin/comments',
+          active: route.path.startsWith('/admin/comments'),
+          testId: 'admin-nav-comments',
+          mobileTestId: 'admin-mobile-nav-comments',
         }]
       : []
   ),

@@ -49,6 +49,10 @@ describe('AdminLayout', () => {
           component: { template: '<div>contact messages</div>' },
         },
         {
+          path: '/admin/comments',
+          component: { template: '<div>comments</div>' },
+        },
+        {
           path: '/admin/login-records',
           component: { template: '<div>login records</div>' },
         },
@@ -234,6 +238,36 @@ describe('AdminLayout', () => {
 
     const editorMount = await mountLayout('/admin')
     expect(editorMount.wrapper.find('[data-testid="admin-nav-contact-messages"]').exists()).toBe(false)
+  })
+
+  it('shows comments nav item for admin and hides it for editor', async () => {
+    authState.profile = {
+      id: 'admin-1',
+      email: 'admin@demo.invalid',
+      username: 'admin',
+      displayName: 'Admin Person',
+      role: 'admin',
+      status: 'active',
+    } as any
+
+    const { wrapper } = await mountLayout('/admin/comments')
+
+    expect(wrapper.get('[data-testid="admin-nav-comments"]').classes()).toContain('active')
+    expect(wrapper.get('[data-testid="admin-mobile-nav-comments"]').exists()).toBe(true)
+
+    wrapper.unmount()
+
+    authState.profile = {
+      id: 'editor-1',
+      email: 'editor@demo.invalid',
+      username: 'editor',
+      displayName: 'Editor Person',
+      role: 'editor',
+      status: 'active',
+    } as any
+
+    const editorMount = await mountLayout('/admin')
+    expect(editorMount.wrapper.find('[data-testid="admin-nav-comments"]').exists()).toBe(false)
   })
 
   it('closes mobile drawer after tapping change-password action', async () => {
